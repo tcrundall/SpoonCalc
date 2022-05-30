@@ -1,33 +1,51 @@
 ##:kivy
 MainWidget:
 
+#:set pad "5dp"
+#:set button_group_size_hint 1, 0.75
+#:set label_color 1, 1, 1, 1
+#:set label_background_color 0.3, 0.7, 0.9, 1
+#:set button_spacing "5dp"
+#:set toplevel_spacing "15dp"
+#:set button_pad "2dp"
+
+<Option@BoxLayout>:
+    orientation: "vertical"
+    padding: (pad, pad, pad, pad)
+
 <MainWidget>
     orientation: "vertical"
-    Label:
+    spacing: toplevel_spacing
+    BackgroundLabel:
         text: "Log activity"
+        font_size: 20
+        color: label_color
     TextInput:
         text: "Activity name"
-        size_hint: None, 1
-        width: 0.8 * root.width
+        size_hint: 1, 0.3
+        # width: 0.8 * root.width
     BoxLayout:
         orientation: "horizontal"
-        BoxLayout:
-            orientation: "vertical"
-            Label:
+        # spacing: toplevel_spacing
+        Option:
+            orientation: "vertical" 
+            padding: (pad, pad, pad, pad)
+            BackgroundLabel:
                 text: "Cog. Load"
+                color: label_color
             BoxLayout:
                 orientation: "horizontal"
-                padding: 0.5
+                # spacing: button_spacing
                 ToggleButton:
                     text: "Low"
                 ToggleButton:
                     text: "Mid"
                 ToggleButton:
                     text: "High"
-        BoxLayout:
-            orientation: "vertical"
-            Label:
+        Option:
+            BackgroundLabel:
                 text: "Phys. Load"
+                color: label_color
             BoxLayout:
                 orientation: "horizontal"
                 ToggleButton:
@@ -36,10 +54,11 @@ MainWidget:
                     text: "Mid"
                 ToggleButton:
                     text: "High"
-    BoxLayout:
+    Option:
         orientation: "vertical"
-        Label:
+        BackgroundLabel:
             text: "Duration"
+            color: label_color
         BoxLayout:
             orientation: "horizontal"
             ToggleButton:
@@ -50,26 +69,30 @@ MainWidget:
                 text: "60"
             TextInput:
                 text: "other"
-    BoxLayout:
+    Option:
         orientation: "vertical"
-        Label:
+        BackgroundLabel:
             text: "End Time"
+            color: label_color
+            halign: "left"
         BoxLayout:
             orientation: "horizontal"
-            ToggleButton:
+            Button:
                 text: "-1"
-            ToggleButton:
+            Button:
                 text: "-0:15"
-            Label:
+            BackgroundLabel:
+                color: label_color
                 text: "0:00"
-            ToggleButton:
+            Button:
                 text: "+0:15"
-            ToggleButton:
+            Button:
                 text: "+1"
-    BoxLayout:
+    Option:
         orientation: "vertical"
-        Label:
+        BackgroundLabel:
             text: "Energy Level"
+            color: label_color
         BoxLayout:
             orientation: "horizontal"
             ToggleButton:
@@ -79,8 +102,21 @@ MainWidget:
             ToggleButton:
                 text: "High"
     BoxLayout:
+        size_hint: 1, 0.5
         orientation: "horizontal"
         Button:
             text: "Cancel"
         Button:
             text: "Save"
+
+<BackgroundColor@Widget>
+    background_color: 1, 1, 1, 1
+    canvas.before:
+        Color:
+            rgba: root.background_color
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<BackgroundLabel@Label+BackgroundColor>
+    background_color: label_background_color
