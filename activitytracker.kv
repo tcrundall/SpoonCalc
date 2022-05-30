@@ -1,5 +1,86 @@
+##:kivy
 MainWidget:
 
 <MainWidget>
-    Button:
-        text: "Sup"
+    orientation: "vertical"
+    Label:
+        text: "Log activity"
+    TextInput:
+        text: "Activity name"
+        size_hint: None, 1
+        width: 0.8 * root.width
+    BoxLayout:
+        orientation: "horizontal"
+        BoxLayout:
+            orientation: "vertical"
+            Label:
+                text: "Cog. Load"
+            BoxLayout:
+                orientation: "horizontal"
+                padding: 0.5
+                ToggleButton:
+                    text: "Low"
+                ToggleButton:
+                    text: "Mid"
+                ToggleButton:
+                    text: "High"
+        BoxLayout:
+            orientation: "vertical"
+            Label:
+                text: "Phys. Load"
+            BoxLayout:
+                orientation: "horizontal"
+                ToggleButton:
+                    text: "Low"
+                ToggleButton:
+                    text: "Mid"
+                ToggleButton:
+                    text: "High"
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            text: "Duration"
+        BoxLayout:
+            orientation: "horizontal"
+            ToggleButton:
+                text: "15"
+            ToggleButton:
+                text: "30"
+            ToggleButton:
+                text: "60"
+            TextInput:
+                text: "other"
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            text: "End Time"
+        BoxLayout:
+            orientation: "horizontal"
+            ToggleButton:
+                text: "-1"
+            ToggleButton:
+                text: "-0:15"
+            Label:
+                text: "0:00"
+            ToggleButton:
+                text: "+0:15"
+            ToggleButton:
+                text: "+1"
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            text: "Energy Level"
+        BoxLayout:
+            orientation: "horizontal"
+            ToggleButton:
+                text: "Low"
+            ToggleButton:
+                text: "Med"
+            ToggleButton:
+                text: "High"
+    BoxLayout:
+        orientation: "horizontal"
+        Button:
+            text: "Cancel"
+        Button:
+            text: "Save"

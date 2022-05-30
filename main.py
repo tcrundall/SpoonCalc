@@ -1,9 +1,12 @@
-from tkinter import Widget
+from kivy.config import Config
+Config.set('graphics', 'width', '400')
+Config.set('graphics', 'height', '800')
+
 from kivy.app import App
-from kivy.uix.widget import Widget
+from kivy.uix.boxlayout import BoxLayout
 
 
-class MainWidget(Widget):
+class MainWidget(BoxLayout):
     pass
 
 
