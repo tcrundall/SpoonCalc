@@ -22,6 +22,7 @@ MainWidget:
         color: label_color
     TextInput:
         text: "Activity name"
+        id: activity_name
         size_hint: 1, 0.3
         # width: 0.8 * root.width
     BoxLayout:
@@ -38,10 +39,17 @@ MainWidget:
                 # spacing: button_spacing
                 ToggleButton:
                     text: "Low"
+                    id: cog_low
+                    on_state: root.on_toggle(self, "cog")
                 ToggleButton:
                     text: "Mid"
+                    id: cog_mid
+                    on_state: root.on_toggle(self, "cog")
+                    state: "down"
                 ToggleButton:
                     text: "High"
+                    id: cog_high
+                    on_state: root.on_toggle(self, "cog")
         Option:
             BackgroundLabel:
                 text: "Phys. Load"
@@ -50,25 +58,50 @@ MainWidget:
                 orientation: "horizontal"
                 ToggleButton:
                     text: "Low"
+                    id: phys_low
+                    on_state: root.on_toggle(self, "phys")
                 ToggleButton:
                     text: "Mid"
+                    id: phys_mid
+                    on_state: root.on_toggle(self, "phys")
+                    state: "down"
                 ToggleButton:
                     text: "High"
+                    id: phys_high
+                    on_state: root.on_toggle(self, "phys")
     Option:
         orientation: "vertical"
         BackgroundLabel:
-            text: "Duration"
+            text: f"Duration: {root.duration_hr}:{root.duration_min:02}"
             color: label_color
         BoxLayout:
             orientation: "horizontal"
             ToggleButton:
-                text: "15"
+                text: "0:15"
+                id: dur_015
+                on_state: root.on_toggle_duration(self)
             ToggleButton:
-                text: "30"
+                text: "0:30"
+                id: dur_030
+                on_state: root.on_toggle_duration(self)
             ToggleButton:
-                text: "60"
-            TextInput:
-                text: "other"
+                text: "1"
+                id: dur_1
+                on_state: root.on_toggle_duration(self)
+                state: "down"
+            ToggleButton:
+                text: "2"
+                id: dur_2
+                on_state: root.on_toggle_duration(self)
+            ToggleButton:
+                text: "4"
+                id: dur_4
+                on_state: root.on_toggle_duration(self)
+            # TextInput:
+            #     id: dur_custom_text
+            #     text: "custom"
+            #     multiline: False
+            #     on_text_validate: root.on_dur_text_validate(self)
     Option:
         orientation: "vertical"
         BackgroundLabel:
@@ -78,29 +111,47 @@ MainWidget:
         BoxLayout:
             orientation: "horizontal"
             Button:
+                id: -1
                 text: "-1"
+                on_press: root.on_end_time_press(self)
             Button:
+                id: -015
                 text: "-0:15"
+                on_press: root.on_end_time_press(self)
             BackgroundLabel:
                 color: label_color
-                text: "0:00"
+                text: f"{root.end_time_hr}:{root.end_time_min:02}"
             Button:
+                id: +015
                 text: "+0:15"
+                on_press: root.on_end_time_press(self)
             Button:
+                id: +1
                 text: "+1"
+                on_press: root.on_end_time_press(self)
     Option:
         orientation: "vertical"
         BackgroundLabel:
             text: "Energy Level"
+            id: energy_toggle_label
             color: label_color
         BoxLayout:
             orientation: "horizontal"
+            text: "Energy Level"
+            id: energy_toggles
             ToggleButton:
                 text: "Low"
+                id: energy_low
+                on_state: root.on_toggle(self, "energy")
             ToggleButton:
-                text: "Med"
+                text: "Mid"
+                id: energy_mid
+                on_state: root.on_toggle(self, "energy")
+                state: "down"
             ToggleButton:
                 text: "High"
+                id: energy_high
+                on_state: root.on_toggle(self, "energy")
     BoxLayout:
         size_hint: 1, 0.5
         orientation: "horizontal"
@@ -108,6 +159,7 @@ MainWidget:
             text: "Cancel"
         Button:
             text: "Save"
+            on_press: root.on_save_press()
 
 <BackgroundColor@Widget>
     background_color: 1, 1, 1, 1
