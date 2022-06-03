@@ -12,9 +12,11 @@ from kivy.uix.boxlayout import BoxLayout
 import datetime
 import json
 import os
+import sqlite3
 import time
 
 DATA_DIR = 'data'
+DATABASE = 'activitytracker.db'
 
 LOW = 1
 MID = 2
@@ -68,7 +70,7 @@ class MainWidget(BoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-    
+
     def on_toggle(self, toggle, load):
         if toggle.state == "down":
             for id in self.button_ids[load]:
@@ -140,11 +142,30 @@ class MainWidget(BoxLayout):
     #             if self.ids[id] != toggle:
     #                 self.ids[id].state = "normal"
 
+    def insert_into_database(self):
+        conn = sqlite3.connect(DATABASE)
+        c = conn.cursor()
+        c.execute("INSERT INTO activities VALUES (:name), (:cogload), (:end)",
+                  {
+                      'name': self.ids['activity_name'].text,
+                      'cogload': self.get_level('cog'),
+                      'end': self.end_time,
+                  })
+        conn.commit()
+        c.execute("SELECT * FROM activities")
+        contents = c.fetchall()
+        conn.commit()
+        print(contents)
+        
+        conn.close()
+
     def on_save_press(self):
         save_dict = self.build_save_dict()
         filename = os.path.join(DATA_DIR, self.generate_ativity_name())
         with open(filename, 'w') as fp:
             save_json = json.dump(save_dict, fp)
+
+        self.insert_into_database()
 
     def get_level(self, load):
         for id in self.button_ids[load]:
@@ -166,8 +187,8 @@ class MainWidget(BoxLayout):
         date, time, name
         """
         now = time.localtime()
-        filename = f"{now.tm_year}_{now.tm_mon}_{now.tm_mday}_" +\
-                   f"{now.tm_hour}_{now.tm_min}_{now.tm_sec}"
+        filename = f"{now.tm_year}_{now.tm_mon:02}_{now.tm_mday:02}_" +\
+                   f"{now.tm_hour:02}_{now.tm_min:02}_{now.tm_sec:02}"
         # TODO: set `activity name` to a default string
         if self.ids['activity_name'].text != "Activity name":
             filename += f"_{self.ids['activity_name'].text}"
@@ -176,7 +197,24 @@ class MainWidget(BoxLayout):
 
 
 class ActivityTrackerApp(App):
-    pass
+    def build(self):
+        print("BUILDING APP!!!")
+        conn = sqlite3.connect(DATABASE)
+
+        c = conn.cursor()
+
+        # c.execute("""CREATE TABLE if not exists activities(
+        c.execute("DROP TABLE if exists activities")
+        c.execute("""CREATE TABLE activities(
+            name text
+            cogload text 
+            endtime text
+        )
+        """)
+
+        conn.commit()
+
+        conn.close()
 
 
 if __name__ == '__main__':
