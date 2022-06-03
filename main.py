@@ -16,7 +16,7 @@ import sqlite3
 import time
 
 DATA_DIR = 'data'
-DATABASE = 'activitytracker.db'
+DATABASE = 'spooncalc.db'
 
 LOW = 1
 MID = 2
@@ -196,7 +196,7 @@ class MainWidget(BoxLayout):
         return filename
 
 
-class ActivityTrackerApp(App):
+class SpoonCalcApp(App):
     def build(self):
         print("BUILDING APP!!!")
         conn = sqlite3.connect(DATABASE)
@@ -218,4 +218,4 @@ class ActivityTrackerApp(App):
 
 
 if __name__ == '__main__':
-    ActivityTrackerApp().run()
+    SpoonCalcApp().run()
