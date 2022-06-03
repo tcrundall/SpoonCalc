@@ -1,2 +1,5 @@
 # Local storage
 *.json
+
+# misc developmental config files
+.flake8
