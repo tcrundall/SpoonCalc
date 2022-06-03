@@ -36,6 +36,7 @@ class MainWidget(BoxLayout):
     Possible extensions:
         - snap begin time to end of last event
     """
+    title = StringProperty("Log Activity")
 
     duration_timedelta = timedelta(hours=1)
     duration_display = StringProperty(
@@ -145,6 +146,8 @@ class MainWidget(BoxLayout):
 
     def on_save_press(self):
         self.insert_into_database()
+        self.title = "Good job! :)"
+
         # Change view screen somehow...
 
     def get_level(self, load):
