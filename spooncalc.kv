@@ -73,7 +73,7 @@ MainWidget:
     Option:
         orientation: "vertical"
         BackgroundLabel:
-            text: f"Duration: {root.duration_hr}:{root.duration_min:02}"
+            text: f"Duration: {root.duration_display}"
             color: label_color
         BoxLayout:
             orientation: "horizontal"
@@ -121,7 +121,7 @@ MainWidget:
                 on_press: root.on_end_time_press(self)
             BackgroundLabel:
                 color: label_color
-                text: f"{root.end_time_hr}:{root.end_time_min:02}"
+                text: f"{root.end_display}"
             Button:
                 id: +015
                 text: "+0:15"
