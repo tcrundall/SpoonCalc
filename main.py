@@ -42,17 +42,15 @@ class InputWindow(Screen):
     Possible extensions:
         - snap begin time to end of last event
     """
-    title = StringProperty("Log Activity")
+    title = StringProperty()
 
-    duration_timedelta = timedelta(hours=1)
-    duration_display = StringProperty(
-        ":".join(str(duration_timedelta).split(':')[:2])
-    )
+    # duration_timedelta = 
+    duration_display = StringProperty()
 
     end_datetime = datetime.now().replace(minute=0, second=0, microsecond=0)
-    end_display = StringProperty(end_datetime.strftime("%H:%M"))
+    end_display = StringProperty()
 
-    start_datetime = end_datetime - duration_timedelta
+    # start_datetime = end_datetime - duration_timedelta
 
     button_ids = {
         'cog': {
@@ -89,10 +87,45 @@ class InputWindow(Screen):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # self.set_defaults()
+
+    # def set_defaults(self):
+    def on_pre_enter(self):
+        # Reset title
+        self.title = "Log Activity"
+        self.ids.activity_name.text = "Activity name"
+
+        # Reset load toggles
+        for load in ["cog", "phys", "energy"]:
+            mid_button_id = f"{load}_mid"
+            self.ids[mid_button_id].state = "down"
+            self.on_toggle(self.ids[mid_button_id], load)
+
+        # Reset duration toggles
+        default_dur_down = ["dur_1"]
+        for id, val in self.duration_toggles.items():
+            if id in default_dur_down:
+                self.ids[id].state = "down"
+            else:
+                self.ids[id].state = "normal"
+        
+        # Update displays
+
+        self.on_toggle_duration(None)
+        self.end_datetime = datetime.now().replace(
+            minute=0, second=0, microsecond=0
+        )
+        self.end_display = self.end_datetime.strftime("%H:%M")
+        self.start_datetime = self.end_datetime - self.duration_timedelta
 
     def on_toggle(self, toggle, load):
         """
         Ensure that exactly one toggle for load `load` is down
+
+        Parameters
+        ----------
+        toggle: the toggle button
+        load: ('cog'|'phys'|'energy')
         """
         if toggle.state == "down":
             for id in self.button_ids[load]:
@@ -112,8 +145,6 @@ class InputWindow(Screen):
         self.duration_display = \
             ':'.join(str(self.duration_timedelta).split(':')[:2])
 
-        print(f"{self.duration_timedelta=!s}")
-
     def on_end_time_press(self, button: Button):
         """
         Inc-/decrement the end time based on pressed button and update display
@@ -132,9 +163,11 @@ class InputWindow(Screen):
         """
         conn = sqlite3.connect(DATABASE)
         c = conn.cursor()
-        c.execute("INSERT INTO activities VALUES (:end), (:duration), " +
-                  "(:name), (:cogload), (:physload), (:energy)",
+        c.execute("INSERT INTO activities VALUES "
+                  + "(:start), (:end), (:duration), "
+                  + "(:name), (:cogload), (:physload), (:energy)",
                   {
+                      'start': str(self.start_datetime),
                       'end': str(self.end_datetime),
                       'duration': str(self.duration_timedelta),
                       'name': self.ids['activity_name'].text,
