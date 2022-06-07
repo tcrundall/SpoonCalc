@@ -1,5 +1,7 @@
 ##:kivy
-MainWidget:
+WindowManager:
+    MenuWindow:
+    InputWindow:
 
 #:set pad "5dp"
 #:set button_group_size_hint 1, 0.75
@@ -13,154 +15,178 @@ MainWidget:
     orientation: "vertical"
     padding: (pad, pad, pad, pad)
 
-<MainWidget>
-    orientation: "vertical"
-    spacing: toplevel_spacing
-    BackgroundLabel:
-        text: f"{root.title}"
-        font_size: '50dp'
-        color: label_color
-    TextInput:
-        text: "Activity name"
-        id: activity_name
-        multiline: False
-        size_hint: 1, 0.3
-        # width: 0.8 * root.width
+<MenuWindow>:
+    name: "menu"
     BoxLayout:
-        orientation: "horizontal"
-        # spacing: toplevel_spacing
+        orientation: "vertical"
+        size: root.width, root.height
+        Label:
+            text: "Spoon Calculator!"
+            size_hint_y: 0.8
+        Button:
+            text: "Log an activity"
+            size_hint_y: 0.2
+            on_release:
+                root.manager.transition.direction = "left"
+                app.root.current = "input"
+
+
+<InputWindow>:
+    name: "input"
+    BoxLayout:
+        orientation: "vertical"
+        spacing: toplevel_spacing
+        BackgroundLabel:
+            text: f"{root.title}"
+            font_size: '50dp'
+            color: label_color
+        TextInput:
+            text: "Activity name"
+            id: activity_name
+            multiline: False
+            size_hint: 1, 0.3
+            # width: 0.8 * root.width
+        BoxLayout:
+            orientation: "horizontal"
+            # spacing: toplevel_spacing
+            Option:
+                orientation: "vertical" 
+                padding: (pad, pad, pad, pad)
+                BackgroundLabel:
+                    text: "Cog. Load"
+                    color: label_color
+                BoxLayout:
+                    orientation: "horizontal"
+                    # spacing: button_spacing
+                    ToggleButton:
+                        text: "Low"
+                        id: cog_low
+                        on_state: root.on_toggle(self, "cog")
+                    ToggleButton:
+                        text: "Mid"
+                        id: cog_mid
+                        on_state: root.on_toggle(self, "cog")
+                        state: "down"
+                    ToggleButton:
+                        text: "High"
+                        id: cog_high
+                        on_state: root.on_toggle(self, "cog")
+            Option:
+                BackgroundLabel:
+                    text: "Phys. Load"
+                    color: label_color
+                BoxLayout:
+                    orientation: "horizontal"
+                    ToggleButton:
+                        text: "Low"
+                        id: phys_low
+                        on_state: root.on_toggle(self, "phys")
+                    ToggleButton:
+                        text: "Mid"
+                        id: phys_mid
+                        on_state: root.on_toggle(self, "phys")
+                        state: "down"
+                    ToggleButton:
+                        text: "High"
+                        id: phys_high
+                        on_state: root.on_toggle(self, "phys")
         Option:
-            orientation: "vertical" 
-            padding: (pad, pad, pad, pad)
+            orientation: "vertical"
             BackgroundLabel:
-                text: "Cog. Load"
+                text: f"Duration: {root.duration_display}"
                 color: label_color
             BoxLayout:
                 orientation: "horizontal"
-                # spacing: button_spacing
                 ToggleButton:
-                    text: "Low"
-                    id: cog_low
-                    on_state: root.on_toggle(self, "cog")
+                    text: "0:15"
+                    id: dur_015
+                    on_state: root.on_toggle_duration(self)
                 ToggleButton:
-                    text: "Mid"
-                    id: cog_mid
-                    on_state: root.on_toggle(self, "cog")
+                    text: "0:30"
+                    id: dur_030
+                    on_state: root.on_toggle_duration(self)
+                ToggleButton:
+                    text: "1"
+                    id: dur_1
+                    on_state: root.on_toggle_duration(self)
                     state: "down"
                 ToggleButton:
-                    text: "High"
-                    id: cog_high
-                    on_state: root.on_toggle(self, "cog")
+                    text: "2"
+                    id: dur_2
+                    on_state: root.on_toggle_duration(self)
+                ToggleButton:
+                    text: "4"
+                    id: dur_4
+                    on_state: root.on_toggle_duration(self)
+                # TextInput:
+                #     id: dur_custom_text
+                #     text: "custom"
+                #     multiline: False
+                #     on_text_validate: root.on_dur_text_validate(self)
         Option:
+            orientation: "vertical"
             BackgroundLabel:
-                text: "Phys. Load"
+                text: "End Time"
+                color: label_color
+                halign: "left"
+            BoxLayout:
+                orientation: "horizontal"
+                Button:
+                    id: -1
+                    text: "-1"
+                    on_press: root.on_end_time_press(self)
+                Button:
+                    id: -015
+                    text: "-0:15"
+                    on_press: root.on_end_time_press(self)
+                BackgroundLabel:
+                    color: label_color
+                    text: f"{root.end_display}"
+                Button:
+                    id: +015
+                    text: "+0:15"
+                    on_press: root.on_end_time_press(self)
+                Button:
+                    id: +1
+                    text: "+1"
+                    on_press: root.on_end_time_press(self)
+        Option:
+            orientation: "vertical"
+            BackgroundLabel:
+                text: "Energy Level"
+                id: energy_toggle_label
                 color: label_color
             BoxLayout:
                 orientation: "horizontal"
+                text: "Energy Level"
+                id: energy_toggles
                 ToggleButton:
                     text: "Low"
-                    id: phys_low
-                    on_state: root.on_toggle(self, "phys")
+                    id: energy_low
+                    on_state: root.on_toggle(self, "energy")
                 ToggleButton:
                     text: "Mid"
-                    id: phys_mid
-                    on_state: root.on_toggle(self, "phys")
+                    id: energy_mid
+                    on_state: root.on_toggle(self, "energy")
                     state: "down"
                 ToggleButton:
                     text: "High"
-                    id: phys_high
-                    on_state: root.on_toggle(self, "phys")
-    Option:
-        orientation: "vertical"
-        BackgroundLabel:
-            text: f"Duration: {root.duration_display}"
-            color: label_color
+                    id: energy_high
+                    on_state: root.on_toggle(self, "energy")
         BoxLayout:
-            orientation: "horizontal"
-            ToggleButton:
-                text: "0:15"
-                id: dur_015
-                on_state: root.on_toggle_duration(self)
-            ToggleButton:
-                text: "0:30"
-                id: dur_030
-                on_state: root.on_toggle_duration(self)
-            ToggleButton:
-                text: "1"
-                id: dur_1
-                on_state: root.on_toggle_duration(self)
-                state: "down"
-            ToggleButton:
-                text: "2"
-                id: dur_2
-                on_state: root.on_toggle_duration(self)
-            ToggleButton:
-                text: "4"
-                id: dur_4
-                on_state: root.on_toggle_duration(self)
-            # TextInput:
-            #     id: dur_custom_text
-            #     text: "custom"
-            #     multiline: False
-            #     on_text_validate: root.on_dur_text_validate(self)
-    Option:
-        orientation: "vertical"
-        BackgroundLabel:
-            text: "End Time"
-            color: label_color
-            halign: "left"
-        BoxLayout:
+            size_hint: 1, 0.5
             orientation: "horizontal"
             Button:
-                id: -1
-                text: "-1"
-                on_press: root.on_end_time_press(self)
+                text: "Cancel"
+                on_release:
+                    root.manager.transition.direction = "right"
+                    app.root.current = "menu"
             Button:
-                id: -015
-                text: "-0:15"
-                on_press: root.on_end_time_press(self)
-            BackgroundLabel:
-                color: label_color
-                text: f"{root.end_display}"
-            Button:
-                id: +015
-                text: "+0:15"
-                on_press: root.on_end_time_press(self)
-            Button:
-                id: +1
-                text: "+1"
-                on_press: root.on_end_time_press(self)
-    Option:
-        orientation: "vertical"
-        BackgroundLabel:
-            text: "Energy Level"
-            id: energy_toggle_label
-            color: label_color
-        BoxLayout:
-            orientation: "horizontal"
-            text: "Energy Level"
-            id: energy_toggles
-            ToggleButton:
-                text: "Low"
-                id: energy_low
-                on_state: root.on_toggle(self, "energy")
-            ToggleButton:
-                text: "Mid"
-                id: energy_mid
-                on_state: root.on_toggle(self, "energy")
-                state: "down"
-            ToggleButton:
-                text: "High"
-                id: energy_high
-                on_state: root.on_toggle(self, "energy")
-    BoxLayout:
-        size_hint: 1, 0.5
-        orientation: "horizontal"
-        Button:
-            text: "Cancel"
-        Button:
-            text: "Save"
-            on_press: root.on_save_press()
+                text: "Save"
+                on_release:
+                    root.on_save_press()
+                    root.manager.transition.direction = "right"
+                    app.root.current = "menu"
 
 <BackgroundColor@Widget>
     background_color: 1, 1, 1, 1

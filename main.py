@@ -8,6 +8,7 @@ from kivy.properties import NumericProperty, StringProperty
 from kivy.uix.button import Button
 from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.screenmanager import ScreenManager, Screen
 
 from datetime import datetime, timedelta
 import sqlite3
@@ -19,7 +20,12 @@ MID = 2
 HI = 3
 
 
-class MainWidget(BoxLayout):
+class MenuWindow(Screen):
+    pass
+
+
+# class MainWidget(BoxLayout):
+class InputWindow(Screen):
     """
     Activity input
     Use this widget to input an activity with the following properties:
@@ -169,6 +175,10 @@ class MainWidget(BoxLayout):
     #         filename += f"_{self.ids['activity_name'].text}"
     #     filename += '.json'
     #     return filename
+
+
+class WindowManager(ScreenManager):
+    pass
 
 
 class SpoonCalcApp(App):
