@@ -3,21 +3,14 @@ Config.set('graphics', 'width', '393')
 Config.set('graphics', 'height', '830')
 
 from kivy.app import App
-from kivy.metrics import dp
-from kivy.properties import NumericProperty, StringProperty
+from kivy.properties import StringProperty
 from kivy.uix.button import Button
-from kivy.uix.togglebutton import ToggleButton
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 from datetime import datetime, timedelta
 import sqlite3
 
 DATABASE = 'spooncalc.db'
-
-LOW = 1
-MID = 2
-HI = 3
 
 
 class MenuWindow(Screen):
