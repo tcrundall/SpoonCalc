@@ -10,7 +10,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 
 from datetime import datetime, timedelta
 import sqlite3
-import pandas as pd
+# import pandas as pd
 
 DATABASE = 'spooncalc.db'
 
@@ -19,14 +19,39 @@ class MyPopup(Popup):
     text = StringProperty()
 
     def open(self, **kwargs):
+        query_text = '''
+            select start, end, duration, name, cogload, physload, energy 
+            from activities
+        '''
         conn = sqlite3.connect(DATABASE)
-        query = pd.read_sql_query(
-            '''select start, end, duration, name, cogload, physload, energy
-              from activities''', conn)
-        df = pd.DataFrame(query, columns=[
-            'start', 'end', 'duration', 'name', 'cogload', 'physload', 'energy'
-        ])
-        self.text = str(df)
+        # query = pd.read_sql_query(
+        #     '''select start, end, duration, name, cogload, physload, energy
+        #       from activities''', conn)
+        # df = pd.DataFrame(query, columns=[
+        #     'start', 'end', 'duration', 'name', 'cogload', 'physload', 'energy'
+        # ])
+        # self.text = str(df)
+        c = conn.cursor()
+        c.execute(query_text)
+        contents = c.fetchall()
+        max_length = {i: 0 for i in range(len(c.description))}
+        header = [col[0] for col in c.description]
+        for entry in contents:
+            for i, value in enumerate(entry):
+                max_length[i] = max(max_length[i], len(str(value)))
+        for i, colname in enumerate(header):
+            max_length[i] = max(max_length[i], len(colname))
+
+        SEP = ' | '
+
+        formatted_header = SEP.join([str(col[0]).ljust(max_length[i]) 
+                                     for i, col in enumerate(c.description)])
+        formatted_contents = '\n'.join([SEP.join([
+            str(val).ljust(max_length[i]) for i, val in enumerate(entry)
+        ]) for entry in contents])
+        print(formatted_contents)
+        self.text = '\n'.join((formatted_header, formatted_contents))
+
         conn.close()
 
         super().open(**kwargs)
