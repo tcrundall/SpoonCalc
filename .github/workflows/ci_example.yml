@@ -20,8 +20,10 @@ jobs:
         run: |
           sudo mkdir -p /.buildozer/android
           sudo chmod -R a+rwx /.buildozer/android
+          ls -l /.buildozer/android
           sudo mkdir -p .buildozer/android
           sudo chmod -R a+rwx .buildozer/android
+          ls -l .buildozer/android
 
 
       # used to cache dependencies with a timeout
@@ -30,6 +32,10 @@ jobs:
         run: |
           echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
         shell: bash
+        
+      - name: Install build dependencies
+        run: |
+          sudo apt-get -y install automake autopoint
 
       - name: Cache Buildozer global directory
         uses: actions/cache@v2
