@@ -5,16 +5,45 @@ Config.set('graphics', 'height', '830')
 from kivy.app import App
 from kivy.properties import StringProperty
 from kivy.uix.button import Button
+from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 from datetime import datetime, timedelta
 import sqlite3
+import pandas as pd
 
 DATABASE = 'spooncalc.db'
 
 
+class MyPopup(Popup):
+    text = StringProperty()
+
+    def open(self, **kwargs):
+        conn = sqlite3.connect(DATABASE)
+        query = pd.read_sql_query(
+            '''select start, end, duration, name, cogload, physload, energy
+              from activities''', conn)
+        df = pd.DataFrame(query, columns=[
+            'start', 'end', 'duration', 'name', 'cogload', 'physload', 'energy'
+        ])
+        self.text = str(df)
+        conn.close()
+
+        super().open(**kwargs)
+
+
 class MenuWindow(Screen):
-    pass
+    def output_database(self):
+        print("DATABASE!")
+
+        conn = sqlite3.connect(DATABASE)
+        c = conn.cursor()
+        c.execute("SELECT * FROM activities")
+        contents = c.fetchall()
+        conn.commit()
+        print(contents)
+
+        conn.close()
 
 
 # class MainWidget(BoxLayout):
@@ -156,9 +185,12 @@ class InputWindow(Screen):
         """
         conn = sqlite3.connect(DATABASE)
         c = conn.cursor()
-        c.execute("INSERT INTO activities VALUES "
-                  + "(:start), (:end), (:duration), "
-                  + "(:name), (:cogload), (:physload), (:energy)",
+            
+        c.execute("INSERT INTO activities "
+                  + "(start, end, duration, name, cogload, physload, energy) "
+                  + " VALUES( "
+                  + ":start, :end, :duration, "
+                  + ":name, :cogload, :physload, :energy)",
                   {
                       'start': str(self.start_datetime),
                       'end': str(self.end_datetime),
@@ -169,7 +201,7 @@ class InputWindow(Screen):
                       'energy': self.get_level('energy')
                   })
         conn.commit()
-        c.execute("SELECT * FROM activities")
+        c.execute("SELECT id, start, end, duration, name, cogload, physload, energy FROM activities")
         contents = c.fetchall()
         conn.commit()
         print(contents)
@@ -217,9 +249,14 @@ class SpoonCalcApp(App):
         # c.execute("DROP TABLE if exists activities")
         # c.execute("""CREATE TABLE activities(
         c.execute("""CREATE TABLE if not exists activities(
-            name text
-            cogload text 
-            endtime text
+            id integer PRIMARY KEY,
+            start text NOT NULL,
+            end text NOT NULL,
+            duration text NOT NULL,
+            name text NOT NULL,
+            cogload text NOT NULL,
+            physload text NOT NULL,
+            energy text NOT NULL
         )
         """)
 

@@ -1,7 +1,33 @@
 ##:kivy
+#:import Factory kivy.factory.Factory
 WindowManager:
     MenuWindow:
     InputWindow:
+
+<MyPopup@Popup>
+    title: "Database"
+    size_hint: 0.8, 0.7
+    pos_hint: {"x": 0.1, "top": 0.9}
+    BoxLayout:
+        orientation: "vertical"
+        ScrollView:
+            size_hint_y: 0.9
+            do_scroll_x: True
+            do_scroll_y: True
+            Label:
+                size_hint_y: None
+                size_hint_x: 2
+                text: root.text
+                text_size: self.size
+                halign: "left"
+                id: database_output
+                font_size: 10
+                font_name: "RobotoMono-Regular"
+        Button:
+            size_hint_y: 0.1
+            text: "close"
+            font_size: 24
+            on_release: root.dismiss()
 
 #:set pad "5dp"
 #:set button_group_size_hint 1, 0.75
@@ -25,10 +51,17 @@ WindowManager:
             size_hint_y: 0.8
         Button:
             text: "Log an activity"
-            size_hint_y: 0.2
+            size_hint_y: 0.1
             on_release:
                 root.manager.transition.direction = "left"
                 app.root.current = "input"
+        
+        Button:
+            text: "Show logs"
+            size_hint_y: 0.1
+            on_release:
+                root.output_database()
+                Factory.MyPopup().open()
 
 <InputWindow>:
     name: "input"
