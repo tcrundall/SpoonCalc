@@ -44,8 +44,10 @@ class MyPopup(Popup):
 
         SEP = ' | '
 
+        print([des[0] for des in c.description])
         formatted_header = SEP.join([str(col[0]).ljust(max_length[i]) 
                                      for i, col in enumerate(c.description)])
+        print(formatted_header)
         formatted_contents = '\n'.join([SEP.join([
             str(val).ljust(max_length[i]) for i, val in enumerate(entry)
         ]) for entry in contents])
