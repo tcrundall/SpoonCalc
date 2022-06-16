@@ -1,10 +1,10 @@
 [app]
 
 # (str) Title of your application
-title = My Application
+title = Spoon Calculator
 
 # (str) Package name
-package.name = myapp
+package.name = spooncalc
 
 # (str) Package domain (needed for android/ios packaging)
 package.domain = org.test
@@ -38,7 +38,7 @@ version = 0.1
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
 # requirements = python3,kivy
-requirements = python3==3.9.12, hostpython3==3.9.12, kivy
+requirements = python3==3.9.12, hostpython3==3.9.12, kivy.garden
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
