@@ -7,7 +7,7 @@ from kivy.properties import StringProperty
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.garden.graph import Graph, LinePlot
+# from kivy.garden.graph import Graph, LinePlot
 
 from datetime import datetime, timedelta
 import sqlite3

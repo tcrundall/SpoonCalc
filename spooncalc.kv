@@ -19,6 +19,7 @@
 WindowManager:
     MenuWindow:
     InputWindow:
+    # PlotWindow:
 
 <MyPopup@Popup>
     title: "Database"
@@ -265,6 +266,11 @@ WindowManager:
                     root.on_save_press()
                     root.manager.transition.direction = "right"
                     app.root.current = "menu"
+
+# <PlotWindow>:
+#     BoxLayout:
+#         orientation: "vertical"
+
 
 <BackgroundColor@Widget>
     background_color: 1, 1, 1, 1
