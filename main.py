@@ -12,6 +12,24 @@ from datetime import datetime, timedelta
 import sqlite3
 # import pandas as pd
 
+# Android specific imports
+from kivy.utils import platform
+from pathlib import Path
+import os
+
+if platform == 'android':
+    from android.permissions import request_permissions, Permission
+    from android.storage import primary_external_storage_path
+    request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
+
+    EXTERNALSTORAGE = primary_external_storage_path()
+if platform == 'macosx':
+    home = str(Path.home())
+    EXTERNALSTORAGE = home
+
+print(f'{platform=}')
+print(f'{EXTERNALSTORAGE=}')
+
 DATABASE = 'spooncalc.db'
 
 
@@ -45,7 +63,7 @@ class MyPopup(Popup):
         SEP = ' | '
 
         print([des[0] for des in c.description])
-        formatted_header = SEP.join([str(col[0]).ljust(max_length[i]) 
+        formatted_header = SEP.join([str(col[0]).ljust(max_length[i])
                                      for i, col in enumerate(c.description)])
         print(formatted_header)
         formatted_contents = '\n'.join([SEP.join([
@@ -60,17 +78,22 @@ class MyPopup(Popup):
 
 
 class MenuWindow(Screen):
-    def output_database(self):
-        print("DATABASE!")
+    def export_database(self):
+        pass
+        filename = os.path.join(EXTERNALSTORAGE, 'spoon-output.csv')
+        with open(filename, 'w') as fp:
+            fp.write("some,misc,data\nin,a,file\n")
 
-        conn = sqlite3.connect(DATABASE)
-        c = conn.cursor()
-        c.execute("SELECT * FROM activities")
-        contents = c.fetchall()
-        conn.commit()
-        print(contents)
+        # print("DATABASE!")
 
-        conn.close()
+        # conn = sqlite3.connect(DATABASE)
+        # c = conn.cursor()
+        # c.execute("SELECT * FROM activities")
+        # contents = c.fetchall()
+        # conn.commit()
+        # print(contents)
+
+        # conn.close()
 
 
 # class MainWidget(BoxLayout):

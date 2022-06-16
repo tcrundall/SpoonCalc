@@ -73,8 +73,14 @@ WindowManager:
             font_size: font_size_heading_1
             size_hint_y: 0.1
             on_release:
-                root.output_database()
                 Factory.MyPopup().open()
+        
+        Button:
+            text: "Export logs"
+            font_size: font_size_heading_1
+            size_hint_y: 0.1
+            on_release:
+                root.export_database()
 
 <InputWindow>:
     name: "input"
