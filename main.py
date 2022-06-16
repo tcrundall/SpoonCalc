@@ -42,13 +42,7 @@ class MyPopup(Popup):
             from activities
         '''
         conn = sqlite3.connect(DATABASE)
-        # query = pd.read_sql_query(
-        #     '''select start, end, duration, name, cogload, physload, energy
-        #       from activities''', conn)
-        # df = pd.DataFrame(query, columns=[
-        #     'start', 'end', 'duration', 'name', 'cogload', 'physload', 'energy'
-        # ])
-        # self.text = str(df)
+
         c = conn.cursor()
         c.execute(query_text)
         contents = c.fetchall()
@@ -79,21 +73,22 @@ class MyPopup(Popup):
 
 class MenuWindow(Screen):
     def export_database(self):
-        pass
         filename = os.path.join(EXTERNALSTORAGE, 'spoon-output.csv')
         with open(filename, 'w') as fp:
-            fp.write("some,misc,data\nin,a,file\n")
+            conn = sqlite3.connect(DATABASE)
+            c = conn.cursor()
+            c.execute("SELECT * FROM activities")
+            contents = c.fetchall()
+            SEP = ','
+            formatted_header = SEP.join([str(col[0])
+                                        for col in c.description])
+            formatted_contents = '\n'.join([SEP.join([
+                str(val) for val in entry
+            ]) for entry in contents])
+            text = '\n'.join((formatted_header, formatted_contents))
+            fp.write(text)
 
-        # print("DATABASE!")
-
-        # conn = sqlite3.connect(DATABASE)
-        # c = conn.cursor()
-        # c.execute("SELECT * FROM activities")
-        # contents = c.fetchall()
-        # conn.commit()
-        # print(contents)
-
-        # conn.close()
+            conn.close()
 
 
 # class MainWidget(BoxLayout):

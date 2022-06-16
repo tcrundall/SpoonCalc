@@ -32,11 +32,12 @@ WindowManager:
             do_scroll_x: True
             do_scroll_y: True
             Label:
-                size_hint_y: None
+                size_hint_y: 0.5
                 size_hint_x: 5
                 text: root.text
                 text_size: self.size
                 halign: "left"
+                valign: "top"
                 id: database_output
                 font_size: font_size_contents
                 font_name: "RobotoMono-Regular"
