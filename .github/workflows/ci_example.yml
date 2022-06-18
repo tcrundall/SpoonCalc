@@ -14,53 +14,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - id: fix-buildozer-permission
-        name: Fix the NDK folder permission to allow caching
-        shell: bash
-        run: |
-          sudo mkdir -p /.buildozer/android
-          sudo chmod -R a+rwx /.buildozer/android
-          ls -l /.buildozer
-          sudo mkdir -p .buildozer/android
-          sudo chmod -R a+rwx .buildozer/android
-          ls -l .buildozer
-
-
-      # used to cache dependencies with a timeout
-      - name: Get Date
-        id: get-date
-        run: |
-          echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
-        shell: bash
-        
       - name: Install build dependencies
         run: |
           sudo apt-get -y install automake autopoint
 
-      - name: Cache Buildozer global directory
-        uses: actions/cache@v2
-        with:
-          path: .buildozer_global
-          key: buildozer-global-${{ hashFiles('buildozer.spec') }} # Replace with your path
-
-      - name: experimenting with variables
-        run: |
-          echo ${ANDROID_HOME}
-          echo ${HOME}
-          echo ${APP_ANDROID_SDK_PATH}
-          echo ${APP_ANDROID_NDK_PATH}
-
-      - uses: actions/cache@v2
-        with:
-          path: .buildozer
-          key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
+      - name: Garden install
+        run: python -m pip install kivy.garden.graph
 
       - name: Build with Buildozer
         uses: ArtemSBulgakov/buildozer-action@v1
         id: buildozer
         with:
           command: buildozer android debug
-          buildozer_version: master
+          buildozer_version: stable
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
