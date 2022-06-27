@@ -229,6 +229,8 @@ class InputWindow(Screen):
         """
         Insert current inputted data into the database
         """
+        self.start_datetime = self.end_datetime - self.duration_timedelta
+
         conn = sqlite3.connect(DATABASE)
         c = conn.cursor()
             
