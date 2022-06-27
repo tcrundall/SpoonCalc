@@ -19,7 +19,7 @@
 WindowManager:
     MenuWindow:
     InputWindow:
-    # PlotWindow:
+    PlotWindow:
 
 <MyPopup@Popup>
     title: "Database"
@@ -33,7 +33,7 @@ WindowManager:
             do_scroll_x: True
             do_scroll_y: True
             Label:
-                size_hint_y: 0.5
+                size_hint_y: 5
                 size_hint_x: 5
                 text: root.text
                 text_size: self.size
@@ -69,7 +69,13 @@ WindowManager:
             on_release:
                 root.manager.transition.direction = "left"
                 app.root.current = "input"
-        
+        Button:
+            text: "Plot"
+            font_size: font_size_heading_1
+            size_hint_y: 0.1
+            on_release:
+                root.manager.transition.direction = "left"
+                app.root.current = "plot"
         Button:
             text: "Show logs"
             font_size: font_size_heading_1
@@ -267,9 +273,23 @@ WindowManager:
                     root.manager.transition.direction = "right"
                     app.root.current = "menu"
 
-# <PlotWindow>:
-#     BoxLayout:
-#         orientation: "vertical"
+<PlotWindow>:
+    name: "plot"
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            id: graph
+            size_hint: 1, 0.9
+            padding: 10, 10, 0, 10
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: 1, 0.1
+            Button:
+                text: "Back"
+                font_size: font_size_button_1
+                on_release:
+                    root.manager.transition.direction = "right"
+                    app.root.current = "menu"
 
 
 <BackgroundColor@Widget>

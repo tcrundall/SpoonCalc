@@ -18,6 +18,8 @@ from kivy.utils import platform
 from pathlib import Path
 import os
 
+import analyser
+
 if platform == 'android':
     from android.permissions import request_permissions, Permission
     from android.storage import primary_external_storage_path
@@ -70,6 +72,49 @@ class MyPopup(Popup):
         conn.close()
 
         super().open(**kwargs)
+
+
+class PlotWindow(Screen):
+    """
+    Display informative plots
+    """
+    N_DAYS_BACK = 7
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.spoons_per_day = analyser.calculate_daily_totals(self.N_DAYS_BACK)
+        self.plot_initialized = False
+
+    def on_pre_enter(self):
+        if not self.plot_initialized:
+            self.init_plot()
+        self.plot_initialized = True
+        self.update_plot()
+
+    def init_plot(self):
+        self.graph = Graph(
+            xmin=-self.N_DAYS_BACK, xmax=0,
+            ymin=0, ymax=max(self.spoons_per_day.values()) * 1.1,
+            border_color=[0, 1, 1, 1],
+            tick_color=[0, 1, 1, 0.7],
+            x_grid=True, y_grid=True,
+            draw_border=True,
+            x_grid_label=True,
+            y_grid_label=True,
+            x_ticks_major=1,
+            y_ticks_major=2.5,
+        )
+        self.ids.graph.add_widget(self.graph)
+
+        self.plot = LinePlot(color=[1, 1, 0, 1], line_width=1.5)
+        self.plot.points = [(-d, spoons) for d, spoons in self.spoons_per_day.items()]
+        self.graph.add_plot(self.plot)
+
+    def update_plot(self):
+        self.spoons_per_day = analyser.calculate_daily_totals(self.N_DAYS_BACK)
+        self.plot.points = [(-d, spoons) for d, spoons in self.spoons_per_day.items()]
+        self.graph.ymax = max(self.spoons_per_day.values()) * 1.1
 
 
 class MenuWindow(Screen):
@@ -252,7 +297,6 @@ class InputWindow(Screen):
         c.execute("SELECT id, start, end, duration, name, cogload, physload, energy FROM activities")
         contents = c.fetchall()
         conn.commit()
-        print(contents)
 
         conn.close()
 
