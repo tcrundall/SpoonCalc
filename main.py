@@ -84,19 +84,19 @@ class ImportWindow(Screen):
         print(filename)
         filepath = os.path.join(EXTERNALSTORAGE, filename)
         with open(filepath, 'r') as fp:
-            header = fp.readline()
-            print(f"{header=}")
+            _ = fp.readline()       # skip header
             for line in fp:
                 print(line)
                 self.insert_if_unique(line)
 
     def insert_if_unique(self, csv_row):
+        """
+        If row doesn't exist in database, then insert it
+        """
         _, start, end, duration, name, cogload, physload, energy =\
             csv_row.strip().split(',')
         conn = sqlite3.connect(DATABASE)
         c = conn.cursor()
-
-        # Check if row exists:
 
         query_text = f"""
             SELECT EXISTS(
@@ -113,21 +113,19 @@ class ImportWindow(Screen):
         c.execute(query_text)
         contents = c.fetchall()
         if contents[0][0] == 1:
-            print("EXISTS!!")
             conn.commit()
             conn.close()
             return
 
-        print("Doesn't exist, inserting now...")
         query_text = f"""
             INSERT INTO activities
                 (start, end, duration, name, cogload, physload, energy)
                 VALUES(
-                    {start}, {end}, {duration}, {name}, {cogload},
-                    {physload}, {energy}
+                    "{start}", "{end}", "{duration}", "{name}", "{cogload}",
+                    "{physload}", "{energy}"
                 );
         """
-        print("Successfully inserted")
+        c.execute(query_text)
         conn.commit()
         conn.close()
             
