@@ -15,11 +15,13 @@
 #:set font_size_button_1 "20dp"
 #:set font_size_button_2 "16dp"
 #:set font_size_contents "15dp"
+#:set container_size_contents "30dp"        # double `font_size_contents`
 
 WindowManager:
     MenuWindow:
     InputWindow:
     PlotWindow:
+    ImportWindow:
 
 <MyPopup@Popup>
     title: "Database"
@@ -89,6 +91,55 @@ WindowManager:
             size_hint_y: 0.1
             on_release:
                 root.export_database()
+        
+        Button:
+            text: "Import logs"
+            font_size: font_size_heading_1
+            size_hint_y: 0.1
+            on_release:
+                root.manager.transition.direction = "left"
+                app.root.current = "import"
+        
+<ImportWindow>:
+    name: "import"
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            size_hint: 1, 0.1
+        BoxLayout:
+            size_hint: 1, 0.1
+            orientation: "horizontal"
+            Label:
+                size_hint: None, None
+                text: "Import filename: "
+                size: self.texture_size
+                height: container_size_contents
+                font_size: font_size_contents
+            TextInput:
+                id: external_file
+                size_hint: 1, None
+                height: container_size_contents
+                font_size: font_size_contents
+                text: "spoon-output.csv"
+        Label:
+            size_hint: 1, 0.7
+        BoxLayout:
+            size_hint: 1, 0.1
+            orientation: "horizontal"
+            Button:
+                text: "Cancel"
+                font_size: font_size_button_1
+                on_release:
+                    root.manager.transition.direction = "right"
+                    app.root.current = "menu"
+            Button:
+                text: "Import"
+                font_size: font_size_button_1
+                on_release:
+                    root.on_import_press(external_file.text)
+                    root.manager.transition.direction = "right"
+                    app.root.current = "menu"
+
 
 <InputWindow>:
     name: "input"

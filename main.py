@@ -74,6 +74,87 @@ class MyPopup(Popup):
         super().open(**kwargs)
 
 
+class ImportWindow(Screen):
+
+    def on_import_press(self, filename):
+        """
+        Import activites from a csv file into database,
+        ignoring duplicates
+        """
+        print(filename)
+        filepath = os.path.join(EXTERNALSTORAGE, filename)
+        with open(filepath, 'r') as fp:
+            header = fp.readline()
+            print(f"{header=}")
+            for line in fp:
+                print(line)
+                self.insert_if_unique(line)
+
+    def insert_if_unique(self, csv_row):
+        _, start, end, duration, name, cogload, physload, energy =\
+            csv_row.strip().split(',')
+        conn = sqlite3.connect(DATABASE)
+        c = conn.cursor()
+
+        # Check if row exists:
+
+        query_text = f"""
+            SELECT EXISTS(
+                SELECT * from activities WHERE
+                    start="{start}"
+                    AND end="{end}"
+                    AND duration="{duration}"
+                    AND name="{name}"
+                    AND cogload = "{cogload}"
+                    AND physload = "{physload}"
+                    AND energy = "{energy}"
+            );
+        """
+        c.execute(query_text)
+        contents = c.fetchall()
+        if contents[0][0] == 1:
+            print("EXISTS!!")
+            conn.commit()
+            conn.close()
+            return
+
+        print("Doesn't exist, inserting now...")
+        query_text = f"""
+            INSERT INTO activities
+                (start, end, duration, name, cogload, physload, energy)
+                VALUES(
+                    {start}, {end}, {duration}, {name}, {cogload},
+                    {physload}, {energy}
+                );
+        """
+        print("Successfully inserted")
+        conn.commit()
+        conn.close()
+            
+        # c.execute("INSERT INTO activities "
+        #           + "(start, end, duration, name, cogload, physload, energy) "
+        #           + " VALUES( "
+        #           + ":start, :end, :duration, "
+        #           + ":name, :cogload, :physload, :energy)",
+        #           {
+        #               'start': str(self.start_datetime),
+        #               'end': str(self.end_datetime),
+        #               'duration': str(self.duration_timedelta),
+        #               'name': self.ids['activity_name'].text,
+        #               'cogload': self.get_level('cog'),
+        #               'physload': self.get_level('phys'),
+        #               'energy': self.get_level('energy')
+        #           })
+        # conn.commit()
+        # c.execute("SELECT id, start, end, duration, name, cogload, physload, energy FROM activities")
+        # contents = c.fetchall()
+        # conn.commit()
+
+        # conn.close()
+
+
+
+
 class PlotWindow(Screen):
     """
     Display informative plots
