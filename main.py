@@ -354,6 +354,9 @@ class InputWindow(Screen):
         Insert current inputted data into the database
         """
         self.start_datetime = self.end_datetime - self.duration_timedelta
+        raw_activity_name = self.ids['activity_name'].text
+        for char in ',.:-\"\'':
+            raw_activity_name = raw_activity_name.replace(char, '')
 
         conn = sqlite3.connect(DATABASE)
         c = conn.cursor()
@@ -367,7 +370,7 @@ class InputWindow(Screen):
                       'start': str(self.start_datetime),
                       'end': str(self.end_datetime),
                       'duration': str(self.duration_timedelta),
-                      'name': self.ids['activity_name'].text,
+                      'name': raw_activity_name,
                       'cogload': self.get_level('cog'),
                       'physload': self.get_level('phys'),
                       'energy': self.get_level('energy')
