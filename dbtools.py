@@ -7,6 +7,16 @@ from datetime import datetime, timedelta
 DATABASE = "spooncalc.db"
 
 
+def submit_query(query_text):
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    c.execute(query_text)
+    contents = c.fetchall()
+    conn.commit()
+    conn.close()
+    return contents
+
+
 def get_logs_from_day(n_days_ago, colnames=None):
     """
     Calculate total spoons spent on `n_days_ago` day.
@@ -31,12 +41,7 @@ def get_logs_from_day(n_days_ago, colnames=None):
         WHERE start BETWEEN "{start_date_str}" and "{end_date_str}"
     """
 
-    conn = sqlite3.connect(DATABASE)
-    c = conn.cursor()
-    c.execute(query_text)
-
-    contents = c.fetchall()
-    conn.close()
+    contents = submit_query(query_text)
 
     entries = [
         {colname: value for colname, value in zip(colnames, entry)}
@@ -44,3 +49,11 @@ def get_logs_from_day(n_days_ago, colnames=None):
     ]
 
     return entries
+
+
+def delete_entry(id):
+    query_text = f"""
+        DELETE FROM activities
+        WHERE id = {id};
+    """
+    submit_query(query_text)

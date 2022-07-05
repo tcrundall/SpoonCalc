@@ -5,3 +5,11 @@
 # misc developmental config files
 .flake8
 
+# unneeded workflows
+.github/workflows
+
+# manual log files
+logs/
+
+# Python byproducts
+__pycache__

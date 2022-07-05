@@ -28,9 +28,12 @@ import dbtools
 if platform == 'android':
     from android.permissions import request_permissions, Permission
     from android.storage import primary_external_storage_path
-    request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
-
+    request_permissions([
+        Permission.WRITE_EXTERNAL_STORAGE,
+        Permission.READ_EXTERNAL_STORAGE
+    ])
     EXTERNALSTORAGE = primary_external_storage_path()
+
 if platform == 'macosx':
     home = str(Path.home())
     EXTERNALSTORAGE = home
@@ -45,36 +48,32 @@ class MyPopup(Popup):
     text = StringProperty()
 
     def open(self, **kwargs):
-        query_text = '''
-            select start, end, duration, name, cogload, physload, energy 
-            from activities
+        colnames = ['start', 'end', 'duration', 'name',
+                    'cogload', 'physload', 'energy']
+        query_text = f'''
+            SELECT {', '.join(colnames)}
+            FROM activities
         '''
-        conn = sqlite3.connect(DATABASE)
+        contents = dbtools.submit_query(query_text)
 
-        c = conn.cursor()
-        c.execute(query_text)
-        contents = c.fetchall()
-        max_length = {i: 0 for i in range(len(c.description))}
-        header = [col[0] for col in c.description]
+        max_length = {i: 0 for i in range(len(colnames))}
         for entry in contents:
             for i, value in enumerate(entry):
                 max_length[i] = max(max_length[i], len(str(value)))
-        for i, colname in enumerate(header):
+        for i, colname in enumerate(colnames):
             max_length[i] = max(max_length[i], len(colname))
 
         SEP = ' | '
 
-        print([des[0] for des in c.description])
-        formatted_header = SEP.join([str(col[0]).ljust(max_length[i])
-                                     for i, col in enumerate(c.description)])
+        # print([des[0] for des in c.description])
+        formatted_header = SEP.join([col.ljust(max_length[i])
+                                     for i, col in enumerate(colnames)])
         print(formatted_header)
         formatted_contents = '\n'.join([SEP.join([
             str(val).ljust(max_length[i]) for i, val in enumerate(entry)
         ]) for entry in contents])
         print(formatted_contents)
         self.text = '\n'.join((formatted_header, formatted_contents))
-
-        conn.close()
 
         super().open(**kwargs)
 
@@ -100,8 +99,6 @@ class ImportWindow(Screen):
         """
         _, start, end, duration, name, cogload, physload, energy =\
             csv_row.strip().split(',')
-        conn = sqlite3.connect(DATABASE)
-        c = conn.cursor()
 
         query_text = f"""
             SELECT EXISTS(
@@ -115,11 +112,8 @@ class ImportWindow(Screen):
                     AND energy = "{energy}"
             );
         """
-        c.execute(query_text)
-        contents = c.fetchall()
+        contents = dbtools.submit_query(query_text)
         if contents[0][0] == 1:
-            conn.commit()
-            conn.close()
             return
 
         query_text = f"""
@@ -130,32 +124,7 @@ class ImportWindow(Screen):
                     "{physload}", "{energy}"
                 );
         """
-        c.execute(query_text)
-        conn.commit()
-        conn.close()
-            
-        # c.execute("INSERT INTO activities "
-        #           + "(start, end, duration, name, cogload, physload, energy) "
-        #           + " VALUES( "
-        #           + ":start, :end, :duration, "
-        #           + ":name, :cogload, :physload, :energy)",
-        #           {
-        #               'start': str(self.start_datetime),
-        #               'end': str(self.end_datetime),
-        #               'duration': str(self.duration_timedelta),
-        #               'name': self.ids['activity_name'].text,
-        #               'cogload': self.get_level('cog'),
-        #               'physload': self.get_level('phys'),
-        #               'energy': self.get_level('energy')
-        #           })
-        # conn.commit()
-        # c.execute("SELECT id, start, end, duration, name, cogload, physload, energy FROM activities")
-        # contents = c.fetchall()
-        # conn.commit()
-
-        # conn.close()
-
-
+        dbtools.submit_query(query_text)
 
 
 class PlotWindow(Screen):
@@ -226,7 +195,7 @@ class InputWindow(Screen):
     """
     Activity input
     Use this widget to input an activity with the following properties:
-        - namm
+        - name
         - cognitive load
         - physical load
         - duration
@@ -240,42 +209,12 @@ class InputWindow(Screen):
         - snap begin time to end of last event
     """
     title = StringProperty()
-
-    # duration_timedelta = 
-    duration_display = StringProperty()
-
-    end_datetime = datetime.now().replace(minute=0, second=0, microsecond=0)
+    start_display = StringProperty()
     end_display = StringProperty()
+    end_datetime = datetime.now().replace(minute=0, second=0, microsecond=0)
+    start_datetime = end_datetime - timedelta(hours=1)
 
-    # start_datetime = end_datetime - duration_timedelta
-
-    button_ids = {
-        'cog': {
-            'cog_low',
-            'cog_mid',
-            'cog_high',
-        },
-        'phys': {
-            'phys_low',
-            'phys_mid',
-            'phys_high',
-        },
-        'energy': {
-            'energy_low',
-            'energy_mid',
-            'energy_high',
-        },
-    }
-
-    duration_toggles = {
-        'dur_015': 15,
-        'dur_030': 30,
-        'dur_1': 60,
-        'dur_2': 120,
-        'dur_4': 240,
-    }
-
-    end_time_buttons = {
+    time_buttons = {
         '-1': -60,
         '-0:15': -15,
         '+0:15': 15,
@@ -284,63 +223,50 @@ class InputWindow(Screen):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # self.set_defaults()
+        self.cogload = 1
+        self.physload = 1
+        self.energy = 1
 
-    # def set_defaults(self):
     def on_pre_enter(self):
         # Reset title
         self.title = "Log Activity"
         self.ids.activity_name.text = "Activity name"
+        self.cogload = 1
+        self.physload = 1
+        self.energy = 1
 
         # Reset load toggles
-        for load in ["cog", "phys", "energy"]:
-            mid_button_id = f"{load}_mid"
-            self.ids[mid_button_id].state = "down"
-            self.on_toggle(self.ids[mid_button_id], load)
+        for group in ["cogload", "physload", "energy"]:
+            print(self.get_widgets_in_group(group))
+            for toggle in self.get_widgets_in_group(group):
+                if toggle.text.lower() == "mid":
+                    toggle._do_press()
 
-        # Reset duration toggles
-        default_dur_down = ["dur_1"]
-        for id, val in self.duration_toggles.items():
-            if id in default_dur_down:
-                self.ids[id].state = "down"
-            else:
-                self.ids[id].state = "normal"
-        
-        # Update displays
-
-        self.on_toggle_duration(None)
+        # Reset times
         self.end_datetime = datetime.now().replace(
             minute=0, second=0, microsecond=0
         )
+        self.start_datetime = self.end_datetime - timedelta(hours=1)
+        self.update_time_displays()
+
+    def update_time_displays(self):
+        self.start_display = self.start_datetime.strftime("%H:%M")
         self.end_display = self.end_datetime.strftime("%H:%M")
-        self.start_datetime = self.end_datetime - self.duration_timedelta
 
-    def on_toggle(self, toggle, load):
+    def on_start_time_press(self, button: Button):
         """
-        Ensure that exactly one toggle for load `load` is down
+        Inc-/decrement the end time based on pressed button and update display
 
-        Parameters
-        ----------
-        toggle: the toggle button
-        load: ('cog'|'phys'|'energy')
+        The value to be inc-/decremented is inferred from the 
+        button's text.
         """
-        if toggle.state == "down":
-            for id in self.button_ids[load]:
-                if self.ids[id] != toggle:
-                    self.ids[id].state = "normal"
-
-    def on_toggle_duration(self, widget):
-        """
-        Recalculate activity duration on each new toggle
-        """
-        duration_timedelta = timedelta()
-        for id, val in self.duration_toggles.items():
-            if self.ids[id].state == "down":
-                duration_timedelta += timedelta(minutes=val)
-
-        self.duration_timedelta = duration_timedelta
-        self.duration_display = \
-            ':'.join(str(self.duration_timedelta).split(':')[:2])
+        self.start_datetime += timedelta(
+            minutes=self.time_buttons[button.text]
+        )
+        duration = self.end_datetime - self.start_datetime
+        if duration.total_seconds() <= 0:
+            self.end_datetime = self.start_datetime + timedelta(hours=1)
+        self.update_time_displays()
 
     def on_end_time_press(self, button: Button):
         """
@@ -350,68 +276,65 @@ class InputWindow(Screen):
         button's text.
         """
         self.end_datetime += timedelta(
-            minutes=self.end_time_buttons[button.text]
+            minutes=self.time_buttons[button.text]
         )
-        self.end_display = self.end_datetime.strftime("%H:%M")
+        duration = self.end_datetime - self.start_datetime
+        if duration.total_seconds() <= 0:
+            self.start_datetime = self.end_datetime - timedelta(hours=1)
+        self.update_time_displays()
 
     def insert_into_database(self):
         """
         Insert current inputted data into the database
         """
-        self.start_datetime = self.end_datetime - self.duration_timedelta
+        duration_timedelta = self.end_datetime - self.start_datetime
+        if duration_timedelta.total_seconds() < 0:
+            return False
+
         raw_activity_name = self.ids['activity_name'].text
         for char in ',.:-\"\'':
             raw_activity_name = raw_activity_name.replace(char, '')
 
-        conn = sqlite3.connect(DATABASE)
-        c = conn.cursor()
-            
-        c.execute("INSERT INTO activities "
-                  + "(start, end, duration, name, cogload, physload, energy) "
-                  + " VALUES( "
-                  + ":start, :end, :duration, "
-                  + ":name, :cogload, :physload, :energy)",
-                  {
-                      'start': str(self.start_datetime),
-                      'end': str(self.end_datetime),
-                      'duration': str(self.duration_timedelta),
-                      'name': raw_activity_name,
-                      'cogload': self.get_level('cog'),
-                      'physload': self.get_level('phys'),
-                      'energy': self.get_level('energy')
-                  })
-        conn.commit()
-        c.execute("SELECT id, start, end, duration, name, cogload, physload, energy FROM activities")
-        contents = c.fetchall()
-        conn.commit()
+        query_text = f"""
+            INSERT INTO activities
+                (start, end, duration, name, cogload, physload, energy)
+                VALUES(
+                    "{self.start_datetime}",
+                    "{self.end_datetime}",
+                    "{duration_timedelta}",
+                    "{raw_activity_name}",
+                    "{self.cogload}", "{self.physload}", "{self.energy}"
+                );
+        """
+        dbtools.submit_query(query_text)
 
-        conn.close()
+        return True
 
     def on_save_press(self):
-        self.insert_into_database()
-        self.title = "Good job! :)"
+        successful = self.insert_into_database()
+        if successful:
+            self.manager.transition.direction = "right"
+            self.parent.current = "menu"
+            print("NAILED IT!")
+        else:
+            self.title = "hmmm... bad data?"
 
-        # Change view screen somehow...
+    def get_widgets_in_group(self, group):
+        widgets = []
+        for id, widget in self.ids.items():
+            if hasattr(widget, 'group') and widget.group == group:
+                widgets.append(widget)
+        return widgets
 
-    def get_level(self, load):
-        for id in self.button_ids[load]:
-            if self.ids[id].state == "down":
-                return id.split('_')[-1]
-        return -1
-
-    # def generate_ativity_name(self):
-    #     """
-    #     date, time, name
-    #     """
-    #     now = time.localtime()
-    #     now = datetime.now().replace(microsecond=0)
-    #     filename = str(now).replace(' ', '_').replace(':','-')
-
-    #     # TODO: set `activity name` to a default string
-    #     if self.ids['activity_name'].text != "Activity name":
-    #         filename += f"_{self.ids['activity_name'].text}"
-    #     filename += '.json'
-    #     return filename
+    def get_down_from_group(self, group):
+        toggle = [widget for id, widget in self.ids.items()
+                  if (
+                      hasattr(widget, 'group')
+                      and widget.group == group
+                      and widget.state == "down"
+                    )]
+        # check if non-empty
+        return toggle
 
 
 class LogsWindow(Screen):
@@ -445,8 +368,8 @@ class StackedLogsLayout(StackLayout):
 
         # Grab all logs from today
         entries = dbtools.get_logs_from_day(
-            self.current_day, 
-            colnames=['id', 'start', 'end', 'name'],
+            self.current_day,
+            colnames=['id', 'start', 'end', 'name', 'cogload', 'physload'],
         )
 
         # Sort entries by start time
@@ -457,7 +380,9 @@ class StackedLogsLayout(StackLayout):
             start = entry['start'].split(' ')[1][:5]    # remove date, seconds
             end = entry['end'].split(' ')[1][:5]
             name = entry['name']
-            entry_box = EntryBox(start, end, name)
+            cogload = entry['cogload']
+            physload = entry['physload']
+            entry_box = EntryBox(start, end, name, cogload, physload)
             self.boxes.append(entry_box)
             self.add_widget(entry_box)
 
@@ -475,7 +400,7 @@ class StackedLogsLayout(StackLayout):
 
 
 class EntryBox(BoxLayout):
-    def __init__(self, start, end, name, **kwargs):
+    def __init__(self, start, end, name, cogload, physload, **kwargs):
         super().__init__(
             size_hint=(1, None),
             size=("20dp", "30dp"),
@@ -496,6 +421,10 @@ class EntryBox(BoxLayout):
             size_hint=(0.3, 1)
         )
         self.add_widget(name_label)
+
+        self.add_widget(Label(text=str(cogload), size_hint=(0.1, 1)))
+        self.add_widget(Label(text=str(physload), size_hint=(0.1, 1)))
+
         self.checkbox = CheckBox(
             size_hint=(0.3, 1),
             group="day_logs",
@@ -512,27 +441,20 @@ class WindowManager(ScreenManager):
 class SpoonCalcApp(App):
     def build(self):
         print("BUILDING APP!!!")
-        conn = sqlite3.connect(DATABASE)
 
-        c = conn.cursor()
-
-        # c.execute("DROP TABLE if exists activities")
-        # c.execute("""CREATE TABLE activities(
-        c.execute("""CREATE TABLE if not exists activities(
-            id integer PRIMARY KEY,
-            start text NOT NULL,
-            end text NOT NULL,
-            duration text NOT NULL,
-            name text NOT NULL,
-            cogload text NOT NULL,
-            physload text NOT NULL,
-            energy text NOT NULL
-        )
-        """)
-
-        conn.commit()
-
-        conn.close()
+        query_text = """
+            CREATE TABLE if not exists activities(
+                id integer PRIMARY KEY,
+                start text NOT NULL,
+                end text NOT NULL,
+                duration text NOT NULL,
+                name text NOT NULL,
+                cogload text NOT NULL,
+                physload text NOT NULL,
+                energy text NOT NULL
+        );
+        """
+        dbtools.submit_query(query_text)
 
 
 if __name__ == '__main__':

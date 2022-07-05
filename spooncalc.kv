@@ -143,6 +143,19 @@ WindowManager:
                     root.manager.transition.direction = "right"
                     app.root.current = "menu"
 
+<LoadToggle@ToggleButton>:
+    font_size: font_size_button_2
+    markup: True
+    on_press: setattr(self, 'state', 'down') 
+
+<CogloadToggle@LoadToggle>:
+    group: "cogload"
+
+<PhysloadToggle@LoadToggle>:
+    group: "physload"
+
+<EnergyToggle@LoadToggle>:
+    group: "energy"
 
 <InputWindow>:
     name: "input"
@@ -172,22 +185,18 @@ WindowManager:
                 BoxLayout:
                     orientation: "horizontal"
                     # spacing: button_spacing
-                    ToggleButton:
+                    CogloadToggle:
                         id: cog_low
                         text: "Low"
-                        font_size: font_size_button_2
-                        on_state: root.on_toggle(self, "cog")
-                    ToggleButton:
+                        on_state: root.cogload = 0
+                    CogloadToggle:
                         id: cog_mid
                         text: "Mid"
-                        on_state: root.on_toggle(self, "cog")
-                        font_size: font_size_button_2
-                        state: "down"
-                    ToggleButton:
+                        on_state: root.cogload = 1
+                    CogloadToggle:
                         id: cog_high
                         text: "High"
-                        font_size: font_size_button_2
-                        on_state: root.on_toggle(self, "cog")
+                        on_state: root.cogload = 2
             Option:
                 BackgroundLabel:
                     text: "Phys. Load"
@@ -195,61 +204,85 @@ WindowManager:
                     font_size: font_size_heading_2
                 BoxLayout:
                     orientation: "horizontal"
-                    ToggleButton:
+                    PhysloadToggle:
                         id: phys_low
                         text: "Low"
-                        font_size: font_size_button_2
-                        on_state: root.on_toggle(self, "phys")
-                    ToggleButton:
+                        on_press: root.physload = 0
+                    PhysloadToggle:
                         id: phys_mid
                         text: "Mid"
-                        font_size: font_size_button_2
-                        on_state: root.on_toggle(self, "phys")
-                        state: "down"
-                    ToggleButton:
+                        on_press: root.physload = 1
+                    PhysloadToggle:
                         id: phys_high
                         text: "High"
-                        font_size: font_size_button_2
-                        on_state: root.on_toggle(self, "phys")
+                        on_press: root.physload = 2
+        # Option:
+        #     orientation: "vertical"
+        #     BackgroundLabel:
+        #         text: f"Duration: {root.duration_display}"
+        #         font_size: font_size_heading_2
+        #         color: label_color
+        #     BoxLayout:
+        #         orientation: "horizontal"
+        #         ToggleButton:
+        #             id: dur_015
+        #             text: "0:15"
+        #             font_size: font_size_button_2
+        #             on_state: root.on_toggle_duration(self)
+        #         ToggleButton:
+        #             id: dur_030
+        #             text: "0:30"
+        #             font_size: font_size_button_2
+        #             on_state: root.on_toggle_duration(self)
+        #         ToggleButton:
+        #             id: dur_1
+        #             text: "1"
+        #             font_size: font_size_button_2
+        #             on_state: root.on_toggle_duration(self)
+        #             state: "down"
+        #         ToggleButton:
+        #             id: dur_2
+        #             text: "2"
+        #             font_size: font_size_button_2
+        #             on_state: root.on_toggle_duration(self)
+        #         ToggleButton:
+        #             id: dur_4
+        #             text: "4"
+        #             font_size: font_size_button_2
+        #             on_state: root.on_toggle_duration(self)
         Option:
             orientation: "vertical"
             BackgroundLabel:
-                text: f"Duration: {root.duration_display}"
+                text: "Start Time"
                 font_size: font_size_heading_2
                 color: label_color
+                halign: "left"
             BoxLayout:
                 orientation: "horizontal"
-                ToggleButton:
-                    id: dur_015
-                    text: "0:15"
+                Button:
+                    id: s -1
+                    text: "-1"
                     font_size: font_size_button_2
-                    on_state: root.on_toggle_duration(self)
-                ToggleButton:
-                    id: dur_030
-                    text: "0:30"
+                    on_press: root.on_start_time_press(self)
+                Button:
+                    id: s-015
+                    text: "-0:15"
                     font_size: font_size_button_2
-                    on_state: root.on_toggle_duration(self)
-                ToggleButton:
-                    id: dur_1
-                    text: "1"
+                    on_press: root.on_start_time_press(self)
+                BackgroundLabel:
+                    color: label_color
+                    text: f"{root.start_display}"
                     font_size: font_size_button_2
-                    on_state: root.on_toggle_duration(self)
-                    state: "down"
-                ToggleButton:
-                    id: dur_2
-                    text: "2"
+                Button:
+                    id: s+015
+                    text: "+0:15"
+                    on_press: root.on_start_time_press(self)
                     font_size: font_size_button_2
-                    on_state: root.on_toggle_duration(self)
-                ToggleButton:
-                    id: dur_4
-                    text: "4"
+                Button:
+                    id: s+1
+                    text: "+1"
+                    on_press: root.on_start_time_press(self)
                     font_size: font_size_button_2
-                    on_state: root.on_toggle_duration(self)
-                # TextInput:
-                #     id: dur_custom_text
-                #     text: "custom"
-                #     multiline: False
-                #     on_text_validate: root.on_dur_text_validate(self)
         Option:
             orientation: "vertical"
             BackgroundLabel:
@@ -294,22 +327,18 @@ WindowManager:
                 orientation: "horizontal"
                 text: "Energy Level"
                 id: energy_toggles
-                ToggleButton:
+                EnergyToggle:
                     text: "Low"
                     id: energy_low
-                    font_size: font_size_button_2
-                    on_state: root.on_toggle(self, "energy")
-                ToggleButton:
+                    on_state: root.energy = 0
+                EnergyToggle:
                     text: "Mid"
                     id: energy_mid
-                    font_size: font_size_button_2
-                    on_state: root.on_toggle(self, "energy")
-                    state: "down"
-                ToggleButton:
+                    on_state: root.energy = 1
+                EnergyToggle:
                     text: "High"
                     id: energy_high
-                    font_size: font_size_button_2
-                    on_state: root.on_toggle(self, "energy")
+                    on_state: root.energy = 2
         BoxLayout:
             size_hint: 1, 0.5
             orientation: "horizontal"
@@ -324,8 +353,8 @@ WindowManager:
                 font_size: font_size_button_1
                 on_release:
                     root.on_save_press()
-                    root.manager.transition.direction = "right"
-                    app.root.current = "menu"
+                    # root.manager.transition.direction = "right"
+                    # app.root.current = "menu"
 
 <PlotWindow>:
     name: "plot"
