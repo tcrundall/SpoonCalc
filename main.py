@@ -7,6 +7,10 @@ from kivy.properties import StringProperty
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.stacklayout import StackLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.checkbox import CheckBox
+from kivy.uix.label import Label
 from kivy_garden.graph import Graph, LinePlot
 
 from datetime import datetime, timedelta
@@ -19,6 +23,7 @@ from pathlib import Path
 import os
 
 import analyser
+import dbtools
 
 if platform == 'android':
     from android.permissions import request_permissions, Permission
@@ -407,6 +412,90 @@ class InputWindow(Screen):
     #         filename += f"_{self.ids['activity_name'].text}"
     #     filename += '.json'
     #     return filename
+
+
+class LogsWindow(Screen):
+    title = StringProperty(datetime.today().strftime('%d.%m.%Y'))
+
+    def update_title(self, day_number):
+        day_offset = timedelta(days=day_number)
+        current_day = datetime.today() - day_offset
+        self.title = current_day.strftime('%d.%m.%Y')
+
+
+class StackedLogsLayout(StackLayout):
+    current_day = 0
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.orientation = 'lr-tb'
+        self.update_display()
+
+    def update_display(self):
+        self.clear_widgets()
+        print("Making entry row!")
+        self.boxes = []
+
+        # Grab all logs from today
+        entries = dbtools.get_logs_from_day(
+            self.current_day, 
+            colnames=['id', 'start', 'end', 'name'],
+        )
+
+        # Sort entries by start time
+        entries = sorted(entries, key=lambda e: e['start'])
+
+        # for i in range(1, 6):
+        for entry in entries:
+            start = entry['start'].split(' ')[1][:5]    # remove date, seconds
+            end = entry['end'].split(' ')[1][:5]
+            name = entry['name']
+            entry_box = EntryBox(start, end, name)
+            self.boxes.append(entry_box)
+            self.add_widget(entry_box)
+
+    def delete_entry(self):
+        """find checked row, and remove from database"""
+        print("not yet implemented")
+
+    def decrement_day(self):
+        self.current_day -= 1
+        self.update_display()
+
+    def increment_day(self):
+        self.current_day += 1
+        self.update_display()
+
+
+class EntryBox(BoxLayout):
+    def __init__(self, start, end, name, **kwargs):
+        super().__init__(
+            size_hint=(1, None),
+            size=("20dp", "30dp"),
+            **kwargs,
+        )
+        print("Initialising entry row!")
+        self.orientation = "horizontal"
+
+        time_label = Label(
+            text=f"{start} - {end}",
+            size_hint=(0.4, 1),
+            # size=("20dp", "100dp")
+        )
+        self.add_widget(time_label)
+
+        name_label = Label(
+            text=f"{name}",
+            size_hint=(0.3, 1)
+        )
+        self.add_widget(name_label)
+        self.checkbox = CheckBox(
+            size_hint=(0.3, 1),
+            group="day_logs",
+            color=(0, 1, 0, 1),
+        )
+
+        self.add_widget(self.checkbox)
 
 
 class WindowManager(ScreenManager):

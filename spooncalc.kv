@@ -20,6 +20,7 @@
 WindowManager:
     MenuWindow:
     InputWindow:
+    LogsWindow:
     PlotWindow:
     ImportWindow:
 
@@ -83,7 +84,9 @@ WindowManager:
             font_size: font_size_heading_1
             size_hint_y: 0.1
             on_release:
-                Factory.MyPopup().open()
+                # Factory.MyPopup().open()
+                root.manager.transition.direction = "left"
+                app.root.current = "logs"
         
         Button:
             text: "Export logs"
@@ -341,6 +344,58 @@ WindowManager:
                 on_release:
                     root.manager.transition.direction = "right"
                     app.root.current = "menu"
+
+
+<LogsWindow>:
+    name: "logs"
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: 1, 0.1
+            Button:
+                text: "<--"
+                font_size: font_size_title
+                size_hint: 0.2, 1
+                on_release:
+                    logs_display.increment_day()
+                    root.update_title(logs_display.current_day)
+            Label:
+                text: root.title
+                id: logs_title
+                font_size: font_size_title
+                size_hint: 0.6, 1
+            Button:
+                text: "-->"
+                font_size: font_size_title
+                size_hint: 0.2, 1
+                on_release:
+                    logs_display.decrement_day()
+                    root.update_title(logs_display.current_day)
+        ScrollView:
+            size_hint: 1, 0.8
+            do_scroll_y: True
+            do_scroll_x: True
+            StackedLogsLayout:
+                id: logs_display
+                size_hint: 1, None
+                height: self.minimum_height
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: 1, 0.1
+            Button:
+                text: "Back"
+                font_size: font_size_button_1
+                on_release:
+                    root.manager.transition.direction = "right"
+                    app.root.current = "menu"
+
+            Button:
+                text: "Delete"
+                font_size: font_size_button_1
+                on_release:
+                    logs_display.delete_entry()
 
 
 <BackgroundColor@Widget>
