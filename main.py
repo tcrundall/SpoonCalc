@@ -422,16 +422,23 @@ class LogsWindow(Screen):
         current_day = datetime.today() - day_offset
         self.title = current_day.strftime('%d.%m.%Y')
 
+    def on_pre_enter(self, *args):
+        self.ids["logs_display"].update()
+        super().on_pre_enter(*args)
+
 
 class StackedLogsLayout(StackLayout):
+    """
+    The first 'initialisation' is handled by
+    LogsWindow's on_pre_enter call.
+    """
     current_day = 0
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.orientation = 'lr-tb'
-        self.update_display()
-
-    def update_display(self):
+    
+    def update(self):
         self.clear_widgets()
         print("Making entry row!")
         self.boxes = []
@@ -460,11 +467,11 @@ class StackedLogsLayout(StackLayout):
 
     def decrement_day(self):
         self.current_day -= 1
-        self.update_display()
+        self.update()
 
     def increment_day(self):
         self.current_day += 1
-        self.update_display()
+        self.update()
 
 
 class EntryBox(BoxLayout):
