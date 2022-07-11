@@ -131,7 +131,11 @@ class PlotWindow(Screen):
     """
     Display informative plots
     """
-    N_DAYS_BACK = 7
+    ymax_persistent = 27
+    start = -7
+    span = 8
+    end = 0
+    mode = "weekly"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -146,8 +150,8 @@ class PlotWindow(Screen):
 
     def init_plot(self):
         self.graph = Graph(
-            xmin=-self.N_DAYS_BACK, xmax=0,
-            ymin=0, ymax=0,
+            xmin=self.start, xmax=self.start + self.span - 1,
+            ymin=0, ymax=1,
             border_color=[0, 1, 1, 1],
             tick_color=[0, 1, 1, 0.7],
             x_grid=True, y_grid=True,
@@ -155,19 +159,59 @@ class PlotWindow(Screen):
             x_grid_label=True,
             y_grid_label=True,
             x_ticks_major=1,
-            y_ticks_major=2.5,
+            y_ticks_major=5,
         )
         self.ids.graph.add_widget(self.graph)
 
-        self.spoons_per_day = analyser.calculate_daily_totals(self.N_DAYS_BACK)
+        self.spoons_per_day = analyser.calculate_daily_totals(
+            self.start, self.span)
         self.plot = LinePlot(color=[1, 1, 0, 1], line_width=1.5)
-        self.plot.points = [(-d, spoons) for d, spoons in self.spoons_per_day.items()]
+        self.plot.points = [(-d, spoons)
+                            for d, spoons in self.spoons_per_day.items()]
         self.graph.add_plot(self.plot)
 
     def update_plot(self):
-        self.spoons_per_day = analyser.calculate_daily_totals(self.N_DAYS_BACK)
-        self.plot.points = [(-d, spoons) for d, spoons in self.spoons_per_day.items()]
-        self.graph.ymax = max(self.spoons_per_day.values()) * 1.1
+        self.spoons_per_day = analyser.calculate_daily_totals(
+            self.start, self.span)
+        self.graph.xmin = self.start
+        self.graph.xmax = self.start + self.span - 1
+        self.plot.points = [(d, spoons)
+                            for d, spoons in self.spoons_per_day.items()]
+        ymax_current = max(self.spoons_per_day.values())
+        self.ymax_persistent = max(ymax_current * 1.1, self.ymax_persistent)
+        self.graph.ymax = self.ymax_persistent
+
+    def shift_window_left(self):
+        if self.mode == "weekly":
+            self.start -= 1
+        elif self.mode == "monthly":
+            self.start -= 7
+        self.update_plot()
+
+    def shift_window_right(self):
+        if self.mode == "weekly":
+            self.start += 1
+        elif self.mode == "monthly":
+            self.start += 7
+        self.update_plot()
+
+    def set_weekly(self):
+        if self.mode == "weekly":
+            return
+        self.mode = "weekly"
+        self.start = -7
+        self.span = 8
+        self.graph.x_ticks_major = 1
+        self.update_plot()
+
+    def set_monthly(self):
+        if self.mode == "monthly":
+            return
+        self.mode = "monthly"
+        self.start = -28
+        self.span = 29
+        self.graph.x_ticks_major = 7
+        self.update_plot()
 
 
 class MenuWindow(Screen):

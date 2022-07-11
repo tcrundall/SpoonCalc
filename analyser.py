@@ -7,26 +7,29 @@ import dbtools
 DATABASE = "spooncalc.db"
 
 
-def calculate_daily_totals(n_days_back):
+def calculate_daily_totals(start_day, span):
     """
     Calculate total spoon expenditure per day for
     previous `n_days_back`
     """
     spoons_each_day = {
-        i: calculate_daily_total(i) for i in range(n_days_back)
+        i: calculate_daily_total(i) for i in range(start_day,
+                                                   start_day + span)
     }
     return spoons_each_day
 
 
-def calculate_daily_total(n_days_ago):
+def calculate_daily_total(day_relative):
     """
-    Calculate total spoons spent on `n_days_ago` day.
+    Calculate total spoons spent on the day
+    `day_relative` days from now,
+    negative values indicate past days
 
-    If `n_days_ago` is 0, then we're calculating today,
-    `n_days_ago` = 1 is yesterday, etc...
+    If `day_relative` is 0, then we're calculating today,
+    `day_relative` = -1 is yesterday, etc...
     """
     entries = dbtools.get_logs_from_day(
-        n_days_ago=n_days_ago,
+        day_relative=day_relative,
         colnames=['duration', 'cogload', 'physload']
     )
 

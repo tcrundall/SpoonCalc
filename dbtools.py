@@ -19,12 +19,13 @@ def submit_query(query_text):
     return contents
 
 
-def get_logs_from_day(n_days_ago, colnames=None):
+def get_logs_from_day(day_relative, colnames=None):
     """
-    Calculate total spoons spent on `n_days_ago` day.
+    Calculate total spoons spent on the day
+    `day_relative` days from today.
 
-    If `n_days_ago` is 0, then we're calculating today,
-    `n_days_ago` = 1 is yesterday, etc...
+    If `day_relative` is 0, then we're calculating today,
+    `day_relative` = -1 is yesterday, etc...
     """
     if colnames is None:
         colnames = [
@@ -32,9 +33,9 @@ def get_logs_from_day(n_days_ago, colnames=None):
         ]
 
     now = datetime.now()
-    start_date = now - timedelta(days=n_days_ago)
+    start_date = now + timedelta(days=day_relative)
     start_date_str = start_date.strftime('%Y-%m-%d')
-    end_date = now - timedelta(days=n_days_ago) + timedelta(days=1)
+    end_date = now + timedelta(days=day_relative) + timedelta(days=1)
     end_date_str = end_date.strftime('%Y-%m-%d')
 
     query_text = f"""
@@ -42,7 +43,6 @@ def get_logs_from_day(n_days_ago, colnames=None):
         FROM activities
         WHERE start BETWEEN "{start_date_str}" and "{end_date_str}"
     """
-
     contents = submit_query(query_text)
 
     entries = [
