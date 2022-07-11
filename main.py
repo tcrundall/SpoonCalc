@@ -449,21 +449,23 @@ class StackedLogsLayout(StackLayout):
         # Grab all logs from today
         entries = dbtools.get_logs_from_day(
             self.current_day,
-            colnames=['id', 'start', 'end', 'name', 'cogload', 'physload'],
+            colnames=['id', 'start', 'end', 'duration', 'name', 'cogload', 'physload'],
         )
 
         # Sort entries by start time
         entries = sorted(entries, key=lambda e: e['start'])
 
+        self.add_widget(TitleBox())
         # for i in range(1, 6):
         for entry in entries:
             id = entry['id']
             start = entry['start'].split(' ')[1][:5]    # remove date, seconds
             end = entry['end'].split(' ')[1][:5]
+            duration = entry['duration']
             name = entry['name']
             cogload = entry['cogload']
             physload = entry['physload']
-            entry_box = EntryBox(id, start, end, name, cogload, physload)
+            entry_box = EntryBox(id, start, end, duration, name, cogload, physload)
             self.boxes.append(entry_box)
             self.add_widget(entry_box)
 
@@ -485,35 +487,52 @@ class StackedLogsLayout(StackLayout):
         self.update()
 
 
-class EntryBox(BoxLayout):
-    def __init__(self, db_id, start, end, name, cogload, physload, **kwargs):
+class TitleBox(BoxLayout):
+    def __init__(self, **kwargs):
         super().__init__(
             size_hint=(1, None),
             size=("20dp", "30dp"),
             **kwargs,
         )
-        print("Initialising entry row!")
+        self.orientation = "horizontal"
+        self.add_widget(Label(text="Time", size_hint=(0.2, 1)))
+        self.add_widget(Label(text="Activity", size_hint=(0.45, 1)))
+        self.add_widget(Label(text="Cog", size_hint=(0.1, 1)))
+        self.add_widget(Label(text="Ph.", size_hint=(0.1, 1)))
+        self.add_widget(Label(text="Sp.", size_hint=(0.1, 1)))
+        self.add_widget(Label(text="X", size_hint=(0.05, 1)))
+
+
+class EntryBox(BoxLayout):
+    def __init__(self, db_id, start, end, duration, name, cogload, physload, **kwargs):
+        super().__init__(
+            size_hint=(1, None),
+            size=("20dp", "30dp"),
+            **kwargs,
+        )
         self.db_id = db_id
         self.orientation = "horizontal"
 
         time_label = Label(
             text=f"{start}-{end}",
-            size_hint=(0.15, 1),
+            size_hint=(0.2, 1),
             # size=("20dp", "100dp")
         )
         self.add_widget(time_label)
 
         name_label = Label(
             text=f"{name}",
-            size_hint=(0.3, 1)
+            size_hint=(0.45, 1)
         )
         self.add_widget(name_label)
 
-        self.add_widget(Label(text=str(cogload), size_hint=(0.05, 1)))
-        self.add_widget(Label(text=str(physload), size_hint=(0.05, 1)))
+        self.add_widget(Label(text=str(cogload), size_hint=(0.1, 1)))
+        self.add_widget(Label(text=str(physload), size_hint=(0.1, 1)))
+        spoons = analyser.calculate_spoons(duration, cogload, physload)
+        self.add_widget(Label(text=f"{str(spoons):<4}", size_hint=(0.1, 1)))
 
         self.checkbox = CheckBox(
-            size_hint=(0.1, 1),
+            size_hint=(0.05, 1),
             group="day_logs",
             color=(0, 1, 0, 1),
         )
