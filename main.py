@@ -250,8 +250,17 @@ class InputWindow(Screen):
         self.update_time_displays()
 
     def update_time_displays(self):
-        self.start_display = self.start_datetime.strftime("%H:%M")
-        self.end_display = self.end_datetime.strftime("%H:%M")
+        format_string = "%H:%M"
+        detailed_format_string = "%d/%m\n%H:%M\n"
+
+        # If start or end time is not from today, include dates in display
+        now = datetime.now()
+        if not (self.start_datetime.date() == self.end_datetime.date()
+                == now.date()):
+            format_string = detailed_format_string
+
+        self.start_display = self.start_datetime.strftime(format_string)
+        self.end_display = self.end_datetime.strftime(format_string)
 
     def on_start_time_press(self, button: Button):
         """
