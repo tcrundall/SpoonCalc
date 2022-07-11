@@ -356,11 +356,12 @@ class StackedLogsLayout(StackLayout):
     LogsWindow's on_pre_enter call.
     """
     current_day = 0
+    boxes = []
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.orientation = 'lr-tb'
-    
+
     def update(self):
         self.clear_widgets()
         print("Making entry row!")
@@ -377,18 +378,24 @@ class StackedLogsLayout(StackLayout):
 
         # for i in range(1, 6):
         for entry in entries:
+            id = entry['id']
             start = entry['start'].split(' ')[1][:5]    # remove date, seconds
             end = entry['end'].split(' ')[1][:5]
             name = entry['name']
             cogload = entry['cogload']
             physload = entry['physload']
-            entry_box = EntryBox(start, end, name, cogload, physload)
+            entry_box = EntryBox(id, start, end, name, cogload, physload)
             self.boxes.append(entry_box)
             self.add_widget(entry_box)
 
     def delete_entry(self):
         """find checked row, and remove from database"""
         print("not yet implemented")
+        for entrybox in self.boxes:
+            if entrybox.checkbox._get_active():
+                dbtools.delete_entry(entrybox.db_id)
+                self.update()
+                return
 
     def decrement_day(self):
         self.current_day -= 1
@@ -400,13 +407,14 @@ class StackedLogsLayout(StackLayout):
 
 
 class EntryBox(BoxLayout):
-    def __init__(self, start, end, name, cogload, physload, **kwargs):
+    def __init__(self, db_id, start, end, name, cogload, physload, **kwargs):
         super().__init__(
             size_hint=(1, None),
             size=("20dp", "30dp"),
             **kwargs,
         )
         print("Initialising entry row!")
+        self.db_id = db_id
         self.orientation = "horizontal"
 
         time_label = Label(
