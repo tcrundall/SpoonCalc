@@ -75,7 +75,7 @@ def parse_duration_string(dur_str):
 
 def parse_load_string(load_str):
     try:
-        return int(load_str)
+        return float(load_str)
     except ValueError:
         load_dict = {
             "low": 0,

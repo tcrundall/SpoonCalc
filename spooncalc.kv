@@ -6,7 +6,7 @@
 #:set label_color 1, 1, 1, 1
 #:set label_background_color 0.3, 0.7, 0.9, 1
 #:set button_spacing "5dp"
-#:set toplevel_spacing "15dp"
+#:set toplevel_spacing "5dp"
 #:set button_pad "2dp"
 
 #:set font_size_title "40dp"
@@ -55,6 +55,7 @@ WindowManager:
 <Option@BoxLayout>:
     orientation: "vertical"
     padding: (pad, pad, pad, pad)
+    size_hint: 1, 0.15
 
 <MenuWindow>:
     name: "menu"
@@ -166,90 +167,68 @@ WindowManager:
             text: f"{root.title}"
             font_size: font_size_title
             color: label_color
+            size_hint: 1, 0.1
         TextInput:
             text: "Activity name"
             font_size: font_size_heading_1
             id: activity_name
             multiline: False
-            size_hint: 1, 0.3
-        BoxLayout:
-            orientation: "horizontal"
-            # spacing: toplevel_spacing
-            Option:
-                orientation: "vertical" 
-                padding: (pad, pad, pad, pad)
-                BackgroundLabel:
-                    text: "Cog. Load"
-                    font_size: font_size_heading_2
-                    color: label_color
-                BoxLayout:
-                    orientation: "horizontal"
-                    # spacing: button_spacing
-                    CogloadToggle:
-                        id: cog_low
-                        text: "Low"
-                        on_state: root.cogload = 0
-                    CogloadToggle:
-                        id: cog_mid
-                        text: "Mid"
-                        on_state: root.cogload = 1
-                    CogloadToggle:
-                        id: cog_high
-                        text: "High"
-                        on_state: root.cogload = 2
-            Option:
-                BackgroundLabel:
-                    text: "Phys. Load"
-                    color: label_color
-                    font_size: font_size_heading_2
-                BoxLayout:
-                    orientation: "horizontal"
-                    PhysloadToggle:
-                        id: phys_low
-                        text: "Low"
-                        on_press: root.physload = 0
-                    PhysloadToggle:
-                        id: phys_mid
-                        text: "Mid"
-                        on_press: root.physload = 1
-                    PhysloadToggle:
-                        id: phys_high
-                        text: "High"
-                        on_press: root.physload = 2
-        # Option:
-        #     orientation: "vertical"
-        #     BackgroundLabel:
-        #         text: f"Duration: {root.duration_display}"
-        #         font_size: font_size_heading_2
-        #         color: label_color
-        #     BoxLayout:
-        #         orientation: "horizontal"
-        #         ToggleButton:
-        #             id: dur_015
-        #             text: "0:15"
-        #             font_size: font_size_button_2
-        #             on_state: root.on_toggle_duration(self)
-        #         ToggleButton:
-        #             id: dur_030
-        #             text: "0:30"
-        #             font_size: font_size_button_2
-        #             on_state: root.on_toggle_duration(self)
-        #         ToggleButton:
-        #             id: dur_1
-        #             text: "1"
-        #             font_size: font_size_button_2
-        #             on_state: root.on_toggle_duration(self)
-        #             state: "down"
-        #         ToggleButton:
-        #             id: dur_2
-        #             text: "2"
-        #             font_size: font_size_button_2
-        #             on_state: root.on_toggle_duration(self)
-        #         ToggleButton:
-        #             id: dur_4
-        #             text: "4"
-        #             font_size: font_size_button_2
-        #             on_state: root.on_toggle_duration(self)
+            size_hint: 1, 0.075
+        Option:
+            BackgroundLabel:
+                text: "Cog. Load"
+                font_size: font_size_heading_2
+                color: label_color
+            BoxLayout:
+                orientation: "horizontal"
+                # spacing: button_spacing
+                CogloadToggle:
+                    id: cog_low
+                    text: "V. Low"
+                    on_state: root.cogload = 0
+                CogloadToggle:
+                    id: cog_low
+                    text: "Low"
+                    on_state: root.cogload = 0.5
+                CogloadToggle:
+                    id: cog_mid
+                    text: "Mid"
+                    on_state: root.cogload = 1
+                CogloadToggle:
+                    id: cog_high
+                    text: "High"
+                    on_state: root.cogload = 1.5
+                CogloadToggle:
+                    id: cog_high
+                    text: "V. High"
+                    on_state: root.cogload = 2
+        Option:
+            BackgroundLabel:
+                text: "Phys. Load"
+                color: label_color
+                font_size: font_size_heading_2
+            BoxLayout:
+                orientation: "horizontal"
+                PhysloadToggle:
+                    id: phys_low
+                    text: "V. Low"
+                    on_press: root.physload = 0
+                PhysloadToggle:
+                    id: phys_low
+                    text: "Low"
+                    on_press: root.physload = 0.5
+                PhysloadToggle:
+                    id: phys_mid
+                    text: "Mid"
+                    on_press: root.physload = 1
+                PhysloadToggle:
+                    id: phys_high
+                    text: "High"
+                    on_press: root.physload = 1.5
+                PhysloadToggle:
+                    id: phys_high
+                    text: "V. High"
+                    on_press: root.physload = 2
         Option:
             orientation: "vertical"
             BackgroundLabel:
@@ -340,7 +319,7 @@ WindowManager:
                     id: energy_high
                     on_state: root.energy = 2
         BoxLayout:
-            size_hint: 1, 0.5
+            size_hint: 1, 0.1
             orientation: "horizontal"
             Button:
                 text: "Cancel"

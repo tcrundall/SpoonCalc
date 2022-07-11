@@ -245,12 +245,6 @@ class InputWindow(Screen):
         - duration
         - end time
         - current energy level
-
-    Limitations/assumptions:
-        - can only input data for today
-    
-    Possible extensions:
-        - snap begin time to end of last event
     """
     title = StringProperty()
     start_display = StringProperty()
