@@ -419,9 +419,9 @@ class InputWindow(Screen):
 class LogsWindow(Screen):
     title = StringProperty(datetime.today().strftime('%d.%m.%Y'))
 
-    def update_title(self, day_number):
-        day_offset = timedelta(days=day_number)
-        current_day = datetime.today() - day_offset
+    def update_title(self, day_offset):
+        day_delta = timedelta(days=day_offset)
+        current_day = datetime.today() + day_delta
         self.title = current_day.strftime('%d.%m.%Y')
 
     def on_pre_enter(self, *args):
@@ -497,8 +497,8 @@ class EntryBox(BoxLayout):
         self.orientation = "horizontal"
 
         time_label = Label(
-            text=f"{start} - {end}",
-            size_hint=(0.4, 1),
+            text=f"{start}-{end}",
+            size_hint=(0.15, 1),
             # size=("20dp", "100dp")
         )
         self.add_widget(time_label)
@@ -509,11 +509,11 @@ class EntryBox(BoxLayout):
         )
         self.add_widget(name_label)
 
-        self.add_widget(Label(text=str(cogload), size_hint=(0.1, 1)))
-        self.add_widget(Label(text=str(physload), size_hint=(0.1, 1)))
+        self.add_widget(Label(text=str(cogload), size_hint=(0.05, 1)))
+        self.add_widget(Label(text=str(physload), size_hint=(0.05, 1)))
 
         self.checkbox = CheckBox(
-            size_hint=(0.3, 1),
+            size_hint=(0.1, 1),
             group="day_logs",
             color=(0, 1, 0, 1),
         )

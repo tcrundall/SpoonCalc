@@ -361,11 +361,6 @@ WindowManager:
                 size_hint: 0.1, 1
                 on_release:
                     root.shift_window_left()
-            # PlotToggle:
-            #     text: "Daily"
-            #     id: daily
-            #     on_release:
-            #         root.set_mode(self.text)
             PlotToggle:
                 text: "Weekly"
                 id: weekly
@@ -408,7 +403,7 @@ WindowManager:
                 font_size: font_size_title
                 size_hint: 0.2, 1
                 on_release:
-                    logs_display.increment_day()
+                    logs_display.decrement_day()
                     root.update_title(logs_display.current_day)
             Label:
                 text: root.title
@@ -420,7 +415,7 @@ WindowManager:
                 font_size: font_size_title
                 size_hint: 0.2, 1
                 on_release:
-                    logs_display.decrement_day()
+                    logs_display.increment_day()
                     root.update_title(logs_display.current_day)
         ScrollView:
             size_hint: 1, 0.8

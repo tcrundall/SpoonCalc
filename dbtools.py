@@ -19,13 +19,13 @@ def submit_query(query_text):
     return contents
 
 
-def get_logs_from_day(day_relative, colnames=None):
+def get_logs_from_day(day_offset, colnames=None):
     """
     Calculate total spoons spent on the day
-    `day_relative` days from today.
+    `day_offset` days from today.
 
-    If `day_relative` is 0, then we're calculating today,
-    `day_relative` = -1 is yesterday, etc...
+    If `day_offset` is 0, then we're calculating today,
+    `day_offset` = -1 is yesterday, etc...
     """
     if colnames is None:
         colnames = [
@@ -33,9 +33,9 @@ def get_logs_from_day(day_relative, colnames=None):
         ]
 
     now = datetime.now()
-    start_date = now + timedelta(days=day_relative)
+    start_date = now + timedelta(days=day_offset)
     start_date_str = start_date.strftime('%Y-%m-%d')
-    end_date = now + timedelta(days=day_relative) + timedelta(days=1)
+    end_date = now + timedelta(days=day_offset) + timedelta(days=1)
     end_date_str = end_date.strftime('%Y-%m-%d')
 
     query_text = f"""

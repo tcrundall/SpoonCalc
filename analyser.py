@@ -19,17 +19,17 @@ def calculate_daily_totals(start_day, span):
     return spoons_each_day
 
 
-def calculate_daily_total(day_relative):
+def calculate_daily_total(day_offset):
     """
     Calculate total spoons spent on the day
-    `day_relative` days from now,
+    `day_offset` days from now,
     negative values indicate past days
 
-    If `day_relative` is 0, then we're calculating today,
-    `day_relative` = -1 is yesterday, etc...
+    If `day_offset` is 0, then we're calculating today,
+    `day_offset` = -1 is yesterday, etc...
     """
     entries = dbtools.get_logs_from_day(
-        day_relative=day_relative,
+        day_offset=day_offset,
         colnames=['duration', 'cogload', 'physload']
     )
 
