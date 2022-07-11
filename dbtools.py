@@ -5,6 +5,8 @@ import sqlite3
 from datetime import datetime, timedelta
 
 DATABASE = "spooncalc.db"
+DATE_FORMATSTRING = "%Y-%m-%d"
+DATETIME_FORMATSTRING = "%Y-%m-%d %H:%M:%S"
 
 
 def submit_query(query_text):
@@ -57,3 +59,15 @@ def delete_entry(id):
         WHERE id = {id};
     """
     submit_query(query_text)
+
+
+def get_latest_endtime():
+    """
+    Acquire the latest end time in database
+    """
+    query_text = """
+        SELECT MAX (end) FROM activities
+    """
+    contents = submit_query(query_text)
+    latest_end = contents[0][0]
+    return datetime.strptime(latest_end, DATETIME_FORMATSTRING)
