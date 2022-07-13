@@ -12,6 +12,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.label import Label
 from kivy_garden.graph import Graph, LinePlot
+from kivy.clock import Clock
 
 from datetime import datetime, timedelta
 import sqlite3
@@ -244,11 +245,14 @@ class PlotWindow(Screen):
 class MenuWindow(Screen):
     spoons_spent_display = StringProperty()
 
-    def on_pre_enter(self, *args):
-        self.update_spoons_spent_display()
-        return super().on_pre_enter(*args)
+    def on_enter(self, *args):
+        # This is ugly, but I don't know how to fix.
+        # Database won't be set up yet, so need to wait until
+        # App.build() is executed...
+        Clock.schedule_once(self.update_spoons_spent_display, 0)
+        return super().on_enter(*args)
 
-    def update_spoons_spent_display(self):
+    def update_spoons_spent_display(self, dt=None):
         """
         Update display of spoons spent today over daily spoons spent
         averaged over past fortnight
@@ -607,7 +611,9 @@ class WindowManager(ScreenManager):
 
 class SpoonCalcApp(App):
     def build(self):
-        print("BUILDING APP!!!")
+        print("-----------------------------------------------")
+        print("--------------- BUILDING APP!!! ---------------")
+        print("-----------------------------------------------")
 
         query_text = """
             CREATE TABLE if not exists activities(
@@ -622,7 +628,9 @@ class SpoonCalcApp(App):
         );
         """
         dbtools.submit_query(query_text)
+        print("---- Activities table created ----")
 
 
 if __name__ == '__main__':
+    print("---- IN MAIN ----")
     SpoonCalcApp().run()
