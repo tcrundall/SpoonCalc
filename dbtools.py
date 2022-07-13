@@ -2,7 +2,7 @@
 A collection of helper functions for interacting with database
 """
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
 DATABASE = "spooncalc.db"
 DATE_FORMATSTRING = "%Y-%m-%d"
@@ -107,3 +107,31 @@ def get_latest_endtime():
     contents = submit_query(query_text)
     latest_end = contents[0][0]
     return datetime.strptime(latest_end, DATETIME_FORMATSTRING)
+
+
+def get_earliest_starttime(day_offset):
+    """
+    Get the earliest start time in database for given day
+    """
+    date_str = date_from_offset(day_offset).strftime(DATE_FORMATSTRING)
+
+    query_text = f"""
+        SELECT MIN (start) FROM activities
+        WHERE start >= "{date_str}"
+    """
+    contents = submit_query(query_text)
+    earliest_start = contents[0][0]
+
+    return datetime.strptime(earliest_start, DATETIME_FORMATSTRING)
+
+
+def date_from_offset(day_offset):
+    return datetime.now().date() + timedelta(days=day_offset)
+
+
+def time2decimal(time_in: time):
+    try:
+        time_in.hour
+    except AttributeError:
+        time_in = datetime.strptime(time_in, DATETIME_FORMATSTRING)
+    return time_in.hour + time_in.minute / 60. + time_in.second / 3600.

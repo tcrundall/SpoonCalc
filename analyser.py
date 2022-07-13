@@ -40,7 +40,7 @@ def calculate_daily_total(day_offset):
     return spoons
 
 
-def calculate_spoons(duration, cogload, physload):
+def calculate_spoons(duration, cogload, physload, **kwargs):
     """
     Current formula spoons is:
         duration [hours] * (cogload + physload)
@@ -61,6 +61,9 @@ def calculate_spoons(duration, cogload, physload):
         'low' | 'mid' | 'high'
     physload: str
         'low' | 'mid' | 'high'
+    **kwargs:
+        ignore any superfluous keys. This makes expanding entries
+        more convenient.
     """
     res = parse_duration_string(duration) \
         * (parse_load_string(cogload)
@@ -108,3 +111,38 @@ def average_spoons_per_day(day_offset_start=-14, day_offset_end=0):
 
     return total_spoons / (day_offset_end - day_offset_start)
 
+
+def cumulative_time_spoons(day_offset=0):
+    """
+    Generate data points for a cumulative spoon expenditure
+    for a given day.
+
+    x points are end times of entries, in units of hours.
+    """
+    colnames = [
+        'start',
+        'end',
+        'duration',
+        'cogload',
+        'physload',
+    ]
+
+    entries = dbtools.get_entries_between_offsets(
+        day_offset,
+        day_offset + 1,
+        colnames=colnames,
+    )
+
+    earliest_starttime = dbtools.time2decimal(
+        dbtools.get_earliest_starttime(day_offset)
+    )
+
+    xs = [0., earliest_starttime]
+    ys = [0., 0.]
+    total_spoons = 0.
+    for entry in entries:
+        time = dbtools.time2decimal(entry['end'])
+        total_spoons += calculate_spoons(**entry)
+        xs.append(time)
+        ys.append(total_spoons)
+    return zip(xs, ys)

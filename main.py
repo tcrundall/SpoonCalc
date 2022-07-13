@@ -136,6 +136,7 @@ class PlotWindow(Screen):
     span = 8
     end = 0
     mode = "weekly"
+    day_start = 0
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -171,6 +172,10 @@ class PlotWindow(Screen):
         self.graph.add_plot(self.plot)
 
     def update_plot(self):
+        if self.mode == "daily":
+            self.plot_daily()
+            return
+        # mode: weekly or monthly
         self.spoons_per_day = analyser.calculate_daily_totals(
             self.start, self.span)
         self.graph.xmin = self.start
@@ -186,6 +191,8 @@ class PlotWindow(Screen):
             self.start -= 1
         elif self.mode == "monthly":
             self.start -= 7
+        elif self.mode == "daily":
+            self.day_start -= 1
         self.update_plot()
 
     def shift_window_right(self):
@@ -193,6 +200,8 @@ class PlotWindow(Screen):
             self.start += 1
         elif self.mode == "monthly":
             self.start += 7
+        elif self.mode == "daily":
+            self.day_start += 1
         self.update_plot()
 
     def set_weekly(self):
@@ -212,6 +221,24 @@ class PlotWindow(Screen):
         self.span = 29
         self.graph.x_ticks_major = 7
         self.update_plot()
+
+    def set_daily(self):
+        if self.mode == "daily":
+            return
+        self.mode = "daily"
+        self.update_plot()
+
+    def plot_daily(self):
+        print("Plotting daily!")
+        self.graph.xmin = 0
+        self.graph.xmax = 24
+        self.graph.ymin = 0
+        self.graph.ymax = self.ymax_persistent
+        self.graph.x_ticks_major = 3
+        self.graph.y_ticks_major = 5
+        points = list(analyser.cumulative_time_spoons(0))
+        print(points)
+        self.plot.points = list(analyser.cumulative_time_spoons(0))
 
 
 class MenuWindow(Screen):
