@@ -3,6 +3,7 @@ Analyse data stored in database and generate
 informative plots
 """
 import dbtools
+import timeutils
 
 DATABASE = "spooncalc.db"
 
@@ -133,16 +134,22 @@ def cumulative_time_spoons(day_offset=0):
         colnames=colnames,
     )
 
-    earliest_starttime = dbtools.time2decimal(
+    entries = sorted(entries, key=lambda e: e['end'])
+
+    earliest_starttime = timeutils.time2decimal(
         dbtools.get_earliest_starttime(day_offset)
     )
 
+    # Initialise points s.t. flat line between start and first entry 
     xs = [0., earliest_starttime]
     ys = [0., 0.]
     total_spoons = 0.
     for entry in entries:
-        time = dbtools.time2decimal(entry['end'])
+        hours_since_midnight = timeutils.hours_between(
+            timeutils.date_from_offset(day_offset),
+            entry['end'],
+        )
         total_spoons += calculate_spoons(**entry)
-        xs.append(time)
+        xs.append(hours_since_midnight)
         ys.append(total_spoons)
-    return zip(xs, ys)
+    return xs, ys

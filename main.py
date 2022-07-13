@@ -138,6 +138,7 @@ class PlotWindow(Screen):
     end = 0
     mode = "weekly"
     day_start = 0
+    plot_title = StringProperty(mode.capitalize())
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -209,6 +210,7 @@ class PlotWindow(Screen):
         if self.mode == "weekly":
             return
         self.mode = "weekly"
+        self.plot_title = self.mode.capitalize()
         self.start = -7
         self.span = 8
         self.graph.x_ticks_major = 1
@@ -217,6 +219,7 @@ class PlotWindow(Screen):
     def set_monthly(self):
         if self.mode == "monthly":
             return
+        self.plot_title = self.mode.capitalize()
         self.mode = "monthly"
         self.start = -28
         self.span = 29
@@ -237,9 +240,21 @@ class PlotWindow(Screen):
         self.graph.ymax = self.ymax_persistent
         self.graph.x_ticks_major = 3
         self.graph.y_ticks_major = 5
-        points = list(analyser.cumulative_time_spoons(0))
-        print(points)
-        self.plot.points = list(analyser.cumulative_time_spoons(0))
+
+        xs, ys = analyser.cumulative_time_spoons(self.day_start)
+
+        # If plotting for a past day, extend line plot to end of range
+        hours_in_day = 24
+        if self.day_start < 0 and max(xs) < hours_in_day:
+            xs.append(hours_in_day)
+            ys.append(ys[-1])
+
+        self.plot.points = list(zip(xs, ys))
+        self.update_daily_title()
+
+    def update_daily_title(self):
+        date = datetime.now().date() + timedelta(days=self.day_start)
+        self.plot_title = date.strftime("%A %d.%m")
 
 
 class MenuWindow(Screen):
@@ -610,6 +625,24 @@ class WindowManager(ScreenManager):
 
 
 class SpoonCalcApp(App):
+    def on_start(self):
+        print("--------------------------------------------------")
+        print("-------------  ON START!!!  ----------------------")
+        print("--------------------------------------------------")
+        return True
+
+    def on_resume(self):
+        print("--------------------------------------------------")
+        print("-------------  ON RESUME!!!  ---------------------")
+        print("--------------------------------------------------")
+        return True
+
+    def on_pause(self):
+        print("--------------------------------------------------")
+        print("-------------  ON PAUSE!!!  ----------------------")
+        print("--------------------------------------------------")
+        return True
+
     def build(self):
         print("-----------------------------------------------")
         print("--------------- BUILDING APP!!! ---------------")
