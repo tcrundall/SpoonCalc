@@ -215,6 +215,22 @@ class PlotWindow(Screen):
 
 
 class MenuWindow(Screen):
+    spoons_spent_display = StringProperty()
+
+    def on_pre_enter(self, *args):
+        self.update_spoons_spent_display()
+        return super().on_pre_enter(*args)
+
+    def update_spoons_spent_display(self):
+        """
+        Update display of spoons spent today over daily spoons spent
+        averaged over past fortnight
+        """
+        spoons_today = analyser.calculate_daily_total(0)
+        spoons_average = analyser.average_spoons_per_day(-14, 0)
+        self.spoons_spent_display =\
+            f"{spoons_today:.0f} / {spoons_average:.0f}"
+
     def export_database(self):
         filename = os.path.join(EXTERNALSTORAGE, 'spoon-output.csv')
         with open(filename, 'w') as fp:

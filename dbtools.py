@@ -27,16 +27,52 @@ def get_logs_from_day(day_offset, colnames=None):
     If `day_offset` is 0, then we're calculating today,
     `day_offset` = -1 is yesterday, etc...
     """
+    entries = get_entries_between_offsets(
+        day_offset,
+        day_offset + 1,
+        colnames=colnames
+    )
+    return entries
+
+
+def get_entries_between_offsets(start: int, end: int, colnames=None):
+    """
+    Get all entries between day offsets [start, end).
+
+    Examples
+    --------
+    start=-1, end=0: all entries from yesterday
+    start=-1, end=-1: no results
+    start=-1, end=1: all entries from yesterday and today
+    """
+    # Use "date" to drop time component (equivalent to midnight, start of day)
+    now_date = datetime.now().date()
+    # TODO: utilise "datetime_from_offset"
+    start_date = now_date + timedelta(days=start)
+    end_date = now_date + timedelta(days=end)
+    entries = get_entries_between_datetimes(
+        start_date,
+        end_date,
+        colnames=colnames
+    )
+    return entries
+
+
+def get_entries_between_datetimes(
+    start: datetime,
+    end: datetime,
+    colnames=None,
+):
+    """
+    Get all entries between the datetimes `start` and `end`.
+    """
     if colnames is None:
         colnames = [
             'id', 'start', 'end', 'name', 'duration', 'cogload', 'physload'
         ]
 
-    now = datetime.now()
-    start_date = now + timedelta(days=day_offset)
-    start_date_str = start_date.strftime('%Y-%m-%d')
-    end_date = now + timedelta(days=day_offset) + timedelta(days=1)
-    end_date_str = end_date.strftime('%Y-%m-%d')
+    start_date_str = start.strftime(DATETIME_FORMATSTRING)
+    end_date_str = end.strftime(DATETIME_FORMATSTRING)
 
     query_text = f"""
         SELECT {', '.join(colnames)}

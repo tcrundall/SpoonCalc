@@ -83,3 +83,28 @@ def parse_load_string(load_str):
             "high": 2,
         }
         return load_dict[load_str]
+
+
+def average_spoons_per_day(day_offset_start=-14, day_offset_end=0):
+    """
+    Calculate the average spoons per day, averaged between
+    `day_offset_start` and `day_offset_end`.
+
+    Defaults are past two weeks
+
+    Example
+    -------
+    start=-14, end=0: spoons per day, averaged over past 14 days
+                      (i.e.not including today)
+    """
+    entries = dbtools.get_entries_between_offsets(
+        day_offset_start,
+        day_offset_end,
+        colnames=['duration', 'cogload', 'physload'],
+    )
+    total_spoons = 0
+    for entry in entries:
+        total_spoons += calculate_spoons(**entry)
+
+    return total_spoons / (day_offset_end - day_offset_start)
+
