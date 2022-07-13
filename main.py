@@ -379,7 +379,7 @@ class InputWindow(Screen):
         """
         Inc-/decrement the end time based on pressed button and update display
 
-        The value to be inc-/decremented is inferred from the 
+        The value to be inc-/decremented is inferred from the
         button's text.
         """
         self.start_datetime += timedelta(
@@ -394,7 +394,7 @@ class InputWindow(Screen):
         """
         Inc-/decrement the end time based on pressed button and update display
 
-        The value to be inc-/decremented is inferred from the 
+        The value to be inc-/decremented is inferred from the
         button's text.
         """
         self.end_datetime += timedelta(
@@ -449,13 +449,15 @@ class InputWindow(Screen):
         return widgets
 
     def get_down_from_group(self, group):
-        toggle = [widget for id, widget in self.ids.items()
-                  if (
-                      hasattr(widget, 'group')
-                      and widget.group == group
-                      and widget.state == "down"
-                    )]
-        # check if non-empty
+        toggle = [
+            widget for id, widget in self.ids.items()
+            if (
+                hasattr(widget, 'group')
+                and widget.group == group
+                and widget.state == "down"
+            )
+        ]
+        # todo: check if non-empty?
         return toggle
 
 
@@ -492,7 +494,15 @@ class StackedLogsLayout(StackLayout):
         # Grab all logs from today
         entries = dbtools.get_logs_from_day(
             self.current_day,
-            colnames=['id', 'start', 'end', 'duration', 'name', 'cogload', 'physload'],
+            colnames=[
+                'id',
+                'start',
+                'end',
+                'duration',
+                'name',
+                'cogload',
+                'physload',
+            ],
         )
 
         # Sort entries by start time
@@ -508,7 +518,11 @@ class StackedLogsLayout(StackLayout):
             name = entry['name']
             cogload = entry['cogload']
             physload = entry['physload']
-            entry_box = EntryBox(id, start, end, duration, name, cogload, physload)
+            entry_box = EntryBox(
+                id, start, end,
+                duration, name,
+                cogload, physload
+            )
             self.boxes.append(entry_box)
             self.add_widget(entry_box)
 
@@ -547,7 +561,11 @@ class TitleBox(BoxLayout):
 
 
 class EntryBox(BoxLayout):
-    def __init__(self, db_id, start, end, duration, name, cogload, physload, **kwargs):
+    def __init__(
+        self, db_id, start, end,
+        duration, name, cogload, physload,
+        **kwargs
+    ):
         super().__init__(
             size_hint=(1, None),
             size=("20dp", "30dp"),

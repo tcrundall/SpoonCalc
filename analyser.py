@@ -82,7 +82,7 @@ def parse_load_string(load_str):
     except ValueError:
         load_dict = {
             "low": 0,
-            "mid": 1, 
+            "mid": 1,
             "high": 2,
         }
         return load_dict[load_str]
