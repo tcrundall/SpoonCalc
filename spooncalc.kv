@@ -162,6 +162,13 @@ WindowManager:
 <EnergyToggle@LoadToggle>:
     group: "energy"
 
+<ToggleImage@Image>:
+    # id:my_test_img
+    size: 0.5 * self.parent.width, 0.5 * self.parent.height
+    allow_stretch: True
+    x: self.parent.x + 0.25 * self.parent.width
+    y: self.parent.y + 0.4 * self.parent.height
+
 <InputWindow>:
     name: "input"
     BoxLayout:
@@ -183,56 +190,80 @@ WindowManager:
                 text: "Cog. Load"
                 font_size: font_size_heading_2
                 color: label_color
+                size_hint: 1, 0.3
             BoxLayout:
                 orientation: "horizontal"
+                size_hint: 1, 0.7
                 # spacing: button_spacing
                 CogloadToggle:
                     id: cog_low
-                    text: "V. Low"
+                    text: "\n\nV. Low"
                     on_state: root.cogload = 0
+                    ToggleImage:
+                        source: "images/sleeping.png"
                 CogloadToggle:
                     id: cog_low
-                    text: "Low"
+                    text: "\n\nLow"
                     on_state: root.cogload = 0.5
+                    ToggleImage:
+                        source: "images/meditation.png"
                 CogloadToggle:
                     id: cog_mid
-                    text: "Mid"
+                    text: "\n\nMid"
                     on_state: root.cogload = 1
+                    ToggleImage:
+                        source: "images/tv.png"
                 CogloadToggle:
                     id: cog_high
-                    text: "High"
+                    text: "\n\nHigh"
                     on_state: root.cogload = 1.5
+                    ToggleImage:
+                        source: "images/social-media.png"
                 CogloadToggle:
                     id: cog_high
-                    text: "V. High"
+                    text: "\n\nV. High"
                     on_state: root.cogload = 2
+                    ToggleImage:
+                        source: "images/work.png"
         Option:
             BackgroundLabel:
                 text: "Phys. Load"
                 color: label_color
                 font_size: font_size_heading_2
+                size_hint: 1, 0.3
             BoxLayout:
                 orientation: "horizontal"
+                size_hint: 1, 0.7
                 PhysloadToggle:
                     id: phys_low
-                    text: "V. Low"
                     on_press: root.physload = 0
+                    text: "\n\nV. Low"
+                    ToggleImage:
+                        source: 'images/lying-down.png'
                 PhysloadToggle:
                     id: phys_low
-                    text: "Low"
+                    text: "\n\nLow"
                     on_press: root.physload = 0.5
+                    ToggleImage:
+                        source: 'images/active-lying.png'
                 PhysloadToggle:
                     id: phys_mid
-                    text: "Mid"
+                    text: "\n\nMid"
                     on_press: root.physload = 1
+                    ToggleImage:
+                        source: 'images/sitting.png'
                 PhysloadToggle:
                     id: phys_high
-                    text: "High"
+                    text: "\n\nHigh"
                     on_press: root.physload = 1.5
+                    ToggleImage:
+                        source: 'images/walking.png'
                 PhysloadToggle:
                     id: phys_high
-                    text: "V. High"
+                    text: "\n\nV. High"
                     on_press: root.physload = 2
+                    ToggleImage:
+                        source: 'images/exertion.png'
         Option:
             orientation: "vertical"
             BackgroundLabel:
