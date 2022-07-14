@@ -65,11 +65,15 @@ WindowManager:
         Label:
             text: "Spoon Calculator!"
             font_size: font_size_title
-            size_hint_y: 0.5
+            size_hint_y: 0.1
         Label:
             text: root.spoons_spent_display
             font_size: font_size_heading_1
             size_hint_y: 0.1
+        BoxLayout:
+            id: menu_graph
+            size_hint_y: 0.4
+            padding: 10, 0, 30, 0
         Button:
             text: "Log an activity"
             font_size: font_size_heading_1

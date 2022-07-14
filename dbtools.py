@@ -113,7 +113,8 @@ def get_latest_endtime():
 
 def get_earliest_starttime(day_offset):
     """
-    Get the earliest start time in database for given day
+    Get the earliest start time in database for given day.
+    If none available, return start of that day.
     """
     date_str = timeutils.date_from_offset(day_offset)\
         .strftime(DATE_FORMATSTRING)
@@ -124,5 +125,14 @@ def get_earliest_starttime(day_offset):
     """
     contents = submit_query(query_text)
     earliest_start = contents[0][0]
+    if earliest_start is None:
+        today_start = datetime.now().replace(
+            hour=0,
+            minute=0,
+            second=0,
+            microsecond=0
+        )
+        target_day_start = today_start + timedelta(days=day_offset)
+        return target_day_start
 
     return datetime.strptime(earliest_start, DATETIME_FORMATSTRING)

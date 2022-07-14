@@ -259,12 +259,17 @@ class PlotWindow(Screen):
 
 class MenuWindow(Screen):
     spoons_spent_display = StringProperty()
+    plot_initialized = False
 
     def on_enter(self, *args):
         # This is ugly, but I don't know how to fix.
         # Database won't be set up yet, so need to wait until
         # App.build() is executed...
         Clock.schedule_once(self.update_spoons_spent_display, 0)
+        if not self.plot_initialized:
+            Clock.schedule_once(self.init_plot, 0)
+            self.plot_initialized = True
+        Clock.schedule_once(self.update_plot, 0)
         return super().on_enter(*args)
 
     def update_spoons_spent_display(self, dt=None):
@@ -294,6 +299,36 @@ class MenuWindow(Screen):
             fp.write(text)
 
             conn.close()
+
+    def init_plot(self, dt=None):
+        self.graph = Graph(
+            xmin=0, xmax=24,
+            ymin=0, ymax=35,
+            x_ticks_major=3,
+            y_ticks_major=5,
+            border_color=[0, 1, 1, 1],
+            tick_color=[0, 1, 1, 0.7],
+            x_grid=True, y_grid=True,
+            draw_border=True,
+            x_grid_label=True,
+            y_grid_label=True,
+            xlabel="O'Clock",
+            ylabel="Spoons",
+        )
+        self.ids.menu_graph.add_widget(self.graph)
+
+        self.plot = LinePlot(color=[1, 1, 0, 1], line_width=1.5)
+        # self.plot.points = [(-d, spoons)
+        #                     for d, spoons in self.spoons_per_day.items()]
+        self.graph.add_plot(self.plot)
+
+    def update_plot(self, dt=None):
+        print("Plotting daily!")
+        today = 0
+        xs, ys = analyser.cumulative_time_spoons(day_offset=today)
+
+        self.plot.points = list(zip(xs, ys))
+        # self.update_daily_title()
 
 
 # class MainWidget(BoxLayout):
