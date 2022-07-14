@@ -405,13 +405,21 @@ class InputWindow(Screen):
         mins = dati.minute
         rounded_min = int(((mins + (minute_interval / 2)) // minute_interval)
                           * minute_interval)
+        # Carry the hour if necessary
         if rounded_min >= 60:
             rounded_hour = dati.hour + 1
             rounded_min %= 60
         else:
             rounded_hour = dati.hour
+        # Carry the day if necessary
+        if rounded_hour >= 24:
+            rounded_day = dati.day + 1
+            rounded_hour %= 24
+        else:
+            rounded_day = dati.day
 
-        return dati.replace(hour=rounded_hour,
+        return dati.replace(day=rounded_day,
+                            hour=rounded_hour,
                             minute=rounded_min,
                             second=0,
                             microsecond=0)
