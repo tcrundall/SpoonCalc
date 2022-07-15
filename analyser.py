@@ -146,7 +146,7 @@ def cumulative_time_spoons(day_offset=0):
     total_spoons = 0.
     for entry in entries:
         hours_since_midnight = timeutils.hours_between(
-            timeutils.date_from_offset(day_offset),
+            timeutils.date_midnight_from_offset(day_offset),
             entry['end'],
         )
         total_spoons += calculate_spoons(**entry)

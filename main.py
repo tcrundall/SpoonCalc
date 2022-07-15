@@ -25,6 +25,7 @@ import os
 
 import analyser
 import dbtools
+import timeutils
 
 if platform == 'android':
     from android.permissions import request_permissions, Permission
@@ -234,8 +235,8 @@ class PlotWindow(Screen):
 
     def plot_daily(self):
         print("Plotting daily!")
-        self.graph.xmin = 0
-        self.graph.xmax = 24
+        self.graph.xmin = timeutils.DAY_BOUNDARY
+        self.graph.xmax = timeutils.DAY_BOUNDARY + 24
         self.graph.ymin = 0
         self.graph.ymax = self.ymax_persistent
         self.graph.x_ticks_major = 3
@@ -244,9 +245,8 @@ class PlotWindow(Screen):
         xs, ys = analyser.cumulative_time_spoons(self.day_start)
 
         # If plotting for a past day, extend line plot to end of range
-        hours_in_day = 24
-        if self.day_start < 0 and max(xs) < hours_in_day:
-            xs.append(hours_in_day)
+        if self.day_start < 0 and max(xs) < self.graph.xmax:
+            xs.append(self.graph.xmax)
             ys.append(ys[-1])
 
         self.plot.points = list(zip(xs, ys))
@@ -284,25 +284,31 @@ class MenuWindow(Screen):
 
     def export_database(self):
         filename = os.path.join(EXTERNALSTORAGE, 'spoon-output.csv')
-        with open(filename, 'w') as fp:
-            conn = sqlite3.connect(DATABASE)
-            c = conn.cursor()
-            c.execute("SELECT * FROM activities")
-            contents = c.fetchall()
-            SEP = ','
-            formatted_header = SEP.join([str(col[0])
-                                        for col in c.description])
-            formatted_contents = '\n'.join([SEP.join([
-                str(val) for val in entry
-            ]) for entry in contents])
-            text = '\n'.join((formatted_header, formatted_contents))
-            fp.write(text)
+        conn = sqlite3.connect(DATABASE)
+        c = conn.cursor()
+        c.execute("SELECT * FROM activities")
+        contents = c.fetchall()
 
-            conn.close()
+        SEP = ','
+        formatted_header = SEP.join([str(col[0])
+                                    for col in c.description])
+        formatted_contents = '\n'.join([SEP.join([
+            str(val) for val in entry
+        ]) for entry in contents])
+        conn.close()
+
+        # Avoid exporting empty database (and risking an overwrite)
+        if len(contents) == 0:
+            return
+        text = '\n'.join((formatted_header, formatted_contents))
+
+        with open(filename, 'w') as fp:
+            fp.write(text)
 
     def init_plot(self, dt=None):
         self.graph = Graph(
-            xmin=0, xmax=24,
+            xmin=timeutils.DAY_BOUNDARY,
+            xmax=timeutils.DAY_BOUNDARY + 24,
             ymin=0, ymax=35,
             x_ticks_major=3,
             y_ticks_major=5,

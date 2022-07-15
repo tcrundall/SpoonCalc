@@ -3,8 +3,10 @@ A collection of helpful functions for using datetime
 """
 from datetime import datetime, timedelta, time
 
+
 DATE_FORMATSTRING = "%Y-%m-%d"
 DATETIME_FORMATSTRING = "%Y-%m-%d %H:%M:%S"
+DAY_BOUNDARY = 3         # o'Clock chosen as the divider between days
 
 
 def hours_between(start: datetime, end: datetime):
@@ -19,6 +21,13 @@ def hours_between(start: datetime, end: datetime):
 
 def date_from_offset(day_offset):
     day_start = datetime.now().replace(
+        hour=DAY_BOUNDARY, minute=0, second=0, microsecond=0
+    )
+    return day_start + timedelta(days=day_offset)
+
+
+def date_midnight_from_offset(day_offset):
+    day_start = datetime.now().replace(
         hour=0, minute=0, second=0, microsecond=0
     )
     return day_start + timedelta(days=day_offset)
@@ -26,11 +35,18 @@ def date_from_offset(day_offset):
 
 def time2decimal(time_in: time):
     if type(time_in) is timedelta:
-        return time_in.total_seconds() / 3600.
+        decimal_time = time_in.total_seconds() / 3600.
+        if decimal_time < DAY_BOUNDARY:
+            decimal_time += 24.
+        return decimal_time
     if type(time_in) is str:
         time_in = datetime.strptime(time_in, DATETIME_FORMATSTRING)
-    # try:
-    #     time_in.hour
-    # except AttributeError:
-    #     time_in = datetime.strptime(time_in, DATETIME_FORMATSTRING)
-    return time_in.hour + time_in.minute / 60 + time_in.second / 3600.
+    # TODO: handle times between midnight and `hour_cutoff`
+    decimal_time = (
+        time_in.hour
+        + time_in.minute / 60
+        + time_in.second / 3600
+    )
+    if decimal_time < DAY_BOUNDARY:
+        decimal_time += 24.
+    return decimal_time

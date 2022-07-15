@@ -50,8 +50,8 @@ def get_entries_between_offsets(start: int, end: int, colnames=None):
     # Use "date" to drop time component (equivalent to midnight, start of day)
     now_date = datetime.now().date()
     # TODO: utilise "datetime_from_offset"
-    start_date = now_date + timedelta(days=start)
-    end_date = now_date + timedelta(days=end)
+    start_date = timeutils.date_from_offset(start)
+    end_date = timeutils.date_from_offset(end)
     entries = get_entries_between_datetimes(
         start_date,
         end_date,
@@ -116,18 +116,18 @@ def get_earliest_starttime(day_offset):
     Get the earliest start time in database for given day.
     If none available, return start of that day.
     """
-    date_str = timeutils.date_from_offset(day_offset)\
-        .strftime(DATE_FORMATSTRING)
+    datetime_str = timeutils.date_from_offset(day_offset)\
+        .strftime(DATETIME_FORMATSTRING)
 
     query_text = f"""
         SELECT MIN (start) FROM activities
-        WHERE start >= "{date_str}"
+        WHERE start >= "{datetime_str}"
     """
     contents = submit_query(query_text)
     earliest_start = contents[0][0]
     if earliest_start is None:
         today_start = datetime.now().replace(
-            hour=0,
+            hour=timeutils.DAY_BOUNDARY,
             minute=0,
             second=0,
             microsecond=0
