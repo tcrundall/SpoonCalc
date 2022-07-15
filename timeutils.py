@@ -9,6 +9,14 @@ DATETIME_FORMATSTRING = "%Y-%m-%d %H:%M:%S"
 DAY_BOUNDARY = 3         # o'Clock chosen as the divider between days
 
 
+def day_start_hour():
+    return DAY_BOUNDARY
+
+
+def day_end_hour():
+    return DAY_BOUNDARY + 24
+
+
 def hours_between(start: datetime, end: datetime):
     if type(start) is str:
         start = datetime.strptime(start, DATETIME_FORMATSTRING)

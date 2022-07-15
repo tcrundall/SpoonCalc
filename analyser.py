@@ -153,3 +153,85 @@ def cumulative_time_spoons(day_offset=0):
         xs.append(hours_since_midnight)
         ys.append(total_spoons)
     return xs, ys
+
+
+def linearly_interpolate(x, xs, ys):
+    """
+    Get the y value corresponding to x, linearly
+    interpolating between xs and ys as needed.
+
+    x is assumed to be between the bounds of xs.
+    xs and ys assumed to be sorted
+    """
+    # Handle case where x is beyond bounds of xs
+    if x >= xs[-1]:
+        return ys[-1]
+
+    # Find first element in xs that is larger than desired x
+    x_right_ix = 0
+    while x_right_ix < len(xs):
+        if xs[x_right_ix] > x:
+            break
+        x_right_ix += 1
+
+    x_left = xs[x_right_ix - 1]
+    x_right = xs[x_right_ix]
+    y_left = ys[x_right_ix - 1]
+    y_right = ys[x_right_ix]
+
+    dx = x - x_left
+    grad = (y_right - y_left) / (x_right - x_left)
+
+    return y_left + dx * grad
+
+
+def calc_mean(values):
+    n = len(values)
+    return sum(values) / n
+
+
+def calc_stdev(values, mean):
+    n = len(values)
+    total = 0
+    for val in values:
+        total += (val - mean)**2
+    return (total / n)**(0.5)
+
+
+def get_mean_and_spread(day_offset_start=-14, day_offset_end=0):
+    """
+    Get mean and spread of cumulative daily spoon plots.
+    """
+    cumulative_plots = [
+        cumulative_time_spoons(day_offset)
+        for day_offset in range(day_offset_start, day_offset_end)
+    ]
+    """
+    equivalent to:
+    times = numpy.linspace(
+        timeutils.day_start_hour(),
+        timeutils.day_end_hour(),
+        0.25
+    )
+    """
+    dt = 0.25       # 15 min resolution
+    times = []
+    t = timeutils.day_start_hour()
+    while t < timeutils.day_end_hour():
+        times.append(t)
+        t += dt
+
+    means = []
+    above = []
+    below = []
+    for time in times:
+        cumulative_spoons = [
+            linearly_interpolate(time, xs, ys) for xs, ys in cumulative_plots
+        ]
+        mean = calc_mean(cumulative_spoons)
+        stdev = calc_stdev(cumulative_spoons, mean)
+        means.append(mean)
+        above.append(mean + stdev)
+        below.append(mean - stdev)
+
+    return times, means, below, above

@@ -151,6 +151,7 @@ WindowManager:
                     root.on_import_press(external_file.text)
                     root.manager.transition.direction = "right"
                     app.root.current = "menu"
+                    app.root.current_screen.update_mean_and_spread()
 
 <LoadToggle@ToggleButton>:
     font_size: font_size_button_2

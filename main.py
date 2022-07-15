@@ -323,18 +323,34 @@ class MenuWindow(Screen):
         )
         self.ids.menu_graph.add_widget(self.graph)
 
-        self.plot = LinePlot(color=[1, 1, 0, 1], line_width=1.5)
-        # self.plot.points = [(-d, spoons)
-        #                     for d, spoons in self.spoons_per_day.items()]
-        self.graph.add_plot(self.plot)
+        self.today = LinePlot(color=[1, 1, 0, 1], line_width=3)
+        self.mean = LinePlot(color=[1, 0, 0, 1], line_width=1.5)
+        self.below = LinePlot(color=[1, 0, 0, 0.8], line_width=1.5)
+        self.above = LinePlot(color=[1, 0, 0, 0.8], line_width=1.5)
+
+        xs, mean, below, above = analyser.get_mean_and_spread()
+        self.mean.points = zip(xs, mean)
+        self.below.points = zip(xs, below)
+        self.above.points = zip(xs, above)
+
+        self.graph.add_plot(self.mean)
+        self.graph.add_plot(self.below)
+        self.graph.add_plot(self.above)
+        self.graph.add_plot(self.today)
 
     def update_plot(self, dt=None):
         print("Plotting daily!")
         today = 0
         xs, ys = analyser.cumulative_time_spoons(day_offset=today)
 
-        self.plot.points = list(zip(xs, ys))
+        self.today.points = list(zip(xs, ys))
         # self.update_daily_title()
+
+    def update_mean_and_spread(self):
+        xs, mean, below, above = analyser.get_mean_and_spread()
+        self.mean.points = zip(xs, mean)
+        self.below.points = zip(xs, below)
+        self.above.points = zip(xs, above) 
 
 
 # class MainWidget(BoxLayout):
