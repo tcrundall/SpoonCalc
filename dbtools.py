@@ -48,10 +48,8 @@ def get_entries_between_offsets(start: int, end: int, colnames=None):
     start=-1, end=1: all entries from yesterday and today
     """
     # Use "date" to drop time component (equivalent to midnight, start of day)
-    now_date = datetime.now().date()
-    # TODO: utilise "datetime_from_offset"
-    start_date = timeutils.date_from_offset(start)
-    end_date = timeutils.date_from_offset(end)
+    start_date = timeutils.datetime_from_offset(start)
+    end_date = timeutils.datetime_from_offset(end)
     entries = get_entries_between_datetimes(
         start_date,
         end_date,
@@ -108,6 +106,10 @@ def get_latest_endtime():
     """
     contents = submit_query(query_text)
     latest_end = contents[0][0]
+    # If no latest time available, set to roughly an hour ago
+    if latest_end is None:
+        return timeutils.get_nowish() - timedelta(hours=1)
+
     return datetime.strptime(latest_end, DATETIME_FORMATSTRING)
 
 
@@ -116,7 +118,7 @@ def get_earliest_starttime(day_offset):
     Get the earliest start time in database for given day.
     If none available, return start of that day.
     """
-    datetime_str = timeutils.date_from_offset(day_offset)\
+    datetime_str = timeutils.datetime_from_offset(day_offset)\
         .strftime(DATETIME_FORMATSTRING)
 
     query_text = f"""

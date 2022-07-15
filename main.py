@@ -412,39 +412,12 @@ class InputWindow(Screen):
         Start time is equal to end time of (chronologically) previous
         log, unless not today, in which case 1 hour before end time.
         """
-        self.end_datetime = self.round_datetime(datetime.now())
+        self.end_datetime = timeutils.round_datetime(datetime.now())
         self.start_datetime = dbtools.get_latest_endtime()
 
         # If start time is not from today, then set 1 hour before end time
         if (self.start_datetime.date() != datetime.now().date()):
             self.start_datetime = self.end_datetime - timedelta(hours=1)
-
-    def round_datetime(self, dati: datetime, minute_interval=15):
-        """
-        Round minutes to nearest given `minute_interval`, carrying the
-        hour if necessary.
-        """
-        mins = dati.minute
-        rounded_min = int(((mins + (minute_interval / 2)) // minute_interval)
-                          * minute_interval)
-        # Carry the hour if necessary
-        if rounded_min >= 60:
-            rounded_hour = dati.hour + 1
-            rounded_min %= 60
-        else:
-            rounded_hour = dati.hour
-        # Carry the day if necessary
-        if rounded_hour >= 24:
-            rounded_day = dati.day + 1
-            rounded_hour %= 24
-        else:
-            rounded_day = dati.day
-
-        return dati.replace(day=rounded_day,
-                            hour=rounded_hour,
-                            minute=rounded_min,
-                            second=0,
-                            microsecond=0)
 
     def update_time_displays(self):
         format_string = "%H:%M"

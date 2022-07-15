@@ -27,7 +27,7 @@ def hours_between(start: datetime, end: datetime):
     return time2decimal(duration)
 
 
-def date_from_offset(day_offset):
+def datetime_from_offset(day_offset):
     day_start = datetime.now().replace(
         hour=DAY_BOUNDARY, minute=0, second=0, microsecond=0
     )
@@ -58,3 +58,35 @@ def time2decimal(time_in: time):
     if decimal_time < DAY_BOUNDARY:
         decimal_time += 24.
     return decimal_time
+
+
+def round_datetime(dati: datetime, minute_interval=15):
+    """
+    Round minutes to nearest given `minute_interval`, carrying the
+    hour if necessary.
+    """
+    mins = dati.minute
+    rounded_min = int(((mins + (minute_interval / 2)) // minute_interval)
+                      * minute_interval)
+    # Carry the hour if necessary
+    if rounded_min >= 60:
+        rounded_hour = dati.hour + 1
+        rounded_min %= 60
+    else:
+        rounded_hour = dati.hour
+    # Carry the day if necessary
+    if rounded_hour >= 24:
+        rounded_day = dati.day + 1
+        rounded_hour %= 24
+    else:
+        rounded_day = dati.day
+
+    return dati.replace(day=rounded_day,
+                        hour=rounded_hour,
+                        minute=rounded_min,
+                        second=0,
+                        microsecond=0)
+
+
+def get_nowish(interval_mins=15):
+    return round_datetime(datetime.now(), minute_interval=interval_mins)
