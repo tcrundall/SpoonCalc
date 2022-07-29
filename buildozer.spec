@@ -46,7 +46,7 @@ requirements = python3,kivy,kivy.garden.graph,kivy_garden.graph
 # requirements.source.kivy = ../../kivy
 
 # (str) Presplash of the application
-presplash.filename = %(source.dir)s/data/spoon_icon.png
+presplash.filename = %(source.dir)s/data/spoon_icon_splash.png
 
 # (str) Icon of the application
 icon.filename = %(source.dir)s/data/spoon_icon.png
