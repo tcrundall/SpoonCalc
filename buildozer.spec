@@ -49,7 +49,7 @@ requirements = python3,kivy,kivy.garden.graph,kivy_garden.graph
 presplash.filename = %(source.dir)s/data/spoon_icon_splash.png
 
 # (str) Icon of the application
-icon.filename = %(source.dir)s/data/spoon_icon.png
+icon.filename = %(source.dir)s/data/ic_launcher.png
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait
