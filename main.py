@@ -13,6 +13,7 @@ from kivy.uix.checkbox import CheckBox
 from kivy.uix.label import Label
 from kivy_garden.graph import Graph, LinePlot
 from kivy.clock import Clock
+from kivy.core.window import Window
 
 from datetime import datetime, timedelta
 import sqlite3
@@ -403,6 +404,13 @@ class InputWindow(Screen):
         self.initialize_times_to_default()
         self.update_time_displays()
 
+    def pre_go_back(self):
+        # Do any screen specific behaviours here
+        # Rely on ScreenManager to handle changing of screen
+        print("Going back")
+        self.manager.transition.direction = "right"
+        self.manager.current = "menu"
+
     def initialize_times_to_default(self):
         """
         Initialize default end and start times.
@@ -492,8 +500,7 @@ class InputWindow(Screen):
     def on_save_press(self):
         successful = self.insert_into_database()
         if successful:
-            self.manager.transition.direction = "right"
-            self.parent.current = "menu"
+            self.manager.go_back()
             print("NAILED IT!")
         else:
             self.title = "hmmm... bad data?"
@@ -659,14 +666,25 @@ class EntryBox(BoxLayout):
 
 
 class WindowManager(ScreenManager):
-    pass
+    def go_back(self):
+        # Try and apply any screen specific "go back" stuff
+        try:
+            self.current_screen.pre_go_back()
+        except AttributeError:
+            pass
+
+        self.transition.direction = "right"
+        self.current = 'menu'
 
 
 class SpoonCalcApp(App):
+
     def on_start(self):
         print("--------------------------------------------------")
         print("-------------  ON START!!!  ----------------------")
         print("--------------------------------------------------")
+        win = Window
+        win.bind(on_keyboard=self.my_key_handler)
         return True
 
     def on_resume(self):
@@ -685,6 +703,13 @@ class SpoonCalcApp(App):
         print("-----------------------------------------------")
         print("--------------- BUILDING APP!!! ---------------")
         print("-----------------------------------------------")
+        wm = WindowManager()
+        wm.add_widget(MenuWindow(name="menu"))
+        wm.add_widget(InputWindow(name="input"))
+        wm.add_widget(LogsWindow(name="logs"))
+        wm.add_widget(PlotWindow(name="plot"))
+        wm.add_widget(ImportWindow(name="import"))
+        self.manager = wm
 
         query_text = """
             CREATE TABLE if not exists activities(
@@ -700,6 +725,16 @@ class SpoonCalcApp(App):
         """
         dbtools.submit_query(query_text)
         print("---- Activities table created ----")
+
+        return wm
+
+    def my_key_handler(self, window, keycode1, keycode2, text, modifiers):
+        if keycode1 in [27]:
+            if self.manager.current == 'menu':
+                self.get_running_app().stop()
+            self.manager.go_back()
+            return True
+        return False
 
 
 if __name__ == '__main__':

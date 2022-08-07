@@ -17,13 +17,6 @@
 #:set font_size_contents "15dp"
 #:set container_size_contents "30dp"        # double `font_size_contents`
 
-WindowManager:
-    MenuWindow:
-    InputWindow:
-    LogsWindow:
-    PlotWindow:
-    ImportWindow:
-
 <MyPopup@Popup>
     title: "Database"
     title_size: font_size_heading_1
@@ -142,16 +135,14 @@ WindowManager:
                 text: "Cancel"
                 font_size: font_size_button_1
                 on_release:
-                    root.manager.transition.direction = "right"
-                    app.root.current = "menu"
+                    root.manager.go_back()
             Button:
                 text: "Import"
                 font_size: font_size_button_1
                 on_release:
                     root.on_import_press(external_file.text)
-                    root.manager.transition.direction = "right"
-                    app.root.current = "menu"
-                    app.root.current_screen.update_mean_and_spread()
+                    root.manager.get_screen("menu").update_mean_and_spread()
+                    root.manager.go_back()
 
 <LoadToggle@ToggleButton>:
     font_size: font_size_button_2
@@ -365,8 +356,9 @@ WindowManager:
                 text: "Cancel"
                 font_size: font_size_button_1
                 on_release:
-                    root.manager.transition.direction = "right"
-                    app.root.current = "menu"
+                    root.pre_go_back()
+                    root.manager.go_back()
+                    # app.root.current = "menu"
             Button:
                 text: "Save"
                 font_size: font_size_button_1
@@ -433,8 +425,7 @@ WindowManager:
                 text: "Back"
                 font_size: font_size_button_1
                 on_release:
-                    root.manager.transition.direction = "right"
-                    app.root.current = "menu"
+                    root.manager.go_back()
 
 
 <LogsWindow>:
@@ -479,8 +470,7 @@ WindowManager:
                 text: "Back"
                 font_size: font_size_button_1
                 on_release:
-                    root.manager.transition.direction = "right"
-                    app.root.current = "menu"
+                    root.manager.go_back()
 
             Button:
                 text: "Delete"
