@@ -10,14 +10,21 @@ DAY_BOUNDARY = 3         # o'Clock chosen as the divider between days
 
 
 def day_start_hour():
+    """Get the "starting" hour of the day"""
     return DAY_BOUNDARY
 
 
 def day_end_hour():
+    """Get the "ending" hour of the day"""
     return DAY_BOUNDARY + 24
 
 
 def hours_between(start: datetime, end: datetime):
+    """Calculate the time between to datetimes, in hours.
+
+    The inputs can be datetime objects or strings that
+    match the DATETIME_FORMATSTRING format
+    """
     if type(start) is str:
         start = datetime.strptime(start, DATETIME_FORMATSTRING)
     if type(end) is str:
@@ -28,6 +35,7 @@ def hours_between(start: datetime, end: datetime):
 
 
 def datetime_from_offset(day_offset):
+    """Get the start of the day `day_offset` from today, as a datetime"""
     day_start = datetime.now().replace(
         hour=DAY_BOUNDARY, minute=0, second=0, microsecond=0
     )
@@ -35,6 +43,7 @@ def datetime_from_offset(day_offset):
 
 
 def date_midnight_from_offset(day_offset):
+    """Get the starting midnight of the day `day_offset` as a datetime"""
     day_start = datetime.now().replace(
         hour=0, minute=0, second=0, microsecond=0
     )
@@ -42,6 +51,7 @@ def date_midnight_from_offset(day_offset):
 
 
 def time2decimal(time_in: time):
+    """Convert a time from various types to hours in decimal"""
     if type(time_in) is timedelta:
         decimal_time = time_in.total_seconds() / 3600.
         if decimal_time < DAY_BOUNDARY:
@@ -63,7 +73,7 @@ def time2decimal(time_in: time):
 def round_datetime(dati: datetime, minute_interval=15):
     """
     Round minutes to nearest given `minute_interval`, carrying the
-    hour if necessary.
+    hour and day if necessary.
     """
     mins = dati.minute
     rounded_min = int(((mins + (minute_interval / 2)) // minute_interval)
@@ -89,4 +99,5 @@ def round_datetime(dati: datetime, minute_interval=15):
 
 
 def get_nowish(interval_mins=15):
+    """Get the datetime for now, rounded to nearest 15 mins"""
     return round_datetime(datetime.now(), minute_interval=interval_mins)
