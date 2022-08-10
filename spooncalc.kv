@@ -176,9 +176,12 @@
             color: label_color
             size_hint: 1, 0.1
         TextInput:
-            text: "Activity name"
+            # text: "Activity name"
             font_size: font_size_heading_1
             id: activity_name
+            hint_text: "Activity name"
+            write_tab: False
+            keyboard_suggestions: True
             multiline: False
             size_hint: 1, 0.075
         Option:
