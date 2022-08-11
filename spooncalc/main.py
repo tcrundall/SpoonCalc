@@ -9,7 +9,7 @@ This app requires the following python libraries:
 - kivy_garden
 - sqlite3
 
-This file can be executed on mac or windows, or can be 
+This file can be executed on mac or windows, or can be
 built into an APK using buildozer/python4android.
 """
 from kivy.config import Config

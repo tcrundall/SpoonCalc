@@ -176,10 +176,10 @@
             color: label_color
             size_hint: 1, 0.1
         TextInput:
-            # text: "Activity name"
+            text: "Activity name"
             font_size: font_size_heading_1
             id: activity_name
-            hint_text: "Activity name"
+            # hint_text: "Activity name"
             write_tab: False
             keyboard_suggestions: True
             multiline: False
@@ -199,31 +199,31 @@
                     text: "\n\nV. Low"
                     on_state: root.cogload = 0
                     ToggleImage:
-                        source: "images/sleeping.png"
+                        source: "resources/images/sleeping.png"
                 CogloadToggle:
                     id: cog_low
                     text: "\n\nLow"
                     on_state: root.cogload = 0.5
                     ToggleImage:
-                        source: "images/meditation.png"
+                        source: "resources/images/meditation.png"
                 CogloadToggle:
                     id: cog_mid
                     text: "\n\nMid"
                     on_state: root.cogload = 1
                     ToggleImage:
-                        source: "images/tv.png"
+                        source: "resources/images/tv.png"
                 CogloadToggle:
                     id: cog_high
                     text: "\n\nHigh"
                     on_state: root.cogload = 1.5
                     ToggleImage:
-                        source: "images/social-media.png"
+                        source: "resources/images/social-media.png"
                 CogloadToggle:
                     id: cog_high
                     text: "\n\nV. High"
                     on_state: root.cogload = 2
                     ToggleImage:
-                        source: "images/work.png"
+                        source: "resources/images/work.png"
         Option:
             BackgroundLabel:
                 text: "Phys. Load"
@@ -238,31 +238,31 @@
                     on_press: root.physload = 0
                     text: "\n\nV. Low"
                     ToggleImage:
-                        source: 'images/lying-down.png'
+                        source: 'resources/images/lying-down.png'
                 PhysloadToggle:
                     id: phys_low
                     text: "\n\nLow"
                     on_press: root.physload = 0.5
                     ToggleImage:
-                        source: 'images/active-lying.png'
+                        source: 'resources/images/active-lying.png'
                 PhysloadToggle:
                     id: phys_mid
                     text: "\n\nMid"
                     on_press: root.physload = 1
                     ToggleImage:
-                        source: 'images/sitting.png'
+                        source: 'resources/images/sitting.png'
                 PhysloadToggle:
                     id: phys_high
                     text: "\n\nHigh"
                     on_press: root.physload = 1.5
                     ToggleImage:
-                        source: 'images/walking.png'
+                        source: 'resources/images/walking.png'
                 PhysloadToggle:
                     id: phys_high
                     text: "\n\nV. High"
                     on_press: root.physload = 2
                     ToggleImage:
-                        source: 'images/exertion.png'
+                        source: 'resources/images/exertion.png'
         Option:
             orientation: "vertical"
             BackgroundLabel:
@@ -359,16 +359,12 @@
                 text: "Cancel"
                 font_size: font_size_button_1
                 on_release:
-                    root.pre_go_back()
                     root.manager.go_back()
-                    # app.root.current = "menu"
             Button:
                 text: "Save"
                 font_size: font_size_button_1
                 on_release:
                     root.on_save_press()
-                    # root.manager.transition.direction = "right"
-                    # app.root.current = "menu"
 
 <PlotToggle@LoadToggle>
     group: "plot"

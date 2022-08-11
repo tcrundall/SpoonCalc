@@ -19,7 +19,7 @@ def submit_query(query_text):
     ----------
     query_text : str
         A complete sqlite3 request
-    
+
     Returns
     -------
     contents
@@ -225,7 +225,7 @@ def get_earliest_starttime(day_offset):
     Returns
     -------
     datetime
-        Either the starting time of earliest activty, or 
+        Either the starting time of earliest activty, or
         start of day.
     """
 
