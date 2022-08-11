@@ -462,6 +462,19 @@ class MenuWindow(Screen):
 
         self.today.points = list(zip(xs, ys))
 
+    def update_mean_and_spread(self):
+        """
+        Update the mean and standard deviation plots
+
+        This mthod is only ever activated when the database is updated
+        via an "import". Note that this method could be getting called from
+        kivy lang.
+        """
+        xs, mean, below, above = analyser.get_mean_and_spread()
+        self.mean.points = zip(xs, mean)
+        self.below.points = zip(xs, below)
+        self.above.points = zip(xs, above)
+
 
 # class MainWidget(BoxLayout):
 class InputWindow(Screen):
