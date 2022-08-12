@@ -1,0 +1,86 @@
+##:kivy
+#:import Factory kivy.factory.Factory
+
+#:set pad "5dp"
+#:set button_group_size_hint 1, 0.75
+#:set label_color 1, 1, 1, 1
+#:set label_background_color 0.3, 0.7, 0.9, 1
+#:set button_spacing "5dp"
+#:set toplevel_spacing "5dp"
+#:set button_pad "2dp"
+
+#:set font_size_title "40dp"
+#:set font_size_heading_1 "24dp"
+#:set font_size_heading_2 "18dp"
+#:set font_size_button_1 "20dp"
+#:set font_size_button_2 "16dp"
+#:set font_size_contents "15dp"
+#:set container_size_contents "30dp"        # double `font_size_contents`
+
+<ToggleImage@Image>:
+    # id:my_test_img
+    size: 0.5 * self.parent.width, 0.5 * self.parent.height
+    allow_stretch: True
+    x: self.parent.x + 0.25 * self.parent.width
+    y: self.parent.y + 0.4 * self.parent.height
+
+<PlotToggle@LoadToggle>
+    group: "plot"
+    size_hint: 0.2, 1
+
+<PlotScreen>:
+    name: 'plotscreen'
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            text: root.plot_title
+            id: plot_title
+            font_size: font_size_title
+            size_hint: 1, 0.1
+        BoxLayout:
+            id: graph
+            size_hint: 1, 0.9
+            padding: 10, 10, 0, 10
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: 1, 0.05
+            Button:
+                text: "<-"
+                font_size: font_size_button_2
+                size_hint: 0.1, 1
+                on_release:
+                    root.shift_window_left()
+            PlotToggle:
+                text: "Daily"
+                id: daily
+                on_release:
+                    root.set_daily()
+                    # root.set_mode(self.text)
+            PlotToggle:
+                text: "Weekly"
+                id: weekly
+                state: "down"
+                on_release:
+                    root.set_weekly()
+                    # root.set_mode(self.text)
+            PlotToggle:
+                text: "Monthly"
+                id: monthly
+                on_release:
+                    root.set_monthly()
+                    # root.set_mode(self.text)
+            Button:
+                text: "->"
+                font_size: font_size_button_2
+                size_hint: 0.1, 1
+                on_release:
+                    root.shift_window_right()
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: 1, 0.1
+            Button:
+                text: "Back"
+                font_size: font_size_button_1
+                on_release:
+                    root.switch_screen("menuscreen")
+                    # root.manager.go_back()

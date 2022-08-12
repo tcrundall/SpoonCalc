@@ -1,0 +1,252 @@
+##:kivy
+#:import Factory kivy.factory.Factory
+
+#:set pad "5dp"
+#:set button_group_size_hint 1, 0.75
+#:set label_color 1, 1, 1, 1
+#:set label_background_color 0.3, 0.7, 0.9, 1
+#:set button_spacing "5dp"
+#:set toplevel_spacing "5dp"
+#:set button_pad "2dp"
+
+#:set font_size_title "40dp"
+#:set font_size_heading_1 "24dp"
+#:set font_size_heading_2 "18dp"
+#:set font_size_button_1 "20dp"
+#:set font_size_button_2 "16dp"
+#:set font_size_contents "15dp"
+#:set container_size_contents "30dp"        # double `font_size_contents`
+
+<BackgroundColor@Widget>
+    background_color: 1, 1, 1, 1
+    canvas.before:
+        Color:
+            rgba: root.background_color
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<BackgroundLabel@Label+BackgroundColor>
+    background_color: label_background_color
+
+<Option@BoxLayout>:
+    orientation: "vertical"
+    padding: (pad, pad, pad, pad)
+    size_hint: 1, 0.15
+
+<LoadToggle@ToggleButton>:
+    font_size: font_size_button_2
+    markup: True
+    on_press: setattr(self, 'state', 'down') 
+
+<CogloadToggle@LoadToggle>:
+    group: "cogload"
+
+<PhysloadToggle@LoadToggle>:
+    group: "physload"
+
+<EnergyToggle@LoadToggle>:
+    group: "energy"
+
+<InputScreen>:
+    name: 'inputscreen'
+    BoxLayout:
+        orientation: "vertical"
+        spacing: toplevel_spacing
+        BackgroundLabel:
+            text: f"{root.title}"
+            font_size: font_size_title
+            color: label_color
+            size_hint: 1, 0.1
+        TextInput:
+            text: "Activity name"
+            font_size: font_size_heading_1
+            id: activity_name
+            # hint_text: "Activity name"
+            write_tab: False
+            keyboard_suggestions: True
+            multiline: False
+            size_hint: 1, 0.075
+        Option:
+            BackgroundLabel:
+                text: "Cog. Load"
+                font_size: font_size_heading_2
+                color: label_color
+                size_hint: 1, 0.3
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1, 0.7
+                # spacing: button_spacing
+                CogloadToggle:
+                    id: cog_low
+                    text: "\n\nV. Low"
+                    on_state: root.cogload = 0
+                    ToggleImage:
+                        source: "spooncalc/resources/images/sleeping.png"
+                CogloadToggle:
+                    id: cog_low
+                    text: "\n\nLow"
+                    on_state: root.cogload = 0.5
+                    ToggleImage:
+                        source: "spooncalc/resources/images/meditation.png"
+                CogloadToggle:
+                    id: cog_mid
+                    text: "\n\nMid"
+                    on_state: root.cogload = 1
+                    ToggleImage:
+                        source: "spooncalc/resources/images/tv.png"
+                CogloadToggle:
+                    id: cog_high
+                    text: "\n\nHigh"
+                    on_state: root.cogload = 1.5
+                    ToggleImage:
+                        source: "spooncalc/resources/images/social-media.png"
+                CogloadToggle:
+                    id: cog_high
+                    text: "\n\nV. High"
+                    on_state: root.cogload = 2
+                    ToggleImage:
+                        source: "spooncalc/resources/images/work.png"
+        Option:
+            BackgroundLabel:
+                text: "Phys. Load"
+                color: label_color
+                font_size: font_size_heading_2
+                size_hint: 1, 0.3
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1, 0.7
+                PhysloadToggle:
+                    id: phys_low
+                    on_press: root.physload = 0
+                    text: "\n\nV. Low"
+                    ToggleImage:
+                        source: 'spooncalc/resources/images/lying-down.png'
+                PhysloadToggle:
+                    id: phys_low
+                    text: "\n\nLow"
+                    on_press: root.physload = 0.5
+                    ToggleImage:
+                        source: 'spooncalc/resources/images/active-lying.png'
+                PhysloadToggle:
+                    id: phys_mid
+                    text: "\n\nMid"
+                    on_press: root.physload = 1
+                    ToggleImage:
+                        source: 'spooncalc/resources/images/sitting.png'
+                PhysloadToggle:
+                    id: phys_high
+                    text: "\n\nHigh"
+                    on_press: root.physload = 1.5
+                    ToggleImage:
+                        source: 'spooncalc/resources/images/walking.png'
+                PhysloadToggle:
+                    id: phys_high
+                    text: "\n\nV. High"
+                    on_press: root.physload = 2
+                    ToggleImage:
+                        source: 'spooncalc/resources/images/exertion.png'
+        Option:
+            orientation: "vertical"
+            BackgroundLabel:
+                text: "Start Time"
+                font_size: font_size_heading_2
+                color: label_color
+                halign: "left"
+            BoxLayout:
+                orientation: "horizontal"
+                Button:
+                    id: s -1
+                    text: "-1"
+                    font_size: font_size_button_2
+                    on_press: root.on_start_time_press(self)
+                Button:
+                    id: s-015
+                    text: "-0:15"
+                    font_size: font_size_button_2
+                    on_press: root.on_start_time_press(self)
+                BackgroundLabel:
+                    color: label_color
+                    text: f"{root.start_display}"
+                    font_size: font_size_button_2
+                Button:
+                    id: s+015
+                    text: "+0:15"
+                    on_press: root.on_start_time_press(self)
+                    font_size: font_size_button_2
+                Button:
+                    id: s+1
+                    text: "+1"
+                    on_press: root.on_start_time_press(self)
+                    font_size: font_size_button_2
+        Option:
+            orientation: "vertical"
+            BackgroundLabel:
+                text: "End Time"
+                font_size: font_size_heading_2
+                color: label_color
+                halign: "left"
+            BoxLayout:
+                orientation: "horizontal"
+                Button:
+                    id: -1
+                    text: "-1"
+                    font_size: font_size_button_2
+                    on_press: root.on_end_time_press(self)
+                Button:
+                    id: -015
+                    text: "-0:15"
+                    font_size: font_size_button_2
+                    on_press: root.on_end_time_press(self)
+                BackgroundLabel:
+                    color: label_color
+                    text: f"{root.end_display}"
+                    font_size: font_size_button_2
+                Button:
+                    id: +015
+                    text: "+0:15"
+                    on_press: root.on_end_time_press(self)
+                    font_size: font_size_button_2
+                Button:
+                    id: +1
+                    text: "+1"
+                    on_press: root.on_end_time_press(self)
+                    font_size: font_size_button_2
+        Option:
+            orientation: "vertical"
+            BackgroundLabel:
+                text: "Energy Level"
+                font_size: font_size_heading_2
+                id: energy_toggle_label
+                color: label_color
+            BoxLayout:
+                orientation: "horizontal"
+                text: "Energy Level"
+                id: energy_toggles
+                EnergyToggle:
+                    text: "Low"
+                    id: energy_low
+                    on_state: root.energy = 0
+                EnergyToggle:
+                    text: "Mid"
+                    id: energy_mid
+                    on_state: root.energy = 1
+                EnergyToggle:
+                    text: "High"
+                    id: energy_high
+                    on_state: root.energy = 2
+        BoxLayout:
+            size_hint: 1, 0.1
+            orientation: "horizontal"
+            Button:
+                text: "Cancel"
+                font_size: font_size_button_1
+                on_release:
+                    root.switch_screen("menuscreen")
+                    # root.manager.go_back()
+            Button:
+                text: "Save"
+                font_size: font_size_button_1
+                on_release:
+                    root.on_save_press()
+
