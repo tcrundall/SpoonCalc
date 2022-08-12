@@ -2,9 +2,9 @@
 A collection of helper functions for interacting with database
 """
 import sqlite3
-import timeutils
 from datetime import datetime, timedelta
 
+from spooncalc import timeutils
 
 DATABASE = "spooncalc.db"
 DATE_FORMATSTRING = "%Y-%m-%d"

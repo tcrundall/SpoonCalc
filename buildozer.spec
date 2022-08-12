@@ -10,7 +10,7 @@ package.name = spooncalc
 package.domain = org.test
 
 # (str) Source code where the main.py live
-source.dir = spooncalc
+source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
 source.include_exts = py,png,jpg,kv,atlas
@@ -46,10 +46,10 @@ requirements = python3,kivy,kivy.garden.graph,kivy_garden.graph
 # requirements.source.kivy = ../../kivy
 
 # (str) Presplash of the application
-presplash.filename = %(source.dir)s/resources/icons/spoon_icon_splash.png
+presplash.filename = %(source.dir)s/spooncalc/resources/icons/spoon_icon_splash.png
 
 # (str) Icon of the application
-icon.filename = %(source.dir)s/resources/icons/ic_launcher.png
+icon.filename = %(source.dir)s/spooncalc/resources/icons/ic_launcher.png
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait

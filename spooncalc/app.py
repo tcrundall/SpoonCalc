@@ -36,9 +36,9 @@ from kivy.utils import platform
 from pathlib import Path
 import os
 
-import analyser
-import dbtools
-import timeutils
+from spooncalc import analyser
+from spooncalc import dbtools
+from spooncalc import timeutils
 
 # Android specific imports
 if platform == 'android':
@@ -1019,8 +1019,3 @@ class SpoonCalcApp(App):
             self.manager.go_back()
             return True
         return False
-
-
-if __name__ == '__main__':
-    print("---- IN MAIN ----")
-    SpoonCalcApp().run()

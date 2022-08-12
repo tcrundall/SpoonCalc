@@ -2,8 +2,8 @@
 Analyse data stored in database and generate
 informative plots
 """
-import dbtools
-import timeutils
+from spooncalc import dbtools
+from spooncalc import timeutils
 
 DATABASE = "spooncalc.db"
 
