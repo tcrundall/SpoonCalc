@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-import sqlite3
 
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
@@ -29,6 +28,10 @@ class MenuScreen(Screen):
     """
     spoons_spent_display = StringProperty()
     plot_initialized = False
+
+    def __init__(self, export_callback, **kwargs):
+        self.export_callback = export_callback
+        super().__init__(**kwargs)
 
     def on_enter(self, *args):
         """
@@ -69,29 +72,7 @@ class MenuScreen(Screen):
         """
         Export the entire activities database as a csv file.
         """
-        # Request entire contents of database
-        filename = os.path.join(app.EXTERNALSTORAGE, 'spoon-output.csv')
-        conn = sqlite3.connect(app.DATABASE)
-        c = conn.cursor()
-        c.execute("SELECT * FROM activities")
-        contents = c.fetchall()
-
-        # Construct the csv file header from the request's description
-        SEP = ','
-        formatted_header = SEP.join([str(col[0])
-                                    for col in c.description])
-        formatted_contents = '\n'.join([SEP.join([
-            str(val) for val in entry
-        ]) for entry in contents])
-        conn.close()
-
-        # Avoid exporting empty database (and risking an overwrite)
-        if len(contents) == 0:
-            return
-        text = '\n'.join((formatted_header, formatted_contents))
-
-        with open(filename, 'w') as fp:
-            fp.write(text)
+        self.export_callback()
 
     def init_plot(self, dt=None):
         """
@@ -152,7 +133,6 @@ class MenuScreen(Screen):
 
         Note that the mean, below and above plots remain unchanged.
         """
-        print("Plotting daily!")
         today = 0
         xs, ys = analyser.cumulative_time_spoons(day_offset=today)
 

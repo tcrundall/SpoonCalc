@@ -69,7 +69,6 @@ class InputScreen(Screen):
 
         # Reset load toggles
         for group in ["cogload", "physload", "energy"]:
-            print(self.get_widgets_in_group(group))
             for toggle in self.get_widgets_in_group(group):
                 if toggle.text.lower() == "mid":
                     # TODO: Maybe `_do_press` can both set and unset toggles
@@ -180,9 +179,7 @@ class InputScreen(Screen):
         """
         successful = self.insert_into_database()
         if successful:
-            self.switch_screen("menuscreen")
-            # self.manager.go_back()
-            print("NAILED IT!")
+            self.manager.switch_screen("menuscreen")
         else:
             self.title = "hmmm... bad data?"
 

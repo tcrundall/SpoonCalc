@@ -1,17 +1,6 @@
-"""Spoon Calculator App for android
-
-This script defines and runs a kivy-based application used to
-track a user's energy expenditure in terms of the abstract unit
-of "spoons".
-
-This app requires the following python libraries:
-- kivy
-- kivy_garden
-- sqlite3
-
-This file can be executed on mac or windows, or can be
-built into an APK using buildozer/python4android.
-"""
+import os
+from pathlib import Path
+import sqlite3
 
 # os.environ["KIVY_NO_CONSOLELOG"] = '1'
 
@@ -20,20 +9,17 @@ Config.set('kivy', 'exit_on_escape', '0')
 Config.set('graphics', 'width', '393')
 Config.set('graphics', 'height', '830')
 
-import os
-
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from kivy.app import App
 from kivy.utils import platform
-from pathlib import Path
 
 from spooncalc import dbtools
 from spooncalc.screens.menuscreen import menuscreen
-from spooncalc.screens.inputscreen import inputscreen
 from spooncalc.screens.plotscreen import plotscreen
 from spooncalc.screens.logsscreen import logsscreen
 from spooncalc.screens.importscreen import importscreen
+from spooncalc.screens.inputscreen import inputscreen
 
 # Android specific imports
 if platform == 'android':
@@ -51,10 +37,6 @@ if platform == 'android':
 if platform == 'macosx':
     home = str(Path.home())
     EXTERNALSTORAGE = home
-
-
-print(f'{platform=}')
-print(f'{EXTERNALSTORAGE=}')
 
 DATABASE = 'spooncalc.db'
 
@@ -124,14 +106,17 @@ class SpoonCalcApp(App):
         );
         """
         dbtools.submit_query(query_text)
-        print("---- Activities table created ----")
 
         sm = MyScreenManager()
-        sm.add_widget(menuscreen.MenuScreen())
+        sm.add_widget(menuscreen.MenuScreen(
+            export_callback=self.export_database
+        ))
         sm.add_widget(inputscreen.InputScreen())
         sm.add_widget(logsscreen.LogsScreen())
         sm.add_widget(plotscreen.PlotScreen())
-        sm.add_widget(importscreen.ImportScreen(self.import_csv_data))
+        sm.add_widget(importscreen.ImportScreen(
+            import_callback=self.import_csv_data
+        ))
         self.manager = sm
 
         Window.bind(on_key_up=self.back_button)
@@ -151,7 +136,6 @@ class SpoonCalcApp(App):
         with open(filepath, 'r') as fp:
             _ = fp.readline()       # skip header
             for line in fp:
-                print(line)
                 self.insert_if_unique(line)
 
     def insert_if_unique(self, csv_row):
@@ -194,3 +178,31 @@ class SpoonCalcApp(App):
                 );
         """
         dbtools.submit_query(query_text)
+
+    def export_database(self):
+        """
+        Export the entire activities database as a csv file.
+        """
+        # Request entire contents of database
+        filename = os.path.join(self.EXTERNALSTORAGE, 'spoon-output.csv')
+        conn = sqlite3.connect(self.DATABASE)
+        c = conn.cursor()
+        c.execute("SELECT * FROM activities")
+        contents = c.fetchall()
+
+        # Construct the csv file header from the request's description
+        SEP = ','
+        formatted_header = SEP.join([str(col[0])
+                                    for col in c.description])
+        formatted_contents = '\n'.join([SEP.join([
+            str(val) for val in entry
+        ]) for entry in contents])
+        conn.close()
+
+        # Avoid exporting empty database (and risking an overwrite)
+        if len(contents) == 0:
+            return
+        text = '\n'.join((formatted_header, formatted_contents))
+
+        with open(filename, 'w') as fp:
+            fp.write(text)
