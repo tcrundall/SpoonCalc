@@ -20,6 +20,8 @@ Config.set('kivy', 'exit_on_escape', '0')
 Config.set('graphics', 'width', '393')
 Config.set('graphics', 'height', '830')
 
+import os
+
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from kivy.app import App
@@ -27,6 +29,11 @@ from kivy.utils import platform
 from pathlib import Path
 
 from spooncalc import dbtools
+from spooncalc.screens.menuscreen import menuscreen
+from spooncalc.screens.inputscreen import inputscreen
+from spooncalc.screens.plotscreen import plotscreen
+from spooncalc.screens.logsscreen import logsscreen
+from spooncalc.screens.importscreen import importscreen
 
 # Android specific imports
 if platform == 'android':
@@ -119,20 +126,12 @@ class SpoonCalcApp(App):
         dbtools.submit_query(query_text)
         print("---- Activities table created ----")
 
-        # These need to be imported here (and not at start of file)
-        # because they require app to be running.
-        from spooncalc.screens.menuscreen import menuscreen
-        from spooncalc.screens.inputscreen import inputscreen
-        from spooncalc.screens.plotscreen import plotscreen
-        from spooncalc.screens.logsscreen import logsscreen
-        from spooncalc.screens.importscreen import importscreen
-
         sm = MyScreenManager()
         sm.add_widget(menuscreen.MenuScreen())
         sm.add_widget(inputscreen.InputScreen())
         sm.add_widget(logsscreen.LogsScreen())
         sm.add_widget(plotscreen.PlotScreen())
-        sm.add_widget(importscreen.ImportScreen())
+        sm.add_widget(importscreen.ImportScreen(self.import_csv_data))
         self.manager = sm
 
         Window.bind(on_key_up=self.back_button)
@@ -146,3 +145,52 @@ class SpoonCalcApp(App):
             if not success:
                 self.stop()
             return True
+
+    def import_csv_data(self, filename):
+        filepath = os.path.join(self.EXTERNALSTORAGE, filename)
+        with open(filepath, 'r') as fp:
+            _ = fp.readline()       # skip header
+            for line in fp:
+                print(line)
+                self.insert_if_unique(line)
+
+    def insert_if_unique(self, csv_row):
+        """
+        Take a raw csv row, extract relevant data, and insert into database.
+
+        If the row already exists in database (i.e. all data entries match
+        exactly), then the row is skipped
+
+        Paramters
+        ---------
+        csv_row : str
+            A raw csv row from a previous database export
+        """
+        _, start, end, duration, name, cogload, physload, energy =\
+            csv_row.strip().split(',')
+
+        query_text = f"""
+            SELECT EXISTS(
+                SELECT * from activities WHERE
+                    start="{start}"
+                    AND end="{end}"
+                    AND duration="{duration}"
+                    AND name="{name}"
+                    AND cogload = "{cogload}"
+                    AND physload = "{physload}"
+                    AND energy = "{energy}"
+            );
+        """
+        contents = dbtools.submit_query(query_text)
+        if contents[0][0] == 1:
+            return
+
+        query_text = f"""
+            INSERT INTO activities
+                (start, end, duration, name, cogload, physload, energy)
+                VALUES(
+                    "{start}", "{end}", "{duration}", "{name}", "{cogload}",
+                    "{physload}", "{energy}"
+                );
+        """
+        dbtools.submit_query(query_text)

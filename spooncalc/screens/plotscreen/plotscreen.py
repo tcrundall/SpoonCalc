@@ -3,12 +3,10 @@ import os
 from pathlib import Path
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
-from kivy.app import App
 from kivy.properties import StringProperty
 from kivy_garden.graph import Graph, LinePlot
 
 from spooncalc import analyser, timeutils
-app = App.get_running_app()
 
 Builder.load_file(os.path.join(
     Path(__file__).parent.absolute(),
@@ -213,6 +211,3 @@ class PlotScreen(Screen):
     def update_daily_title(self):
         date = datetime.now().date() + timedelta(days=self.day_offset)
         self.plot_title = date.strftime("%A %d.%m")
-
-    def switch_screen(self, screen_name):
-        app.switch_screen(screen_name)

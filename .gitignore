@@ -17,3 +17,7 @@ __pycache__
 
 # ??
 .DS_store
+
+# misc clutter
+*.png
+*.zip

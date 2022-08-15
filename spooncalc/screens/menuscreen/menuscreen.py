@@ -4,13 +4,11 @@ import sqlite3
 
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
-from kivy.app import App
 from kivy.properties import StringProperty
 from kivy.clock import Clock
 from kivy_garden.graph import Graph, LinePlot
 
 from spooncalc import analyser, timeutils
-app = App.get_running_app()
 
 Builder.load_file(os.path.join(
     Path(__file__).parent.absolute(),
@@ -172,6 +170,3 @@ class MenuScreen(Screen):
         self.mean.points = zip(xs, mean)
         self.below.points = zip(xs, below)
         self.above.points = zip(xs, above)
-
-    def switch_screen(self, screen_name):
-        app.switch_screen(screen_name)
