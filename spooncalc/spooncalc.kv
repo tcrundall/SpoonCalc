@@ -1,5 +1,4 @@
 ##:kivy
-#:import Factory kivy.factory.Factory
 
 #:set pad "5dp"
 #:set button_group_size_hint 1, 0.75
@@ -16,3 +15,13 @@
 #:set font_size_button_2 "16dp"
 #:set font_size_contents "15dp"
 #:set container_size_contents "30dp"        # double `font_size_contents`
+#:set nothing print("building spooncalc.kv")
+
+<BackgroundColor@Widget>
+    background_color: 1, 1, 1, 1
+    canvas.before:
+        Color:
+            rgba: root.background_color
+        Rectangle:
+            size: self.size
+            pos: self.pos
