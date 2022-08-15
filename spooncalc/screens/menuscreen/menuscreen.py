@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import sqlite3
 
 from kivy.uix.screenmanager import Screen
@@ -10,6 +11,11 @@ from kivy_garden.graph import Graph, LinePlot
 
 from spooncalc import analyser, timeutils
 app = App.get_running_app()
+
+Builder.load_file(os.path.join(
+    Path(__file__).parent.absolute(),
+    "menuscreen.kv"
+))
 
 
 class MenuScreen(Screen):
@@ -169,6 +175,3 @@ class MenuScreen(Screen):
 
     def switch_screen(self, screen_name):
         app.switch_screen(screen_name)
-
-
-Builder.load_file('menuscreen.kv')

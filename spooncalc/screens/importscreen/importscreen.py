@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
@@ -6,6 +7,11 @@ from kivy.app import App
 app = App.get_running_app()
 
 from spooncalc import dbtools
+
+Builder.load_file(os.path.join(
+    Path(__file__).parent.absolute(),
+    "importscreen.kv"
+))
 
 
 class ImportScreen(Screen):
@@ -82,6 +88,3 @@ class ImportScreen(Screen):
 
     def switch_screen(self, screen_name):
         app.switch_screen(screen_name)
-
-
-Builder.load_file('importscreen.kv')

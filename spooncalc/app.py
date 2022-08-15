@@ -13,19 +13,7 @@ This file can be executed on mac or windows, or can be
 built into an APK using buildozer/python4android.
 """
 
-import sys
-import os
 # os.environ["KIVY_NO_CONSOLELOG"] = '1'
-
-
-def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(os.path.dirname(sys.argv[0]))
-
-    return os.path.join(base_path, relative_path)
-
 
 from kivy.config import Config
 Config.set('kivy', 'exit_on_escape', '0')
@@ -33,7 +21,6 @@ Config.set('graphics', 'width', '393')
 Config.set('graphics', 'height', '830')
 
 from kivy.core.window import Window
-from kivy.resources import resource_add_path
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from kivy.app import App
 from kivy.utils import platform
@@ -58,11 +45,6 @@ if platform == 'macosx':
     home = str(Path.home())
     EXTERNALSTORAGE = home
 
-resource_add_path(resource_path(os.path.join('spooncalc', 'screens', 'menuscreen')))
-resource_add_path(resource_path(os.path.join('spooncalc', 'screens', 'inputscreen')))
-resource_add_path(resource_path(os.path.join('spooncalc', 'screens', 'plotscreen')))
-resource_add_path(resource_path(os.path.join('spooncalc', 'screens', 'logsscreen')))
-resource_add_path(resource_path(os.path.join('spooncalc', 'screens', 'importscreen')))
 
 print(f'{platform=}')
 print(f'{EXTERNALSTORAGE=}')
@@ -113,6 +95,8 @@ class SpoonCalcApp(App):
         dbtools.submit_query(query_text)
         print("---- Activities table created ----")
 
+        # These need to be imported here (and not at start of file)
+        # because they require app to be running.
         from spooncalc.screens.menuscreen import menuscreen
         from spooncalc.screens.inputscreen import inputscreen
         from spooncalc.screens.plotscreen import plotscreen

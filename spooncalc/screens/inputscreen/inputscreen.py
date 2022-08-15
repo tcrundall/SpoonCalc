@@ -1,4 +1,7 @@
 from datetime import datetime, timedelta
+import os
+from pathlib import Path
+
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.app import App
@@ -7,6 +10,11 @@ from kivy.uix.button import Button
 
 from spooncalc import timeutils, dbtools
 app = App.get_running_app()
+
+Builder.load_file(os.path.join(
+    Path(__file__).parent.absolute(),
+    "inputscreen.kv"
+))
 
 
 class InputScreen(Screen):
@@ -211,6 +219,3 @@ class InputScreen(Screen):
 
     def switch_screen(self, screen_name):
         app.switch_screen(screen_name)
-
-
-Builder.load_file('inputscreen.kv')

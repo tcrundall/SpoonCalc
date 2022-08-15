@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+import os
+from pathlib import Path
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.app import App
@@ -7,6 +9,11 @@ from kivy_garden.graph import Graph, LinePlot
 
 from spooncalc import analyser, timeutils
 app = App.get_running_app()
+
+Builder.load_file(os.path.join(
+    Path(__file__).parent.absolute(),
+    "plotscreen.kv"
+))
 
 
 class PlotScreen(Screen):
@@ -209,6 +216,3 @@ class PlotScreen(Screen):
 
     def switch_screen(self, screen_name):
         app.switch_screen(screen_name)
-
-
-Builder.load_file('plotscreen.kv')
