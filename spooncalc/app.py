@@ -53,7 +53,31 @@ DATABASE = 'spooncalc.db'
 
 
 class MyScreenManager(ScreenManager):
-    pass
+    """
+    The window manager which holds instances of all windows.
+    The current window layout is:
+        MenuWindow
+            InputWindow
+            PlotWindow
+            LogsWindow
+            ImportWindow
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.screen_history = []
+        self.transition = FadeTransition()
+
+    def switch_screen(self, screen_name):
+        self.current = screen_name
+        self.screen_history.append(screen_name)
+
+    def back_button(self):
+        self.screen_history.pop()
+        if self.screen_history != []:
+            self.current = self.screen_history[-1]
+        else:
+            return False
+        return True
 
 
 class SpoonCalcApp(App):
@@ -103,36 +127,22 @@ class SpoonCalcApp(App):
         from spooncalc.screens.logsscreen import logsscreen
         from spooncalc.screens.importscreen import importscreen
 
-        self.root = ScreenManager()
-        self.menuscreen = menuscreen.MenuScreen()
-        self.inputscreen = inputscreen.InputScreen()
-        self.plotscreen = plotscreen.PlotScreen()
-        self.logsscreen = logsscreen.LogsScreen()
-        self.importscreen = importscreen.ImportScreen()
-        self.screens = {
-            "menuscreen": self.menuscreen,
-            "inputscreen": self.inputscreen,
-            "plotscreen": self.plotscreen,
-            "logsscreen": self.logsscreen,
-            "importscreen": self.importscreen,
-        }
-        self.screen_history = []
+        sm = MyScreenManager()
+        sm.add_widget(menuscreen.MenuScreen())
+        sm.add_widget(inputscreen.InputScreen())
+        sm.add_widget(logsscreen.LogsScreen())
+        sm.add_widget(plotscreen.PlotScreen())
+        sm.add_widget(importscreen.ImportScreen())
+        self.manager = sm
+
         Window.bind(on_key_up=self.back_button)
         Window.softinput_mode = "below_target"
-        self.root.transition = FadeTransition()
-        # self.switch_screen("logsscreen")
-        self.switch_screen("menuscreen")
-        return self.root
-
-    def switch_screen(self, screen_name):
-        self.root.switch_to(self.screens.get(screen_name))
-        self.screen_history.append(screen_name)
+        sm.switch_screen("menuscreen")
+        return sm
 
     def back_button(self, instance, keyboard, *args):
         if keyboard in (1001, 27):
-            self.screen_history.pop()
-            if self.screen_history != []:
-                self.root.switch_to(self.screens.get(self.screen_history[-1]))
-            else:
+            success = self.manager.back_button()
+            if not success:
                 self.stop()
             return True

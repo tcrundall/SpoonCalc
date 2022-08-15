@@ -47,13 +47,11 @@
                 text: "Cancel"
                 font_size: font_size_button_1
                 on_release:
-                    root.switch_screen("menuscreen")
-                    # root.manager.go_back()
+                    root.manager.switch_screen("menuscreen")
             Button:
                 text: "Import"
                 font_size: font_size_button_1
                 on_release:
                     root.on_import_press(external_file.text)
-                    # root.manager.get_screen("menu").update_mean_and_spread()
-                    # root.manager.go_back()
-                    root.switch_screen("menuscreen")
+                    root.manager.get_screen("menu").update_mean_and_spread()
+                    root.manager.switch_screen("menuscreen")

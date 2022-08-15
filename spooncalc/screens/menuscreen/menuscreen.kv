@@ -23,26 +23,19 @@
             font_size: font_size_heading_1
             size_hint_y: 0.1
             on_release:
-                root.switch_screen("inputscreen")
-                # root.manager.transition.direction = "left"
-                # app.root.current = "inputscreen"
+                root.manager.switch_screen("inputscreen")
         Button:
             text: "Plot"
             font_size: font_size_heading_1
             size_hint_y: 0.1
             on_release:
-                root.switch_screen("plotscreen")
-                # root.manager.transition.direction = "left"
-                # app.root.current = "plotscreen"
+                root.manager.switch_screen("plotscreen")
         Button:
             text: "Show logs"
             font_size: font_size_heading_1
             size_hint_y: 0.1
             on_release:
-                # Factory.MyPopup().open()
-                root.switch_screen("logsscreen")
-                # root.manager.transition.direction = "left"
-                # app.root.current = "logsscreen"
+                root.manager.switch_screen("logsscreen")
         
         Button:
             text: "Export logs"
@@ -56,6 +49,4 @@
             font_size: font_size_heading_1
             size_hint_y: 0.1
             on_release:
-                root.switch_screen("importscreen")
-                # root.manager.transition.direction = "left"
-                # app.root.current = "importscreen"
+                root.manager.switch_screen("importscreen")

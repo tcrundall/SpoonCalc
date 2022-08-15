@@ -1,7 +1,6 @@
 ##:kivy
 
 <ToggleImage@Image>:
-    # id:my_test_img
     size: 0.5 * self.parent.width, 0.5 * self.parent.height
     allow_stretch: True
     x: self.parent.x + 0.25 * self.parent.width
@@ -38,20 +37,17 @@
                 id: daily
                 on_release:
                     root.set_daily()
-                    # root.set_mode(self.text)
             PlotToggle:
                 text: "Weekly"
                 id: weekly
                 state: "down"
                 on_release:
                     root.set_weekly()
-                    # root.set_mode(self.text)
             PlotToggle:
                 text: "Monthly"
                 id: monthly
                 on_release:
                     root.set_monthly()
-                    # root.set_mode(self.text)
             Button:
                 text: "->"
                 font_size: font_size_button_2
@@ -65,5 +61,4 @@
                 text: "Back"
                 font_size: font_size_button_1
                 on_release:
-                    root.switch_screen("menuscreen")
-                    # root.manager.go_back()
+                    root.manager.switch_screen("menuscreen")
