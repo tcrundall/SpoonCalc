@@ -43,8 +43,9 @@ class PlotScreen(Screen):
 
     plot_title = StringProperty("Weekly")
 
-    def __init__(self, **kwargs):
+    def __init__(self, db, **kwargs):
         super().__init__(**kwargs)
+        self.db = db
         self.ymax_persistent = 27
         self.start = -7
         self.span = 8
@@ -85,8 +86,9 @@ class PlotScreen(Screen):
         self.ids.graph.add_widget(self.graph)
 
         # The default mode is weekly, so we plot daily totals
-        self.spoons_per_day = analyser.calculate_daily_totals(
-            self.start, self.span)
+        self.spoons_per_day = analyser.fetch_daily_totals(
+            self.db, self.start, self.span
+        )
         self.plot = LinePlot(color=[1, 1, 0, 1], line_width=1.5)
         self.plot.points = [(-d, spoons)
                             for d, spoons in self.spoons_per_day.items()]
@@ -101,8 +103,9 @@ class PlotScreen(Screen):
             self.plot_daily()
             return
         # mode: weekly or monthly
-        self.spoons_per_day = analyser.calculate_daily_totals(
-            self.start, self.span)
+        self.spoons_per_day = analyser.fetch_daily_totals(
+            self.db, self.start, self.span
+        )
         self.graph.xmin = self.start
         self.graph.xmax = self.start + self.span - 1
         self.plot.points = [(d, spoons)
@@ -198,7 +201,9 @@ class PlotScreen(Screen):
         self.graph.x_ticks_major = 3
         self.graph.y_ticks_major = 5
 
-        xs, ys = analyser.cumulative_time_spoons(self.day_offset)
+        xs, ys = analyser.fetch_cumulative_time_spoons(
+            self.db, self.day_offset
+        )
 
         # If plotting for a past day, extend line plot to end of x range
         if self.day_offset < 0 and max(xs) < self.graph.xmax:

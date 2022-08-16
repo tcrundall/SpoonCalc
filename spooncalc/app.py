@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-import sqlite3
 
 # os.environ["KIVY_NO_CONSOLELOG"] = '1'
 
@@ -14,7 +13,7 @@ from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from kivy.app import App
 from kivy.utils import platform
 
-from spooncalc import dbtools
+from spooncalc.dbtools import Database
 from spooncalc.screens.menuscreen import menuscreen
 from spooncalc.screens.plotscreen import plotscreen
 from spooncalc.screens.logsscreen import logsscreen
@@ -37,8 +36,6 @@ if platform == 'android':
 if platform == 'macosx':
     home = str(Path.home())
     EXTERNALSTORAGE = home
-
-DATABASE = 'spooncalc.db'
 
 
 class MyScreenManager(ScreenManager):
@@ -91,29 +88,16 @@ class SpoonCalcApp(App):
         the required windows.
         """
         self.EXTERNALSTORAGE = EXTERNALSTORAGE
-        self.DATABASE = DATABASE
-
-        query_text = """
-            CREATE TABLE if not exists activities(
-                id integer PRIMARY KEY,
-                start text NOT NULL,
-                end text NOT NULL,
-                duration text NOT NULL,
-                name text NOT NULL,
-                cogload text NOT NULL,
-                physload text NOT NULL,
-                energy text NOT NULL
-        );
-        """
-        dbtools.submit_query(query_text)
+        self.db = Database(db="spooncalc.db")
 
         sm = MyScreenManager()
         sm.add_widget(menuscreen.MenuScreen(
-            export_callback=self.export_database
+            export_callback=self.export_database,
+            db=self.db,
         ))
-        sm.add_widget(inputscreen.InputScreen())
-        sm.add_widget(logsscreen.LogsScreen())
-        sm.add_widget(plotscreen.PlotScreen())
+        sm.add_widget(inputscreen.InputScreen(db=self.db))
+        sm.add_widget(logsscreen.LogsScreen(db=self.db))
+        sm.add_widget(plotscreen.PlotScreen(db=self.db))
         sm.add_widget(importscreen.ImportScreen(
             import_callback=self.import_csv_data
         ))
@@ -165,7 +149,7 @@ class SpoonCalcApp(App):
                     AND energy = "{energy}"
             );
         """
-        contents = dbtools.submit_query(query_text)
+        contents = self.db.submit_query(query_text)
         if contents[0][0] == 1:
             return
 
@@ -177,32 +161,11 @@ class SpoonCalcApp(App):
                     "{physload}", "{energy}"
                 );
         """
-        dbtools.submit_query(query_text)
+        self.db.submit_query(query_text)
 
     def export_database(self):
         """
         Export the entire activities database as a csv file.
         """
-        # Request entire contents of database
         filename = os.path.join(self.EXTERNALSTORAGE, 'spoon-output.csv')
-        conn = sqlite3.connect(self.DATABASE)
-        c = conn.cursor()
-        c.execute("SELECT * FROM activities")
-        contents = c.fetchall()
-
-        # Construct the csv file header from the request's description
-        SEP = ','
-        formatted_header = SEP.join([str(col[0])
-                                    for col in c.description])
-        formatted_contents = '\n'.join([SEP.join([
-            str(val) for val in entry
-        ]) for entry in contents])
-        conn.close()
-
-        # Avoid exporting empty database (and risking an overwrite)
-        if len(contents) == 0:
-            return
-        text = '\n'.join((formatted_header, formatted_contents))
-
-        with open(filename, 'w') as fp:
-            fp.write(text)
+        self.db.export_database(filename)

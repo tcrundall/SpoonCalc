@@ -27,6 +27,10 @@ class LogsScreen(Screen):
     """
     title = StringProperty(datetime.today().strftime('%d.%m.%Y'))
 
+    def __init__(self, db, **kwargs):
+        super().__init__(**kwargs)
+        self.ids.logs_display.pass_db_reference(db)
+
     def update_title(self, day_offset):
         """
         Update the title, reflecting change of the day in question

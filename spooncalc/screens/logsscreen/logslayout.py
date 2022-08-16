@@ -29,6 +29,9 @@ class LogsLayout(StackLayout):
         # Set the stacking order: left-to-right, then top-to-bottom
         self.orientation = 'lr-tb'
 
+    def pass_db_reference(self, db):
+        self.db = db
+
     def update(self):
         """
         Update the list of all children (EntryBox) Widgets.
@@ -40,7 +43,7 @@ class LogsLayout(StackLayout):
         self.boxes = []
 
         # Grab all logs from today
-        entries = dbtools.get_logs_from_day(
+        entries = self.db.get_logs_from_day(
             self.current_day,
             colnames=[
                 'id',

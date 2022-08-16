@@ -7,7 +7,7 @@ from kivy.lang import Builder
 from kivy.properties import StringProperty
 from kivy.uix.button import Button
 
-from spooncalc import timeutils, dbtools
+from spooncalc import timeutils
 from spooncalc.models.activitylog import ActivityLog
 
 Builder.load_file(os.path.join(
@@ -49,8 +49,9 @@ class InputScreen(Screen):
         '+1': 60,
     }
 
-    def __init__(self, **kwargs):
+    def __init__(self, db, **kwargs):
         super().__init__(**kwargs)
+        self.db = db
         self.activitylog = ActivityLog()
 
     def on_pre_enter(self):
@@ -90,7 +91,7 @@ class InputScreen(Screen):
         """
 
         self.activitylog.end = timeutils.round_datetime(datetime.now())
-        self.activitylog.start = dbtools.get_latest_endtime()
+        self.activitylog.start = self.db.get_latest_endtime()
 
         # If start time is not from today, then set 1 hour before end time
         if (self.activitylog.start.date() != datetime.now().date()):
@@ -177,7 +178,7 @@ class InputScreen(Screen):
                     {self.activitylog.get_value_string()}
                 );
         """
-        dbtools.submit_query(query_text)
+        self.db.submit_query(query_text)
 
         return True
 

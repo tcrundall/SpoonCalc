@@ -29,8 +29,9 @@ class MenuScreen(Screen):
     spoons_spent_display = StringProperty()
     plot_initialized = False
 
-    def __init__(self, export_callback, **kwargs):
+    def __init__(self, export_callback, db, **kwargs):
         self.export_callback = export_callback
+        self.db = db
         super().__init__(**kwargs)
 
     def on_enter(self, *args):
@@ -63,8 +64,8 @@ class MenuScreen(Screen):
         dt : float, unused
             only included to satisfy schedulable methods signature requirement
         """
-        spoons_today = analyser.calculate_daily_total(0)
-        spoons_average = analyser.average_spoons_per_day(-14, 0)
+        spoons_today = analyser.fetch_daily_total(self.db, 0)
+        spoons_average = analyser.fetch_average_spoons_per_day(self.db, -14, 0)
         self.spoons_spent_display =\
             f"{spoons_today:.0f} / {spoons_average:.0f}"
 
@@ -117,7 +118,7 @@ class MenuScreen(Screen):
 
         # Get the mean (plus and minus 1 standard deviation) of past 14 days
         # and provide points to LinePlot objects
-        xs, mean, below, above = analyser.get_mean_and_spread()
+        xs, mean, below, above = analyser.get_mean_and_spread(self.db)
         self.mean.points = zip(xs, mean)
         self.below.points = zip(xs, below)
         self.above.points = zip(xs, above)
@@ -134,7 +135,10 @@ class MenuScreen(Screen):
         Note that the mean, below and above plots remain unchanged.
         """
         today = 0
-        xs, ys = analyser.cumulative_time_spoons(day_offset=today)
+        xs, ys = analyser.fetch_cumulative_time_spoons(
+            db=self.db,
+            day_offset=today
+        )
 
         self.today.points = list(zip(xs, ys))
 
@@ -142,11 +146,11 @@ class MenuScreen(Screen):
         """
         Update the mean and standard deviation plots
 
-        This mthod is only ever activated when the database is updated
+        This method is only ever activated when the database is updated
         via an "import". Note that this method could be getting called from
         kivy lang.
         """
-        xs, mean, below, above = analyser.get_mean_and_spread()
+        xs, mean, below, above = analyser.get_mean_and_spread(db=self.db)
         self.mean.points = zip(xs, mean)
         self.below.points = zip(xs, below)
         self.above.points = zip(xs, above)

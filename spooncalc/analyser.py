@@ -2,13 +2,10 @@
 Analyse data stored in database and generate
 informative plots
 """
-from spooncalc import dbtools
 from spooncalc import timeutils
 
-DATABASE = "spooncalc.db"
 
-
-def calculate_daily_totals(start_day_offset, span):
+def fetch_daily_totals(db, start_day_offset, span):
     """
     Calculate total spoon expenditure per day for the `span`
     days beginning at `start_day_offset`
@@ -27,13 +24,13 @@ def calculate_daily_totals(start_day_offset, span):
     """
 
     spoons_each_day = {
-        i: calculate_daily_total(i) for i in range(start_day_offset,
+        i: fetch_daily_total(db, i) for i in range(start_day_offset,
                                                    start_day_offset + span)
     }
     return spoons_each_day
 
 
-def calculate_daily_total(day_offset):
+def fetch_daily_total(db, day_offset):
     """
     Calculate total spoons spent `day_offset` days from now.
 
@@ -49,7 +46,7 @@ def calculate_daily_total(day_offset):
         The total number of spoons spent on this day
     """
 
-    entries = dbtools.get_logs_from_day(
+    entries = db.get_logs_from_day(
         day_offset=day_offset,
         colnames=['duration', 'cogload', 'physload']
     )
@@ -137,7 +134,7 @@ def parse_load_string(load_str):
         return load_dict[load_str]
 
 
-def average_spoons_per_day(day_offset_start=-14, day_offset_end=0):
+def fetch_average_spoons_per_day(db, day_offset_start=-14, day_offset_end=0):
     """
     Calculate the average spoons per day, averaged between
     `day_offset_start` and `day_offset_end`.
@@ -156,7 +153,7 @@ def average_spoons_per_day(day_offset_start=-14, day_offset_end=0):
     start=-14, end=0: spoons per day, averaged over past 14 days
                       (i.e.not including today)
     """
-    entries = dbtools.get_entries_between_offsets(
+    entries = db.get_entries_between_offsets(
         day_offset_start,
         day_offset_end,
         colnames=['duration', 'cogload', 'physload'],
@@ -168,7 +165,7 @@ def average_spoons_per_day(day_offset_start=-14, day_offset_end=0):
     return total_spoons / (day_offset_end - day_offset_start)
 
 
-def cumulative_time_spoons(day_offset=0):
+def fetch_cumulative_time_spoons(db, day_offset=0):
     """
     Generate data points for a cumulative spoon expenditure
     for a given day.
@@ -199,7 +196,7 @@ def cumulative_time_spoons(day_offset=0):
         'physload',
     ]
 
-    entries = dbtools.get_entries_between_offsets(
+    entries = db.get_entries_between_offsets(
         day_offset,
         day_offset + 1,
         colnames=colnames,
@@ -208,7 +205,7 @@ def cumulative_time_spoons(day_offset=0):
     entries = sorted(entries, key=lambda e: e['end'])
 
     earliest_starttime = timeutils.time2decimal(
-        dbtools.get_earliest_starttime(day_offset)
+        db.get_earliest_starttime(day_offset)
     )
 
     # Initialise points s.t. flat line between start and first entry
@@ -285,7 +282,7 @@ def calc_stdev(values, mean=None):
     return (total / n)**(0.5)
 
 
-def get_mean_and_spread(day_offset_start=-14, day_offset_end=0):
+def get_mean_and_spread(db, day_offset_start=-14, day_offset_end=0):
     """
     Get mean and spread of cumulative daily spoon plots.
 
@@ -312,7 +309,7 @@ def get_mean_and_spread(day_offset_start=-14, day_offset_end=0):
             and 32.5%.
     """
     cumulative_plots = [
-        cumulative_time_spoons(day_offset)
+        fetch_cumulative_time_spoons(db, day_offset)
         for day_offset in range(day_offset_start, day_offset_end)
     ]
 
