@@ -7,6 +7,20 @@ from datetime import datetime, timedelta
 from spooncalc import timeutils
 
 
+class Cursor:
+    def __init__(self, db):
+        self.db = db
+
+    def __enter__(self):
+        self.conn = sqlite3.connect(self.db)
+        self.cursor = self.conn.cursor()
+        return self.cursor
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.conn.commit()
+        self.conn.close()
+
+
 class Database:
     DATE_FORMATSTRING = "%Y-%m-%d"
     DATETIME_FORMATSTRING = "%Y-%m-%d %H:%M:%S"
@@ -33,12 +47,10 @@ class Database:
             to the selected columns
         """
 
-        conn = sqlite3.connect(self.db)
-        c = conn.cursor()
-        c.execute(query_text)
-        contents = c.fetchall()
-        conn.commit()
-        conn.close()
+        with Cursor(self.db) as c:
+            c.execute(query_text)
+            contents = c.fetchall()
+
         return contents
 
     def get_logs_from_day(self, day_offset, colnames=None):
@@ -270,19 +282,18 @@ class Database:
         """
         # Request entire contents of database
         # filename = os.path.join(self.EXTERNALSTORAGE, 'spoon-output.csv')
-        conn = sqlite3.connect(self.db)
-        c = conn.cursor()
-        c.execute("SELECT * FROM activities")
-        contents = c.fetchall()
+        with Cursor(self.db) as c:
+            c.execute("SELECT * FROM activities")
+            contents = c.fetchall()
+            description = c.description
 
         # Construct the csv file header from the request's description
         SEP = ','
         formatted_header = SEP.join([str(col[0])
-                                    for col in c.description])
+                                    for col in description])
         formatted_contents = '\n'.join([SEP.join([
             str(val) for val in entry
         ]) for entry in contents])
-        conn.close()
 
         # Avoid exporting empty database (and risking an overwrite)
         if len(contents) == 0:
