@@ -1,6 +1,7 @@
 from kivy.uix.stacklayout import StackLayout
 
 from spooncalc import dbtools
+from spooncalc.models.activitylog import ActivityLog
 from .titlebox import TitleBox
 from .entrybox import EntryBox
 
@@ -36,7 +37,6 @@ class LogsLayout(StackLayout):
         EntryBox, and add them (in time order) to this StackedLayout
         """
         self.clear_widgets()
-        print("Making entry row!")
         self.boxes = []
 
         # Grab all logs from today
@@ -46,7 +46,6 @@ class LogsLayout(StackLayout):
                 'id',
                 'start',
                 'end',
-                'duration',
                 'name',
                 'cogload',
                 'physload',
@@ -58,18 +57,8 @@ class LogsLayout(StackLayout):
 
         self.add_widget(TitleBox())             # Add a header
         for entry in entries:
-            id = entry['id']
-            start = entry['start'].split(' ')[1][:5]    # remove date, seconds
-            end = entry['end'].split(' ')[1][:5]
-            duration = entry['duration']
-            name = entry['name']
-            cogload = entry['cogload']
-            physload = entry['physload']
-            entry_box = EntryBox(
-                id, start, end,
-                duration, name,
-                cogload, physload
-            )
+            activitylog = ActivityLog(**entry)
+            entry_box = EntryBox(activitylog)
             self.boxes.append(entry_box)
             self.add_widget(entry_box)
 
@@ -97,4 +86,3 @@ class LogsLayout(StackLayout):
         """
         self.current_day += 1
         self.update()
-

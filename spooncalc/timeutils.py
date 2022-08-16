@@ -54,8 +54,9 @@ def time2decimal(time_in: time):
     """Convert a time from various types to hours in decimal"""
     if type(time_in) is timedelta:
         decimal_time = time_in.total_seconds() / 3600.
-        if decimal_time < DAY_BOUNDARY:
-            decimal_time += 24.
+        # .... no idea what this was here for. Just seems plain wrong
+        # if decimal_time < DAY_BOUNDARY:
+        #     decimal_time += 24.
         return decimal_time
     if type(time_in) is str:
         time_in = datetime.strptime(time_in, DATETIME_FORMATSTRING)

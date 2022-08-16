@@ -67,15 +67,12 @@ class InputScreen(Screen):
         self.ids.activity_name.text = self.activitylog.name
 
         # Reset load toggles
-        for group in ["cogload", "physload", "energy"]:
-            for toggle in self.get_widgets_in_group(group):
-                if toggle.text.lower() == "mid":
-                    # TODO: Maybe `_do_press` can both set and unset toggles
-                    toggle._do_press()
+        default_pressed_toggle_ids = ["cog_mid", "phys_mid", "energy_mid"]
+        for toggle_id in default_pressed_toggle_ids:
+            if self.ids[toggle_id].state == "normal":
+                self.ids[toggle_id]._do_press()
 
         # Reset times
-        # start time set equal to latest end time
-        # end time set to beginning of current hour (todo: nearest 15 mins?)
         self.initialize_times_to_default()
         self.update_time_displays()
 
@@ -98,6 +95,15 @@ class InputScreen(Screen):
         # If start time is not from today, then set 1 hour before end time
         if (self.activitylog.start.date() != datetime.now().date()):
             self.activitylog.start = self.activitylog.end - timedelta(hours=1)
+
+    def set_cogload(self, cogload):
+        self.activitylog.cogload = cogload
+
+    def set_physload(self, physload):
+        self.activitylog.physload = physload
+
+    def set_energy(self, energy):
+        self.activitylog.energy = energy
 
     def update_time_displays(self):
         """

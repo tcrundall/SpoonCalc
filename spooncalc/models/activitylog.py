@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 # from typing import Union
 
-from spooncalc import timeutils
+from spooncalc import timeutils, analyser
 
 
 @dataclass
@@ -29,6 +29,15 @@ class ActivityLog:
                 timeutils.DATETIME_FORMATSTRING,
             )
 
+        if isinstance(self.cogload, str):
+            self.cogload = float(self.cogload)
+
+        if isinstance(self.physload, str):
+            self.physload = float(self.physload)
+
+        if isinstance(self.physload, str):
+            self.physload = float(self.physload)
+
     def get_duration(self):
         if self.start and self.end:
             return self.end - self.start
@@ -48,4 +57,11 @@ class ActivityLog:
 
     def is_everything_today(self):
         """Check if start and end datetimes are today"""
-        return (self.start.date() == self.end.date() == datetime.now.date())
+        return (self.start.date() == self.end.date() == datetime.now().date())
+
+    def get_spoons(self):
+        """
+        Calculate spoons spent by this activity
+        """
+        duration = timeutils.time2decimal(self.end - self.start)
+        return analyser.calculate_spoons(duration, self.cogload, self.physload)

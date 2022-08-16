@@ -2,7 +2,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.checkbox import CheckBox
 
-from spooncalc import analyser
+from spooncalc.models.activitylog import ActivityLog
 
 
 class EntryBox(BoxLayout):
@@ -17,11 +17,7 @@ class EntryBox(BoxLayout):
         displays
     """
 
-    def __init__(
-        self, db_id, start, end,
-        duration, name, cogload, physload,
-        **kwargs
-    ):
+    def __init__(self, activitylog: ActivityLog, **kwargs):
         """
         Initialize the EntryBox with the data from a database entry
         corresponding to a logged activity.
@@ -63,30 +59,36 @@ class EntryBox(BoxLayout):
             size=("20dp", "30dp"),
             **kwargs,
         )
-        self.db_id = db_id
+        self.activitylog = activitylog
+        self.db_id = activitylog.id
         self.orientation = "horizontal"
 
-        time_label = Label(
-            text=f"{start}-{end}",
-            size_hint=(0.2, 1),
-        )
+        time_label = Label(text=self.get_timetext(), size_hint=(0.2, 1))
         self.add_widget(time_label)
 
         name_label = Label(
-            text=f"{name}",
+            text=f"{self.activitylog.name}",
             size_hint=(0.45, 1)
         )
         self.add_widget(name_label)
 
-        self.add_widget(Label(text=str(cogload), size_hint=(0.1, 1)))
-        self.add_widget(Label(text=str(physload), size_hint=(0.1, 1)))
-        spoons = analyser.calculate_spoons(duration, cogload, physload)
-        self.add_widget(Label(text=f"{str(spoons):<4}", size_hint=(0.1, 1)))
+        self.add_widget(
+            Label(text=f"{self.activitylog.cogload:.1f}", size_hint=(0.1, 1))
+        )
+        self.add_widget(
+            Label(text=f"{self.activitylog.physload:.1f}", size_hint=(0.1, 1))
+        )
+        spoons = self.activitylog.get_spoons()
+        self.add_widget(Label(text=f"{spoons:.1f}", size_hint=(0.1, 1)))
 
         self.checkbox = CheckBox(
             size_hint=(0.05, 1),
             group="day_logs",
             color=(0, 1, 0, 1),
         )
-
         self.add_widget(self.checkbox)
+
+    def get_timetext(self):
+        start = self.activitylog.start.strftime("%H:%M")
+        end = self.activitylog.end.strftime("%H:%M")
+        return f'{start}-{end}'

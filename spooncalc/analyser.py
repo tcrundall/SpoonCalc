@@ -93,14 +93,17 @@ def calculate_spoons(duration, cogload, physload, **kwargs):
         ignore any superfluous keys. This makes expanding entries
         more convenient, as entries are permitted to have extra columns
 
-    Example
-    -------
+    Examples
+    --------
     >>> calculate_spoons("2:00:00", "1.5", "mid")
-    5
+    5.
+    >>> calculate_spoons(3.5, "0.5", "1.5")
+    7.
     """
-    res = parse_duration_string(duration) \
-        * (parse_load_string(cogload)
-           + parse_load_string(physload))
+
+    if isinstance(duration, str):
+        duration = parse_duration_string(duration)
+    res = duration * (parse_load_string(cogload) + parse_load_string(physload))
     return res
 
 

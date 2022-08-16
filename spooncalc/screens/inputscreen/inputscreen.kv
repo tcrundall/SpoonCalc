@@ -53,33 +53,33 @@
                 size_hint: 1, 0.7
                 # spacing: button_spacing
                 CogloadToggle:
-                    id: cog_low
+                    id: cog_vlow
                     text: "\n\nV. Low"
-                    on_state: root.cogload = 0
+                    on_state: root.set_cogload(0.)
                     ToggleImage:
                         source: "spooncalc/resources/images/sleeping.png"
                 CogloadToggle:
                     id: cog_low
                     text: "\n\nLow"
-                    on_state: root.cogload = 0.5
+                    on_state: root.set_cogload(0.5)
                     ToggleImage:
                         source: "spooncalc/resources/images/meditation.png"
                 CogloadToggle:
                     id: cog_mid
                     text: "\n\nMid"
-                    on_state: root.cogload = 1
+                    on_state: root.set_cogload(1.0)
                     ToggleImage:
                         source: "spooncalc/resources/images/tv.png"
                 CogloadToggle:
                     id: cog_high
                     text: "\n\nHigh"
-                    on_state: root.cogload = 1.5
+                    on_state: root.set_cogload(1.5)
                     ToggleImage:
                         source: "spooncalc/resources/images/social-media.png"
                 CogloadToggle:
-                    id: cog_high
+                    id: cog_vhigh
                     text: "\n\nV. High"
-                    on_state: root.cogload = 2
+                    on_state: root.set_cogload(2.)
                     ToggleImage:
                         source: "spooncalc/resources/images/work.png"
         Option:
@@ -92,33 +92,36 @@
                 orientation: "horizontal"
                 size_hint: 1, 0.7
                 PhysloadToggle:
-                    id: phys_low
-                    on_press: root.physload = 0
+                    id: phys_vlow
+                    on_state: root.set_physload(0.)
                     text: "\n\nV. Low"
                     ToggleImage:
                         source: 'spooncalc/resources/images/lying-down.png'
                 PhysloadToggle:
                     id: phys_low
                     text: "\n\nLow"
-                    on_press: root.physload = 0.5
+                    on_state: root.set_physload(0.5)
+                    # on_press: root.physload = 0.5
                     ToggleImage:
                         source: 'spooncalc/resources/images/active-lying.png'
                 PhysloadToggle:
                     id: phys_mid
                     text: "\n\nMid"
-                    on_press: root.physload = 1
+                    on_state: root.set_physload(1.)
+                    # on_press: root.physload = 1
                     ToggleImage:
                         source: 'spooncalc/resources/images/sitting.png'
                 PhysloadToggle:
                     id: phys_high
                     text: "\n\nHigh"
-                    on_press: root.physload = 1.5
+                    on_state: root.set_physload(1.5)
+                    # on_press: root.physload = 1.5
                     ToggleImage:
                         source: 'spooncalc/resources/images/walking.png'
                 PhysloadToggle:
-                    id: phys_high
+                    id: phys_vhigh
                     text: "\n\nV. High"
-                    on_press: root.physload = 2
+                    on_state: root.set_physload(2.)
                     ToggleImage:
                         source: 'spooncalc/resources/images/exertion.png'
         Option:
@@ -201,15 +204,15 @@
                 EnergyToggle:
                     text: "Low"
                     id: energy_low
-                    on_state: root.energy = 0
+                    on_state: root.set_energy(0.)
                 EnergyToggle:
                     text: "Mid"
                     id: energy_mid
-                    on_state: root.energy = 1
+                    on_state: root.set_energy(1.)
                 EnergyToggle:
                     text: "High"
                     id: energy_high
-                    on_state: root.energy = 2
+                    on_state: root.set_energy(2.)
         BoxLayout:
             size_hint: 1, 0.1
             orientation: "horizontal"
