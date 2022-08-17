@@ -35,23 +35,9 @@ class EntryBox(BoxLayout):
 
         Parameters
         ----------
-        db_id : int
-            unique id from database
-        start : str
-            the start time of activity, already formatted as "HH:MM"
-        end : str
-            the end time of activity, already formatted as "HH:MM"
-        duration : str
-            the duration of activity, as formatted in database
-        name : str
-            activity name, as taken from database
-        cogload : str
-            cognitive load, as taken from database
-        physload : str
-            physical load, as taken from database
-
-        TODO:   Write, and then utilize, a LoggedActivity class in order
-                to avoid this formatting nonsense.
+        activitylog: ActivityLog
+            An activity log built from the contents of a database entry.
+            This activity log must have a unique id
         """
 
         super().__init__(
@@ -91,6 +77,8 @@ class EntryBox(BoxLayout):
         self.add_widget(self.checkbox)
 
     def get_timetext(self) -> str:
+        """Generate text for the time label, e.g. 9:00-10:00"""
+
         start = self.activitylog.start.strftime("%H:%M")
         end = self.activitylog.end.strftime("%H:%M")
         return f'{start}-{end}'

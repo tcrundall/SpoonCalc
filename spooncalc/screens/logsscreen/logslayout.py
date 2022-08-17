@@ -17,10 +17,11 @@ class LogsLayout(StackLayout):
     ----------
     current_day : int
         the day in question, encoded as an offset from today
-    boxes : list(EntryBox)
+    boxes : list[EntryBox]
         a list of all entryBoxes, where each entryBox is a widget
         displaying partial information of a logged activity.
     """
+
     current_day = 0
     boxes = []
 
@@ -30,6 +31,7 @@ class LogsLayout(StackLayout):
         self.orientation = 'lr-tb'
 
     def pass_db_reference(self, db: Database) -> None:
+        """Provide this class with reference to object wrapping database"""
         self.db = db
 
     def update(self) -> None:
@@ -39,6 +41,7 @@ class LogsLayout(StackLayout):
         Convert each of the `current_day`s database entries into an
         EntryBox, and add them (in time order) to this StackedLayout
         """
+
         self.clear_widgets()
         self.boxes: list[EntryBox] = []
 
@@ -70,6 +73,7 @@ class LogsLayout(StackLayout):
         Find the checked EntryBox, and delete corresponding entry
         from database.
         """
+
         for entrybox in self.boxes:
             if entrybox.checkbox._get_active():
                 self.db.delete_entry(entrybox.db_id)
@@ -77,15 +81,13 @@ class LogsLayout(StackLayout):
                 return
 
     def decrement_day(self) -> None:
-        """
-        Display logs for previous day
-        """
+        """ Display logs for previous day """
+
         self.current_day -= 1
         self.update()
 
     def increment_day(self) -> None:
-        """
-        Display logs for following day
-        """
+        """ Display logs for following day """
+
         self.current_day += 1
         self.update()

@@ -10,15 +10,25 @@ from spooncalc import timeutils
 
 
 class Cursor:
-    def __init__(self, db) -> None:
-        self.db = db
+    """A context manager for connecting to sqlite3 databases"""
+    def __init__(self, db_path: str) -> None:
+        """Initialize the context manager"""
+        self.db_path = db_path
 
     def __enter__(self) -> SQLCursor:
-        self.conn = sqlite3.connect(self.db)
+        """
+        Upon entering the context manager, build the connection and return
+        a cursor
+        """
+        self.conn = sqlite3.connect(self.db_path)
         self.cursor = self.conn.cursor()
         return self.cursor
 
     def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
+        """
+        Upon exiting the context manager, commmit the changes and close
+        the connection
+        """
         self.conn.commit()
         self.conn.close()
 
@@ -27,8 +37,16 @@ class Database:
     DATE_FORMATSTRING = "%Y-%m-%d"
     DATETIME_FORMATSTRING = "%Y-%m-%d %H:%M:%S"
 
-    def __init__(self, db: str = "spooncalc.db") -> None:
-        self.db = db
+    def __init__(self, db_path: str = "spooncalc.db") -> None:
+        """
+        Initialize a Database object
+
+        Parameters
+        ----------
+        db_path : str
+            a path to the database file. The file may not exist.
+        """
+        self.db_path = db_path
         self.initialize_database()
 
     def submit_query(self, query_text) -> list[Any]:
@@ -49,7 +67,7 @@ class Database:
             to the selected columns
         """
 
-        with Cursor(self.db) as c:
+        with Cursor(self.db_path) as c:
             c.execute(query_text)
             contents = c.fetchall()
 
@@ -60,6 +78,7 @@ class Database:
         day_offset: int,
         colnames: Optional[list[str]] = None,
     ) -> list[dict[str, Any]]:
+
         """
         Calculate total spoons spent on the day
         `day_offset` days from today.
@@ -72,6 +91,10 @@ class Database:
         day_offset : int
             The number of days between today and day in question.
             `day_offset`=0 is today, `day_offset`=-1 is yesterday
+        colnames : list[str] default None
+            The list of database column names. If None, defaults are those
+            used by get_entries_between_datetimes:
+                'id', 'start', 'end', 'name', 'duration', 'cogload', 'physload'
 
         Returns
         -------
@@ -204,7 +227,7 @@ class Database:
         """
         self.submit_query(query_text)
 
-    def get_latest_endtime(self) -> datetime:
+    def get_latest_endtime(self) -> datetime | None:
         """
         Acquire the latest end time in database
 
@@ -293,7 +316,7 @@ class Database:
         """
         # Request entire contents of database
         # filename = os.path.join(self.EXTERNALSTORAGE, 'spoon-output.csv')
-        with Cursor(self.db) as c:
+        with Cursor(self.db_path) as c:
             c.execute("SELECT * FROM activities")
             contents = c.fetchall()
             description = c.description

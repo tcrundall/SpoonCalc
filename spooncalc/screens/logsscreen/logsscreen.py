@@ -27,6 +27,7 @@ class LogsScreen(Screen):
 
     TODO: Include day name in title
     """
+
     title = StringProperty(datetime.today().strftime('%d.%m.%Y'))
 
     def __init__(self, db: Database, **kwargs) -> None:
@@ -37,6 +38,7 @@ class LogsScreen(Screen):
         """
         Update the title, reflecting change of the day in question
         """
+
         day_delta = timedelta(days=day_offset)
         current_day = datetime.today() + day_delta
         self.title = current_day.strftime('%d.%m.%Y')
@@ -46,5 +48,6 @@ class LogsScreen(Screen):
         Update the stackedLogsLayout (bound in kivy lang) before
         entering this window.
         """
+
         self.ids["logs_display"].update()
         super().on_pre_enter(*args)

@@ -100,13 +100,16 @@ class InputScreen(Screen):
 
         return start, end
 
-    def set_cogload(self, cogload) -> None:
+    def set_cogload(self, cogload: float) -> None:
+        """Set the activitylog's cogload"""
         self.activitylog.cogload = cogload
 
-    def set_physload(self, physload) -> None:
+    def set_physload(self, physload: float) -> None:
+        """Set the activitylog's physload"""
         self.activitylog.physload = physload
 
-    def set_energy(self, energy) -> None:
+    def set_energy(self, energy: float) -> None:
+        """Set the activitylog's energy"""
         self.activitylog.energy = energy
 
     def update_time_displays(self) -> None:
@@ -162,7 +165,7 @@ class InputScreen(Screen):
 
     def insert_into_database(self) -> bool:
         """
-        Insert current inputted data into the database
+        Insert data currently stored in activitylog into database
         """
 
         duration_timedelta = self.activitylog.get_duration()

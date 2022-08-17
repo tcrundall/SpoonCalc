@@ -215,5 +215,7 @@ class PlotScreen(Screen):
         self.update_daily_title()
 
     def update_daily_title(self) -> None:
+        """Update the title of the daily plot"""
+
         date = datetime.now().date() + timedelta(days=self.day_offset)
         self.plot_title = date.strftime("%A %d.%m")

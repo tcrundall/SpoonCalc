@@ -44,24 +44,27 @@ else:
 
 class MyScreenManager(ScreenManager):
     """
-    The window manager which holds instances of all windows.
-    The current window layout is:
-        MenuWindow
-            InputWindow
-            PlotWindow
-            LogsWindow
-            ImportWindow
+   The screen manager which holds instances of all screens.
+    The current screen layout is:
+        MenuScreen
+            InputScreen
+            PlotScreen
+            LogsScreen
+            ImportScreen
     """
+
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.screen_history = []
         self.transition = FadeTransition()
 
     def switch_screen(self, screen_name: str) -> None:
+        """Switch to provided screen, and add the name to history stack"""
         self.current = screen_name
         self.screen_history.append(screen_name)
 
     def back_button(self) -> bool:
+        """Use the screen history stack to change to the previous screen"""
         self.screen_history.pop()
         if self.screen_history != []:
             self.current = self.screen_history[-1]

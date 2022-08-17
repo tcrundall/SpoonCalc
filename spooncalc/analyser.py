@@ -19,6 +19,8 @@ def fetch_daily_totals(
 
     Parameters
     ----------
+    db : Database
+        a reference to a database wrapper
     start_day_offset : int
         day (offset from today) that starts the span of days
     span : int
@@ -26,7 +28,7 @@ def fetch_daily_totals(
 
     Examples
     --------
-    >>> calculate_daily_totals(-2, 3)
+    >>> calculate_daily_totals(db, -2, 3)
     {-2: 20.5, -1: 22.5, 0: 4.25}
     """
 
@@ -43,6 +45,8 @@ def fetch_daily_total(db: Database, day_offset: int) -> float:
 
     Parameters
     ----------
+    db : Database
+        a reference to a database wrapper
     day_offset : int
         The number of days between today and day in question.
         `day_offset`=0 is today, `day_offset`=-1 is yesterday
@@ -158,6 +162,8 @@ def fetch_average_spoons_per_day(
 
     Parameters
     ----------
+    db : Database
+        a reference to a database wrapper
     day_offset_start : int
         number of days between now and starting day
     day_offset_end : int
@@ -192,6 +198,8 @@ def fetch_cumulative_time_spoons(
 
     Parameters
     ----------
+    db : Database
+        a reference to a database wrapper
     day_offset : int
         number of days between today and target day
 
@@ -310,6 +318,8 @@ def get_mean_and_spread(
 
     Parameters
     ----------
+    db : Database
+        a reference to a database wrapper
     day_offset_start : int
         number of days between today and start day
     day_offset_end : int

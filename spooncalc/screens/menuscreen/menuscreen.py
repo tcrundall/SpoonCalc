@@ -28,6 +28,7 @@ class MenuScreen(Screen):
     plot_initialized : bool
         A flag indicating initialization status of the home screen plot
     """
+
     spoons_spent_display = StringProperty()
     plot_initialized = False
 
@@ -52,6 +53,7 @@ class MenuScreen(Screen):
         (with a time delay of 0 seconds). Scheduled tasks seem to be run
         only after the app is built.
         """
+
         # This is ugly, but I don't know how to fix.
         # Database won't be set up yet, so need to wait until
         # App.build() is executed...
@@ -72,15 +74,15 @@ class MenuScreen(Screen):
         dt : float, unused
             only included to satisfy schedulable methods signature requirement
         """
+
         spoons_today = analyser.fetch_daily_total(self.db, 0)
         spoons_average = analyser.fetch_average_spoons_per_day(self.db, -14, 0)
         self.spoons_spent_display =\
             f"{spoons_today:.0f} / {spoons_average:.0f}"
 
     def export_database(self) -> None:
-        """
-        Export the entire activities database as a csv file.
-        """
+        """ Export the entire activities database as a csv file.  """
+
         self.export_callback()
 
     def init_plot(self, dt: Optional[int] = None) -> None:
@@ -101,6 +103,7 @@ class MenuScreen(Screen):
             only included to satisfy signature requirement of schedulable
             methods
         """
+
         self.graph = Graph(
             xmin=timeutils.DAY_BOUNDARY,
             xmax=timeutils.DAY_BOUNDARY + 24,
@@ -141,7 +144,14 @@ class MenuScreen(Screen):
         Update the plot by plotting the day's cumulative spoons.
 
         Note that the mean, below and above plots remain unchanged.
+
+        Parameters
+        ----------
+        dt : float, unused
+            only included to satisfy signature requirement of schedulable
+            methods
         """
+
         today = 0
         xs, ys = analyser.fetch_cumulative_time_spoons(
             db=self.db,
@@ -158,6 +168,7 @@ class MenuScreen(Screen):
         via an "import". Note that this method could be getting called from
         kivy lang.
         """
+
         xs, mean, below, above = analyser.get_mean_and_spread(db=self.db)
         self.mean.points = zip(xs, mean)
         self.below.points = zip(xs, below)
