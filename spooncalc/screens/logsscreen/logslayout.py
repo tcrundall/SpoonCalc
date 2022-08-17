@@ -1,6 +1,7 @@
 from kivy.uix.stacklayout import StackLayout
 
 from spooncalc.models.activitylog import ActivityLog
+from spooncalc.dbtools import Database
 from .titlebox import TitleBox
 from .entrybox import EntryBox
 
@@ -23,15 +24,15 @@ class LogsLayout(StackLayout):
     current_day = 0
     boxes = []
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         # Set the stacking order: left-to-right, then top-to-bottom
         self.orientation = 'lr-tb'
 
-    def pass_db_reference(self, db):
+    def pass_db_reference(self, db: Database) -> None:
         self.db = db
 
-    def update(self):
+    def update(self) -> None:
         """
         Update the list of all children (EntryBox) Widgets.
 
@@ -39,7 +40,7 @@ class LogsLayout(StackLayout):
         EntryBox, and add them (in time order) to this StackedLayout
         """
         self.clear_widgets()
-        self.boxes = []
+        self.boxes: list[EntryBox] = []
 
         # Grab all logs from today
         entries = self.db.get_logs_from_day(
@@ -64,7 +65,7 @@ class LogsLayout(StackLayout):
             self.boxes.append(entry_box)
             self.add_widget(entry_box)
 
-    def delete_entry(self):
+    def delete_entry(self) -> None:
         """
         Find the checked EntryBox, and delete corresponding entry
         from database.
@@ -75,14 +76,14 @@ class LogsLayout(StackLayout):
                 self.update()
                 return
 
-    def decrement_day(self):
+    def decrement_day(self) -> None:
         """
         Display logs for previous day
         """
         self.current_day -= 1
         self.update()
 
-    def increment_day(self):
+    def increment_day(self) -> None:
         """
         Display logs for following day
         """

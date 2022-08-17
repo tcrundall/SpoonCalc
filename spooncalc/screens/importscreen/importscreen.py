@@ -19,11 +19,11 @@ class ImportScreen(Screen):
     on_import_press(filename)
         Parses activities in provided csv and inserts into database
     """
-    def __init__(self, import_callback, **kwargs):
+    def __init__(self, import_callback, **kwargs) -> None:
         self.import_callback = import_callback
         super().__init__(**kwargs)
 
-    def on_import_press(self, filename):
+    def on_import_press(self, filename) -> None:
         """
         Import activites from a csv file into database, ignoring duplicates
 

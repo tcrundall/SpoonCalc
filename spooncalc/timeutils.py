@@ -1,7 +1,6 @@
 """
 A collection of helpful functions for using datetime
 """
-from typing import Union
 from datetime import datetime, timedelta, time
 
 
@@ -20,7 +19,7 @@ def day_end_hour() -> int:
     return DAY_BOUNDARY + 24
 
 
-def hours_between(start: datetime, end: datetime) -> float:
+def hours_between(start: datetime | str, end: datetime | str) -> float:
     """Calculate the time between to datetimes, in hours.
 
     The inputs can be datetime objects or strings that
@@ -51,7 +50,7 @@ def date_midnight_from_offset(day_offset: int) -> datetime:
     return day_start + timedelta(days=day_offset)
 
 
-def time2decimal(time_in: Union[time, str, timedelta]) -> float:
+def time2decimal(time_in: time | str | timedelta) -> float:
     """Convert a time from various types to hours in decimal"""
 
     if isinstance(time_in, datetime):

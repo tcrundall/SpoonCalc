@@ -7,6 +7,7 @@ from kivy.properties import StringProperty
 from kivy_garden.graph import Graph, LinePlot
 
 from spooncalc import analyser, timeutils
+from spooncalc.dbtools import Database
 
 Builder.load_file(os.path.join(
     Path(__file__).parent.absolute(),
@@ -43,7 +44,7 @@ class PlotScreen(Screen):
 
     plot_title = StringProperty("Weekly")
 
-    def __init__(self, db, **kwargs):
+    def __init__(self, db: Database, **kwargs) -> None:
         super().__init__(**kwargs)
         self.db = db
         self.ymax_persistent = 27
@@ -54,7 +55,7 @@ class PlotScreen(Screen):
         self.day_offset = 0
         self.plot_initialized = False
 
-    def on_pre_enter(self):
+    def on_pre_enter(self) -> None:
         """
         Method(s) to be executed before switching to this window.
         """
@@ -64,7 +65,7 @@ class PlotScreen(Screen):
         self.plot_initialized = True
         self.update_plot()
 
-    def init_plot(self):
+    def init_plot(self) -> None:
         """
         Initializes the kivy_garden.Graph and .LinePlot objects
 
@@ -94,7 +95,7 @@ class PlotScreen(Screen):
                             for d, spoons in self.spoons_per_day.items()]
         self.graph.add_plot(self.plot)
 
-    def update_plot(self):
+    def update_plot(self) -> None:
         """
         Update plot, reflecting changes in mode and/or x-range
         """
@@ -114,7 +115,7 @@ class PlotScreen(Screen):
         self.ymax_persistent = max(ymax_current * 1.1, self.ymax_persistent)
         self.graph.ymax = self.ymax_persistent
 
-    def shift_window_left(self):
+    def shift_window_left(self) -> None:
         """
         Shift the plot to show earlier data.
 
@@ -129,7 +130,7 @@ class PlotScreen(Screen):
             self.day_offset -= 1
         self.update_plot()
 
-    def shift_window_right(self):
+    def shift_window_right(self) -> None:
         """
         Shift the plot to show later data.
 
@@ -144,7 +145,7 @@ class PlotScreen(Screen):
             self.day_offset += 1
         self.update_plot()
 
-    def set_weekly(self):
+    def set_weekly(self) -> None:
         """
         Set the current mode to weekly, updating key attributes as required
         """
@@ -158,7 +159,7 @@ class PlotScreen(Screen):
         self.graph.x_ticks_major = 1
         self.update_plot()
 
-    def set_monthly(self):
+    def set_monthly(self) -> None:
         """
         Set the current mode to monthly, updating key attributes as required
         """
@@ -172,7 +173,7 @@ class PlotScreen(Screen):
         self.graph.x_ticks_major = 7
         self.update_plot()
 
-    def set_daily(self):
+    def set_daily(self) -> None:
         """
         Set the current mode to daily, updating key attributes as required
         """
@@ -182,7 +183,7 @@ class PlotScreen(Screen):
         self.mode = "daily"
         self.update_plot()
 
-    def plot_daily(self):
+    def plot_daily(self) -> None:
         """
         Plot the cumulative spoon expenditure over a 24 hour period.
 
@@ -213,6 +214,6 @@ class PlotScreen(Screen):
         self.plot.points = list(zip(xs, ys))
         self.update_daily_title()
 
-    def update_daily_title(self):
+    def update_daily_title(self) -> None:
         date = datetime.now().date() + timedelta(days=self.day_offset)
         self.plot_title = date.strftime("%A %d.%m")

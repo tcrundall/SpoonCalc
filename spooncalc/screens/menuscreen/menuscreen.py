@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Callable, Optional
 
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
@@ -8,6 +9,7 @@ from kivy.clock import Clock
 from kivy_garden.graph import Graph, LinePlot
 
 from spooncalc import analyser, timeutils
+from spooncalc.dbtools import Database
 
 Builder.load_file(os.path.join(
     Path(__file__).parent.absolute(),
@@ -29,12 +31,18 @@ class MenuScreen(Screen):
     spoons_spent_display = StringProperty()
     plot_initialized = False
 
-    def __init__(self, export_callback, db, **kwargs):
+    def __init__(
+        self,
+        export_callback: Callable,
+        db: Database,
+        **kwargs
+    ) -> None:
+
         self.export_callback = export_callback
         self.db = db
         super().__init__(**kwargs)
 
-    def on_enter(self, *args):
+    def on_enter(self, *args) -> None:
         """
         Methods to execute right before switching to this window
 
@@ -54,7 +62,7 @@ class MenuScreen(Screen):
         Clock.schedule_once(self.update_plot, 0)
         return super().on_enter(*args)
 
-    def update_spoons_spent_display(self, dt=None):
+    def update_spoons_spent_display(self, dt: Optional[int] = None) -> None:
         """
         Update display of spoons spent today over daily spoons spent
         averaged over past fortnight
@@ -69,13 +77,13 @@ class MenuScreen(Screen):
         self.spoons_spent_display =\
             f"{spoons_today:.0f} / {spoons_average:.0f}"
 
-    def export_database(self):
+    def export_database(self) -> None:
         """
         Export the entire activities database as a csv file.
         """
         self.export_callback()
 
-    def init_plot(self, dt=None):
+    def init_plot(self, dt: Optional[int] = None) -> None:
         """
         Initialize the home screen plot.
 
@@ -128,7 +136,7 @@ class MenuScreen(Screen):
         self.graph.add_plot(self.above)
         self.graph.add_plot(self.today)
 
-    def update_plot(self, dt=None):
+    def update_plot(self, dt: Optional[int] = None) -> None:
         """
         Update the plot by plotting the day's cumulative spoons.
 
@@ -142,7 +150,7 @@ class MenuScreen(Screen):
 
         self.today.points = list(zip(xs, ys))
 
-    def update_mean_and_spread(self):
+    def update_mean_and_spread(self) -> None:
         """
         Update the mean and standard deviation plots
 

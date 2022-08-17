@@ -6,9 +6,11 @@ from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.properties import StringProperty
 from kivy.uix.button import Button
+from kivy.uix.widget import Widget
 
 from spooncalc import timeutils
 from spooncalc.models.activitylog import ActivityLog
+from spooncalc.dbtools import Database
 
 Builder.load_file(os.path.join(
     Path(__file__).parent.absolute(),
@@ -49,12 +51,11 @@ class InputScreen(Screen):
         '+1': 60,
     }
 
-    def __init__(self, db, **kwargs):
+    def __init__(self, db, **kwargs) -> None:
         super().__init__(**kwargs)
-        self.db = db
-        self.activitylog = ActivityLog()
+        self.db: Database = db
 
-    def on_pre_enter(self):
+    def on_pre_enter(self) -> None:
         """
         Before entering, reset all load values, toggles and times
 
@@ -62,9 +63,13 @@ class InputScreen(Screen):
         Values and toggles not resetting properly
         """
 
-        # Reset title
+        # Initialize activitylog
+        start, end = self.get_default_times()
+        self.activitylog = ActivityLog(start=start, end=end)
+
+        # Initialize screen display
         self.title = "Log Activity"
-        self.activitylog = ActivityLog()
+        self.update_time_displays()
         self.ids.activity_name.text = self.activitylog.name
 
         # Reset load toggles
@@ -73,11 +78,7 @@ class InputScreen(Screen):
             if self.ids[toggle_id].state == "normal":
                 self.ids[toggle_id]._do_press()
 
-        # Reset times
-        self.initialize_times_to_default()
-        self.update_time_displays()
-
-    def initialize_times_to_default(self):
+    def get_default_times(self) -> tuple[datetime, datetime]:
         """
         Initialize default end and start times.
 
@@ -90,23 +91,25 @@ class InputScreen(Screen):
                 recent activity. See issue #36
         """
 
-        self.activitylog.end = timeutils.round_datetime(datetime.now())
-        self.activitylog.start = self.db.get_latest_endtime()
+        end = timeutils.round_datetime(datetime.now())
+        start = self.db.get_latest_endtime()
 
         # If start time is not from today, then set 1 hour before end time
-        if (self.activitylog.start.date() != datetime.now().date()):
-            self.activitylog.start = self.activitylog.end - timedelta(hours=1)
+        if (start.date() != datetime.now().date()):
+            start = end - timedelta(hours=1)
 
-    def set_cogload(self, cogload):
+        return start, end
+
+    def set_cogload(self, cogload) -> None:
         self.activitylog.cogload = cogload
 
-    def set_physload(self, physload):
+    def set_physload(self, physload) -> None:
         self.activitylog.physload = physload
 
-    def set_energy(self, energy):
+    def set_energy(self, energy) -> None:
         self.activitylog.energy = energy
 
-    def update_time_displays(self):
+    def update_time_displays(self) -> None:
         """
         Update the string time displays, reflecting changes from start
         and end times.
@@ -121,7 +124,7 @@ class InputScreen(Screen):
         self.start_display = self.activitylog.start.strftime(format_string)
         self.end_display = self.activitylog.end.strftime(format_string)
 
-    def on_start_time_press(self, button: Button):
+    def on_start_time_press(self, button: Button) -> None:
         """
         Inc-/decrement the end time based on pressed button and update display
 
@@ -139,7 +142,7 @@ class InputScreen(Screen):
             self.activitylog.end = self.activitylog.start + timedelta(hours=1)
         self.update_time_displays()
 
-    def on_end_time_press(self, button: Button):
+    def on_end_time_press(self, button: Button) -> None:
         """
         Inc-/decrement the end time based on pressed button and update display
 
@@ -157,7 +160,7 @@ class InputScreen(Screen):
             self.activitylog.start = self.activitylog.end - timedelta(hours=1)
         self.update_time_displays()
 
-    def insert_into_database(self):
+    def insert_into_database(self) -> bool:
         """
         Insert current inputted data into the database
         """
@@ -182,7 +185,7 @@ class InputScreen(Screen):
 
         return True
 
-    def on_save_press(self):
+    def on_save_press(self) -> None:
         """
         Handle press of "Save" button
         """
@@ -193,7 +196,7 @@ class InputScreen(Screen):
         else:
             self.title = "hmmm... bad data?"
 
-    def get_widgets_in_group(self, group):
+    def get_widgets_in_group(self, group) -> list[Widget]:
         """
         Collect all widgets that are a member of `group`.
 
@@ -203,18 +206,18 @@ class InputScreen(Screen):
         """
 
         widgets = []
-        for id, widget in self.ids.items():
+        for _, widget in self.ids.items():
             if hasattr(widget, 'group') and widget.group == group:
                 widgets.append(widget)
         return widgets
 
-    def get_down_from_group(self, group):
+    def get_down_from_group(self, group) -> list[Widget]:
         """
         Identify which toggle from a provided widget group is down
         """
 
         toggle = [
-            widget for id, widget in self.ids.items()
+            widget for _, widget in self.ids.items()
             if (
                 hasattr(widget, 'group')
                 and widget.group == group

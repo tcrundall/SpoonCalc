@@ -2,10 +2,17 @@
 Analyse data stored in database and generate
 informative plots
 """
+from typing import Optional
+
 from spooncalc import timeutils
+from spooncalc.dbtools import Database
 
 
-def fetch_daily_totals(db, start_day_offset, span):
+def fetch_daily_totals(
+    db: Database,
+    start_day_offset: int,
+    span: int
+) -> dict:
     """
     Calculate total spoon expenditure per day for the `span`
     days beginning at `start_day_offset`
@@ -30,7 +37,7 @@ def fetch_daily_totals(db, start_day_offset, span):
     return spoons_each_day
 
 
-def fetch_daily_total(db, day_offset):
+def fetch_daily_total(db: Database, day_offset: int) -> float:
     """
     Calculate total spoons spent `day_offset` days from now.
 
@@ -51,14 +58,19 @@ def fetch_daily_total(db, day_offset):
         colnames=['duration', 'cogload', 'physload']
     )
 
-    spoons = 0
+    spoons = 0.
     for entry in entries:
         spoons += calculate_spoons(**entry)
 
     return spoons
 
 
-def calculate_spoons(duration, cogload, physload, **kwargs):
+def calculate_spoons(
+    duration: str | float,
+    cogload: str | float,
+    physload: str | float,
+    **kwargs
+) -> float:
     """
     Convert load levels and duration into energy spent with units
     "spoons".
@@ -104,7 +116,7 @@ def calculate_spoons(duration, cogload, physload, **kwargs):
     return res
 
 
-def parse_duration_string(dur_str):
+def parse_duration_string(dur_str: str) -> float:
     """Convert duration string into hours
 
     Parameters
@@ -116,25 +128,28 @@ def parse_duration_string(dur_str):
     return hours + mins / 60. + secs / 3600.
 
 
-def parse_load_string(load_str):
+def parse_load_string(load: float | str) -> float:
     """Convert load string to a float
 
     Loads are stored as (strings of) floats, but for backwards
     compatibility, this method can also handle conversions from
     the stored words.
     """
-    try:
-        return float(load_str)
-    except ValueError:
-        load_dict = {
-            "low": 0.,
-            "mid": 1.,
-            "high": 2.,
-        }
-        return load_dict[load_str]
+    load_dict = {
+        "low": 0.,
+        "mid": 1.,
+        "high": 2.,
+    }
+    if load in load_dict:
+        return load_dict[load]
+    return float(load)
 
 
-def fetch_average_spoons_per_day(db, day_offset_start=-14, day_offset_end=0):
+def fetch_average_spoons_per_day(
+    db: Database,
+    day_offset_start: int = -14,
+    day_offset_end: int = 0,
+) -> float:
     """
     Calculate the average spoons per day, averaged between
     `day_offset_start` and `day_offset_end`.
@@ -165,7 +180,10 @@ def fetch_average_spoons_per_day(db, day_offset_start=-14, day_offset_end=0):
     return total_spoons / (day_offset_end - day_offset_start)
 
 
-def fetch_cumulative_time_spoons(db, day_offset=0):
+def fetch_cumulative_time_spoons(
+    db: Database,
+    day_offset: int = 0,
+) -> tuple[list[float], list[float]]:
     """
     Generate data points for a cumulative spoon expenditure
     for a given day.
@@ -205,7 +223,7 @@ def fetch_cumulative_time_spoons(db, day_offset=0):
     entries = sorted(entries, key=lambda e: e['end'])
 
     earliest_starttime = timeutils.time2decimal(
-        db.get_earliest_starttime(day_offset)
+        db.get_earliest_starttime(day_offset).time()
     )
 
     # Initialise points s.t. flat line between start and first entry
@@ -215,7 +233,7 @@ def fetch_cumulative_time_spoons(db, day_offset=0):
     for entry in entries:
         hours_since_midnight = timeutils.hours_between(
             timeutils.date_midnight_from_offset(day_offset),
-            entry['end'],
+            str(entry['end']),      # (re)casting to str to satisfy typehints
         )
         total_spoons += calculate_spoons(**entry)
         xs.append(hours_since_midnight)
@@ -223,7 +241,7 @@ def fetch_cumulative_time_spoons(db, day_offset=0):
     return xs, ys
 
 
-def linearly_interpolate(x, xs, ys):
+def linearly_interpolate(x: float, xs: list[float], ys: list[float]) -> float:
     """
     Get the y value corresponding to x, linearly
     interpolating between xs and ys as needed.
@@ -265,24 +283,28 @@ def linearly_interpolate(x, xs, ys):
     return y_left + dx * grad
 
 
-def calc_mean(values):
+def calc_mean(values: list[float]) -> float:
     """Calculate the mean of a set of values"""
     n = len(values)
     return sum(values) / n
 
 
-def calc_stdev(values, mean=None):
+def calc_stdev(values: list[float], mean: Optional[float] = None) -> float:
     """Calculate the standard deviation of a set of values"""
     if mean is None:
         mean = calc_mean(values)
     n = len(values)
-    total = 0
+    total = 0.
     for val in values:
         total += (val - mean)**2
     return (total / n)**(0.5)
 
 
-def get_mean_and_spread(db, day_offset_start=-14, day_offset_end=0):
+def get_mean_and_spread(
+    db: Database,
+    day_offset_start: int = -14,
+    day_offset_end: int = 0
+) -> tuple[list[float], list[float], list[float], list[float]]:
     """
     Get mean and spread of cumulative daily spoon plots.
 
@@ -322,15 +344,16 @@ def get_mean_and_spread(db, day_offset_start=-14, day_offset_end=0):
     )
     """
     dt = 0.25       # 15 min resolution
-    times = []
+    times: list[float] = []
+    means: list[float] = []
+    above: list[float] = []
+    below: list[float] = []
+
     t = timeutils.day_start_hour()
     while t < timeutils.day_end_hour():
         times.append(t)
         t += dt
 
-    means = []
-    above = []
-    below = []
     for time in times:
         cumulative_spoons = [
             linearly_interpolate(time, xs, ys) for xs, ys in cumulative_plots

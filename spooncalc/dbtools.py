@@ -1,22 +1,24 @@
 """
 A collection of helper functions for interacting with database
 """
-import sqlite3
 from datetime import datetime, timedelta
+from typing import Any, Optional
+import sqlite3
+from sqlite3 import Cursor as SQLCursor
 
 from spooncalc import timeutils
 
 
 class Cursor:
-    def __init__(self, db):
+    def __init__(self, db) -> None:
         self.db = db
 
-    def __enter__(self):
+    def __enter__(self) -> SQLCursor:
         self.conn = sqlite3.connect(self.db)
         self.cursor = self.conn.cursor()
         return self.cursor
 
-    def __exit__(self, exc_type, exc_value, exc_traceback):
+    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
         self.conn.commit()
         self.conn.close()
 
@@ -25,11 +27,11 @@ class Database:
     DATE_FORMATSTRING = "%Y-%m-%d"
     DATETIME_FORMATSTRING = "%Y-%m-%d %H:%M:%S"
 
-    def __init__(self, db="spooncalc.db"):
+    def __init__(self, db: str = "spooncalc.db") -> None:
         self.db = db
         self.initialize_database()
 
-    def submit_query(self, query_text):
+    def submit_query(self, query_text) -> list[Any]:
         """
         A helper function for fetching results of a query
 
@@ -53,7 +55,11 @@ class Database:
 
         return contents
 
-    def get_logs_from_day(self, day_offset, colnames=None):
+    def get_logs_from_day(
+        self,
+        day_offset: int,
+        colnames: Optional[list[str]] = None,
+    ) -> list[dict[str, Any]]:
         """
         Calculate total spoons spent on the day
         `day_offset` days from today.
@@ -82,7 +88,12 @@ class Database:
         )
         return entries
 
-    def get_entries_between_offsets(self, start: int, end: int, colnames=None):
+    def get_entries_between_offsets(
+        self,
+        start: int,
+        end: int,
+        colnames=None
+    ) -> list[dict[str, int | str]]:
         """
         Get all entries between day offsets [start, end).
 
@@ -131,8 +142,8 @@ class Database:
         self,
         start: datetime,
         end: datetime,
-        colnames=None,
-    ):
+        colnames: Optional[list[str]] = None,
+    ) -> list[dict[str, int | str]]:
         """
         Get all entries between the datetimes `start` and `end`.
 
@@ -177,7 +188,7 @@ class Database:
 
         return entries
 
-    def delete_entry(self, id):
+    def delete_entry(self, id: int) -> None:
         """
         Delete the entry which matches `id`
 
@@ -193,7 +204,7 @@ class Database:
         """
         self.submit_query(query_text)
 
-    def get_latest_endtime(self):
+    def get_latest_endtime(self) -> datetime:
         """
         Acquire the latest end time in database
 
@@ -220,7 +231,7 @@ class Database:
 
         return datetime.strptime(latest_end, self.DATETIME_FORMATSTRING)
 
-    def get_earliest_starttime(self, day_offset):
+    def get_earliest_starttime(self, day_offset: int) -> datetime:
         """
         Get the earliest start time in database for given day.
         If none available, return start boundary of that day.
@@ -261,7 +272,7 @@ class Database:
 
         return datetime.strptime(earliest_start, self.DATETIME_FORMATSTRING)
 
-    def initialize_database(self):
+    def initialize_database(self) -> None:
         query_text = """
             CREATE TABLE if not exists activities(
                 id integer PRIMARY KEY,
@@ -276,7 +287,7 @@ class Database:
         """
         self.submit_query(query_text)
 
-    def export_database(self, filename):
+    def export_database(self, filename: str) -> None:
         """
         Export the entire activities database as a csv file.
         """

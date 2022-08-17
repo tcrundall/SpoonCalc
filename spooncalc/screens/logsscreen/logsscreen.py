@@ -5,6 +5,8 @@ from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.properties import StringProperty
 
+from spooncalc.dbtools import Database
+
 Builder.load_file(os.path.join(
     Path(__file__).parent.absolute(),
     "logsscreen.kv"
@@ -27,11 +29,11 @@ class LogsScreen(Screen):
     """
     title = StringProperty(datetime.today().strftime('%d.%m.%Y'))
 
-    def __init__(self, db, **kwargs):
+    def __init__(self, db: Database, **kwargs) -> None:
         super().__init__(**kwargs)
         self.ids.logs_display.pass_db_reference(db)
 
-    def update_title(self, day_offset):
+    def update_title(self, day_offset) -> None:
         """
         Update the title, reflecting change of the day in question
         """
@@ -39,7 +41,7 @@ class LogsScreen(Screen):
         current_day = datetime.today() + day_delta
         self.title = current_day.strftime('%d.%m.%Y')
 
-    def on_pre_enter(self, *args):
+    def on_pre_enter(self, *args) -> None:
         """
         Update the stackedLogsLayout (bound in kivy lang) before
         entering this window.

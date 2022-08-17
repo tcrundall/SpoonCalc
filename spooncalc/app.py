@@ -20,22 +20,26 @@ from spooncalc.screens.logsscreen import logsscreen
 from spooncalc.screens.importscreen import importscreen
 from spooncalc.screens.inputscreen import inputscreen
 
-# Android specific imports
+# Android specific imports and setup
 if platform == 'android':
-    from android.permissions import request_permissions, Permission
-    from android.storage import primary_external_storage_path
+    from android.permissions import request_permissions        # type:ignore
+    from android.permissions import Permission                 # type:ignore
+    from android.storage import primary_external_storage_path  # type:ignore
     request_permissions([
         Permission.WRITE_EXTERNAL_STORAGE,
         Permission.READ_EXTERNAL_STORAGE
     ])
 
-# Set external storage
-if platform == 'android':
-    EXTERNALSTORAGE = primary_external_storage_path()
+    # Set external storage
+    if platform == 'android':
+        EXTERNALSTORAGE = primary_external_storage_path()
 
-if platform == 'macosx':
+elif platform == 'macosx':
+    # Set external storage
     home = str(Path.home())
     EXTERNALSTORAGE = home
+else:
+    raise UserWarning(f"Unsupported: {platform=}")
 
 
 class MyScreenManager(ScreenManager):
@@ -48,16 +52,16 @@ class MyScreenManager(ScreenManager):
             LogsWindow
             ImportWindow
     """
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.screen_history = []
         self.transition = FadeTransition()
 
-    def switch_screen(self, screen_name):
+    def switch_screen(self, screen_name: str) -> None:
         self.current = screen_name
         self.screen_history.append(screen_name)
 
-    def back_button(self):
+    def back_button(self) -> bool:
         self.screen_history.pop()
         if self.screen_history != []:
             self.current = self.screen_history[-1]
@@ -73,10 +77,9 @@ class SpoonCalcApp(App):
     This class holds all the (python) methods required for building,
     initialising, and reacting.
     """
-    name = "SpoonCalc"
     title = "SpoonCalc"
 
-    def build(self):
+    def build(self) -> MyScreenManager:
         """
         This method builds the app, initialising what must be initialised.
 
@@ -108,21 +111,22 @@ class SpoonCalcApp(App):
         sm.switch_screen("menuscreen")
         return sm
 
-    def back_button(self, instance, keyboard, *args):
+    def back_button(self, instance, keyboard, *args) -> bool:
         if keyboard in (1001, 27):
             success = self.manager.back_button()
             if not success:
                 self.stop()
-            return True
+                return False
+        return True
 
-    def import_csv_data(self, filename):
+    def import_csv_data(self, filename) -> None:
         filepath = os.path.join(self.EXTERNALSTORAGE, filename)
         with open(filepath, 'r') as fp:
             _ = fp.readline()       # skip header
             for line in fp:
                 self.insert_if_unique(line)
 
-    def insert_if_unique(self, csv_row):
+    def insert_if_unique(self, csv_row: str) -> None:
         """
         Take a raw csv row, extract relevant data, and insert into database.
 
@@ -150,7 +154,7 @@ class SpoonCalcApp(App):
             );
         """
         contents = self.db.submit_query(query_text)
-        if contents[0][0] == 1:
+        if contents[0][0] > 0:
             return
 
         query_text = f"""
@@ -163,7 +167,7 @@ class SpoonCalcApp(App):
         """
         self.db.submit_query(query_text)
 
-    def export_database(self):
+    def export_database(self) -> None:
         """
         Export the entire activities database as a csv file.
         """

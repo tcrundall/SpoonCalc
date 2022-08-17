@@ -17,7 +17,7 @@ class EntryBox(BoxLayout):
         displays
     """
 
-    def __init__(self, activitylog: ActivityLog, **kwargs):
+    def __init__(self, activitylog: ActivityLog, **kwargs) -> None:
         """
         Initialize the EntryBox with the data from a database entry
         corresponding to a logged activity.
@@ -59,6 +59,8 @@ class EntryBox(BoxLayout):
             size=("20dp", "30dp"),
             **kwargs,
         )
+        if activitylog.id is None:
+            raise UserWarning("Require an id generated from database")
         self.activitylog = activitylog
         self.db_id = activitylog.id
         self.orientation = "horizontal"
@@ -88,7 +90,7 @@ class EntryBox(BoxLayout):
         )
         self.add_widget(self.checkbox)
 
-    def get_timetext(self):
+    def get_timetext(self) -> str:
         start = self.activitylog.start.strftime("%H:%M")
         end = self.activitylog.end.strftime("%H:%M")
         return f'{start}-{end}'

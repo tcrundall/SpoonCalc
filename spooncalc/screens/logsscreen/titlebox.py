@@ -6,7 +6,7 @@ class TitleBox(BoxLayout):
     """
     A simple class that serves as a header "row" in the StackedLogsLayout
     """
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super().__init__(
             size_hint=(1, None),
             size=("20dp", "30dp"),
