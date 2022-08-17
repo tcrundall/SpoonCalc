@@ -236,11 +236,8 @@ class Database:
 
         Returns
         -------
-        datetime
-            Either latest end time, or roughly an hour ago
-
-        TODO:   Instead of failing silently, maybe return None and
-                generate this alternative time above.
+        datetime | None
+            Either latest end time, or if not available, None
         """
 
         query_text = """
@@ -248,11 +245,11 @@ class Database:
         """
         contents = self.submit_query(query_text)
         latest_end = contents[0][0]
-        # If no latest time available, set to roughly an hour ago
-        if latest_end is None:
-            return timeutils.get_nowish() - timedelta(hours=1)
+        if isinstance(latest_end, str):
+            return datetime.strptime(latest_end, self.DATETIME_FORMATSTRING)
 
-        return datetime.strptime(latest_end, self.DATETIME_FORMATSTRING)
+        # If no latest time available, return None
+        return None
 
     def get_earliest_starttime(self, day_offset: int) -> datetime:
         """

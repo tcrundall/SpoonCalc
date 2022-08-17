@@ -137,12 +137,12 @@
                     id: s -1
                     text: "-1"
                     font_size: font_size_button_2
-                    on_press: root.on_start_time_press(self)
+                    on_press: root.on_time_press(target="start", minutes=-60)
                 Button:
                     id: s-015
                     text: "-0:15"
                     font_size: font_size_button_2
-                    on_press: root.on_start_time_press(self)
+                    on_press: root.on_time_press(target="start", minutes=-15)
                 BackgroundLabel:
                     color: label_color
                     text: f"{root.start_display}"
@@ -150,12 +150,12 @@
                 Button:
                     id: s+015
                     text: "+0:15"
-                    on_press: root.on_start_time_press(self)
+                    on_press: root.on_time_press(target="start", minutes=15)
                     font_size: font_size_button_2
                 Button:
                     id: s+1
                     text: "+1"
-                    on_press: root.on_start_time_press(self)
+                    on_press: root.on_time_press(target="start", minutes=60)
                     font_size: font_size_button_2
         Option:
             orientation: "vertical"
@@ -170,12 +170,12 @@
                     id: -1
                     text: "-1"
                     font_size: font_size_button_2
-                    on_press: root.on_end_time_press(self)
+                    on_press: root.on_time_press(target="end", minutes=-60)
                 Button:
                     id: -015
                     text: "-0:15"
                     font_size: font_size_button_2
-                    on_press: root.on_end_time_press(self)
+                    on_press: root.on_time_press(target="end", minutes=-15)
                 BackgroundLabel:
                     color: label_color
                     text: f"{root.end_display}"
@@ -183,12 +183,12 @@
                 Button:
                     id: +015
                     text: "+0:15"
-                    on_press: root.on_end_time_press(self)
+                    on_press: root.on_time_press(target="end", minutes=15)
                     font_size: font_size_button_2
                 Button:
                     id: +1
                     text: "+1"
-                    on_press: root.on_end_time_press(self)
+                    on_press: root.on_time_press(target="end", minutes=60)
                     font_size: font_size_button_2
         Option:
             orientation: "vertical"

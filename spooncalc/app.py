@@ -94,7 +94,7 @@ class SpoonCalcApp(App):
         the required windows.
         """
         self.EXTERNALSTORAGE = EXTERNALSTORAGE
-        self.db = Database(db="spooncalc.db")
+        self.db = Database(db_path="spooncalc.db")
 
         sm = MyScreenManager()
         sm.add_widget(menuscreen.MenuScreen(

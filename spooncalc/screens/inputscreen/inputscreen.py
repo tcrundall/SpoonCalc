@@ -5,8 +5,6 @@ from pathlib import Path
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.properties import StringProperty
-from kivy.uix.button import Button
-from kivy.uix.widget import Widget
 
 from spooncalc import timeutils
 from spooncalc.models.activitylog import ActivityLog
@@ -86,16 +84,13 @@ class InputScreen(Screen):
 
         Start time is equal to end time of (chronologically) previous
         log, unless not today, in which case 1 hour before end time.
-
-        TODO:   incorporate timeutils.DAY_BOUNDARY in finding most
-                recent activity. See issue #36
         """
 
-        end = timeutils.round_datetime(datetime.now())
         start = self.db.get_latest_endtime()
+        end = timeutils.get_nowish()
 
-        # If start time is not from today, then set 1 hour before end time
-        if (start.date() != datetime.now().date()):
+        # If start time invalid, set to an hour before end
+        if start is None or not timeutils.within_todays_boundaries(start):
             start = end - timedelta(hours=1)
 
         return start, end
@@ -127,40 +122,34 @@ class InputScreen(Screen):
         self.start_display = self.activitylog.start.strftime(format_string)
         self.end_display = self.activitylog.end.strftime(format_string)
 
-    def on_start_time_press(self, button: Button) -> None:
+    def on_time_press(self, target: str, minutes: int) -> None:
         """
-        Inc-/decrement the end time based on pressed button and update display
+        Inc-/decrement the start or end time and update display
 
-        The value to be inc-/decremented is inferred from the
-        button's text.
+        Parameters
+        ----------
+        target : str {"start", "end"}
+            select either the start or end time
+        minutes : int
+            the number of minutes the selected time is to be adjusted by
         """
 
-        self.activitylog.start += timedelta(
-            minutes=self.time_buttons[button.text]
-        )
+        time_increment = timedelta(minutes=minutes)
+        if target == "start":
+            self.activitylog.start += time_increment
+        if target == "end":
+            self.activitylog.end += time_increment
 
-        # if duration would be negative, shift end time to 1 hourafter start
+        # if duration would be negative, other time is 1 hour different
         duration = self.activitylog.end - self.activitylog.start
         if duration.total_seconds() <= 0:
-            self.activitylog.end = self.activitylog.start + timedelta(hours=1)
-        self.update_time_displays()
+            if target == "start":
+                self.activitylog.end = \
+                    self.activitylog.start + timedelta(hours=1)
+            elif target == "end":
+                self.activitylog.start = \
+                    self.activitylog.end - timedelta(hours=1)
 
-    def on_end_time_press(self, button: Button) -> None:
-        """
-        Inc-/decrement the end time based on pressed button and update display
-
-        The value to be inc-/decremented is inferred from the
-        button's text.
-        """
-
-        self.activitylog.end += timedelta(
-            minutes=self.time_buttons[button.text]
-        )
-
-        # If the duration would be negative, shift start to 1 hour before end
-        duration = self.activitylog.end - self.activitylog.start
-        if duration.total_seconds() <= 0:
-            self.activitylog.start = self.activitylog.end - timedelta(hours=1)
         self.update_time_displays()
 
     def insert_into_database(self) -> bool:
@@ -199,33 +188,33 @@ class InputScreen(Screen):
         else:
             self.title = "hmmm... bad data?"
 
-    def get_widgets_in_group(self, group) -> list[Widget]:
-        """
-        Collect all widgets that are a member of `group`.
+    # def get_widgets_in_group(self, group) -> list[Widget]:
+    #     """
+    #     Collect all widgets that are a member of `group`.
 
-        This is useful for finding all the toggles associated with
-        physical load, such that we can guarantee one of them is set
-        when entering the window
-        """
+    #     This is useful for finding all the toggles associated with
+    #     physical load, such that we can guarantee one of them is set
+    #     when entering the window
+    #     """
 
-        widgets = []
-        for _, widget in self.ids.items():
-            if hasattr(widget, 'group') and widget.group == group:
-                widgets.append(widget)
-        return widgets
+    #     widgets = []
+    #     for _, widget in self.ids.items():
+    #         if hasattr(widget, 'group') and widget.group == group:
+    #             widgets.append(widget)
+    #     return widgets
 
-    def get_down_from_group(self, group) -> list[Widget]:
-        """
-        Identify which toggle from a provided widget group is down
-        """
+    # def get_down_from_group(self, group) -> list[Widget]:
+    #     """
+    #     Identify which toggle from a provided widget group is down
+    #     """
 
-        toggle = [
-            widget for _, widget in self.ids.items()
-            if (
-                hasattr(widget, 'group')
-                and widget.group == group
-                and widget.state == "down"
-            )
-        ]
-        # todo: check if non-empty?
-        return toggle
+    #     toggle = [
+    #         widget for _, widget in self.ids.items()
+    #         if (
+    #             hasattr(widget, 'group')
+    #             and widget.group == group
+    #             and widget.state == "down"
+    #         )
+    #     ]
+    #     # todo: check if non-empty?
+    #     return toggle

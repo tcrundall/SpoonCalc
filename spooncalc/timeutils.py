@@ -19,6 +19,14 @@ def day_end_hour() -> int:
     return DAY_BOUNDARY + 24
 
 
+def within_todays_boundaries(dati: datetime) -> bool:
+    """Establish if provided datetime occurs today, factoring in
+    a non-midnight day boundary"""
+    today_start = datetime_from_offset(day_offset=0)
+    today_end = datetime_from_offset(day_offset=1)
+    return today_start <= dati < today_end
+
+
 def hours_between(start: datetime | str, end: datetime | str) -> float:
     """Calculate the time between to datetimes, in hours.
 
@@ -29,6 +37,9 @@ def hours_between(start: datetime | str, end: datetime | str) -> float:
         start = datetime.strptime(start, DATETIME_FORMATSTRING)
     if type(end) is str:
         end = datetime.strptime(end, DATETIME_FORMATSTRING)
+
+    assert isinstance(start, datetime)       # assertions to satisfy type hints
+    assert isinstance(end, datetime)
 
     duration = end - start
     return time2decimal(duration)
