@@ -1,6 +1,5 @@
 from kivy.uix.stacklayout import StackLayout
 
-from spooncalc import dbtools
 from spooncalc.models.activitylog import ActivityLog
 from .titlebox import TitleBox
 from .entrybox import EntryBox
@@ -72,7 +71,7 @@ class LogsLayout(StackLayout):
         """
         for entrybox in self.boxes:
             if entrybox.checkbox._get_active():
-                dbtools.delete_entry(entrybox.db_id)
+                self.db.delete_entry(entrybox.db_id)
                 self.update()
                 return
 
