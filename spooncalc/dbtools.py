@@ -7,6 +7,7 @@ import sqlite3
 from sqlite3 import Cursor as SQLCursor
 
 from spooncalc import timeutils
+from spooncalc.models.activitylog import ActivityLog
 
 
 class Cursor:
@@ -36,6 +37,15 @@ class Cursor:
 class Database:
     DATE_FORMATSTRING = "%Y-%m-%d"
     DATETIME_FORMATSTRING = "%Y-%m-%d %H:%M:%S"
+    ACTIVITIES_COLNAMES = (
+        'start',
+        'end',
+        'name',
+        'duration',
+        'cogload',
+        'physload',
+        'energy'
+    )
 
     def __init__(self, db_path: str = "spooncalc.db") -> None:
         """
@@ -293,16 +303,15 @@ class Database:
         return datetime.strptime(earliest_start, self.DATETIME_FORMATSTRING)
 
     def initialize_database(self) -> None:
-        query_text = """
+        # Dynamically generate column names
+        col_props = ', '.join(
+            [f'{col} text NOT NULL' for col in self.ACTIVITIES_COLNAMES]
+        )
+
+        query_text = f"""
             CREATE TABLE if not exists activities(
                 id integer PRIMARY KEY,
-                start text NOT NULL,
-                end text NOT NULL,
-                duration text NOT NULL,
-                name text NOT NULL,
-                cogload text NOT NULL,
-                physload text NOT NULL,
-                energy text NOT NULL
+                {col_props}
         );
         """
         self.submit_query(query_text)
@@ -333,3 +342,20 @@ class Database:
 
         with open(filename, 'w') as fp:
             fp.write(text)
+
+    def insert_activitylog(self, log: ActivityLog) -> None:
+        # Get the table columns that are also activity log attributes
+        valid_cols = [c for c in self.ACTIVITIES_COLNAMES if hasattr(log, c)]
+
+        # Get the corresponding values of the valid column names
+        values = [str(getattr(log, c)) for c in valid_cols]
+
+        query_text = f"""
+            INSERT INTO activities(
+                    {','.join(valid_cols)}
+                )
+                VALUES(
+                    "{'", "'.join(values)}"
+                );
+        """
+        self.submit_query(query_text)

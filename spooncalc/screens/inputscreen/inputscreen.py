@@ -157,7 +157,7 @@ class InputScreen(Screen):
         Insert data currently stored in activitylog into database
         """
 
-        duration_timedelta = self.activitylog.get_duration()
+        duration_timedelta = self.activitylog.duration
 
         if duration_timedelta and duration_timedelta.total_seconds() < 0:
             return False
@@ -166,14 +166,7 @@ class InputScreen(Screen):
         for char in ',.:-\"\'':
             self.activitylog.name = raw_activity_name.replace(char, '')
 
-        query_text = f"""
-            INSERT INTO activities
-                (start, end, duration, name, cogload, physload, energy)
-                VALUES(
-                    {self.activitylog.get_value_string()}
-                );
-        """
-        self.db.submit_query(query_text)
+        self.db.insert_activitylog(self.activitylog)
 
         return True
 

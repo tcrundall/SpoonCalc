@@ -2,7 +2,9 @@ from typing import Optional
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from spooncalc import timeutils, analyser
+from spooncalc import timeutils
+
+PHYSLOAD_BOOST_SPOON_VALUE = 2.
 
 
 @dataclass
@@ -10,11 +12,19 @@ class ActivityLog:
     start: datetime
     end: datetime
     id: Optional[int] = None
-    # start: Union[datetime, str]
     name: str = "Activity Name"
     cogload: float = 1.0
     physload: float = 1.0
     energy: float = 1.0
+    phone: bool = False
+    screen: bool = False
+    productive: bool = False
+    leisure: bool = False
+    rest: bool = False
+    exercise: bool = False
+    physload_boost: bool = False
+    necessary: bool = False
+    social: bool = False
 
     def __post_init__(self) -> None:
         if isinstance(self.start, str):
@@ -38,14 +48,27 @@ class ActivityLog:
         if isinstance(self.physload, str):
             self.physload = float(self.physload)
 
-    def get_duration(self) -> timedelta:
+    # The property decorator enforces `activitylog.duration` usage
+    @property
+    def duration(self) -> timedelta:
+        """The duration is a derived value"""
         return self.end - self.start
 
     def get_value_string(self) -> str:
+        """
+        Generates long string of all values
+
+        This is used for building SQL requests.
+
+        Note: this is bad, because it relies on the identical ordering
+        of attributes wherever this SQL is done.
+        TODO:   instead, when generating SQL request, loop over attribute
+                names and use getattr
+        """
         return f"""
             "{self.start}",
             "{self.end}",
-            "{self.get_duration()}",
+            "{self.duration}",
             "{self.name}",
             "{self.cogload}",
             "{self.physload}",
@@ -61,4 +84,14 @@ class ActivityLog:
         Calculate spoons spent by this activity
         """
         duration = timeutils.time2decimal(self.end - self.start)
-        return analyser.calculate_spoons(duration, self.cogload, self.physload)
+
+        # Augment physload when physload_boost is used
+        augmented_physload = self.physload
+        if self.physload_boost:
+            augmented_physload += PHYSLOAD_BOOST_SPOON_VALUE
+
+        return duration * (self.cogload + augmented_physload)
+
+    @property
+    def spoons(self) -> float:
+        return self.get_spoons()

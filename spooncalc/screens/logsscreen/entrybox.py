@@ -66,8 +66,9 @@ class EntryBox(BoxLayout):
         self.add_widget(
             Label(text=f"{self.activitylog.physload:.1f}", size_hint=(0.1, 1))
         )
-        spoons = self.activitylog.get_spoons()
-        self.add_widget(Label(text=f"{spoons:.1f}", size_hint=(0.1, 1)))
+        self.add_widget(
+            Label(text=f"{self.activitylog.spoons:.1f}", size_hint=(0.1, 1))
+        )
 
         self.checkbox = CheckBox(
             size_hint=(0.05, 1),
