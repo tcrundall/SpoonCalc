@@ -1,11 +1,10 @@
 import os
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable
 
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.properties import StringProperty
-from kivy.clock import Clock
 from kivy_garden.graph import Graph, LinePlot
 
 from spooncalc import analyser, timeutils
@@ -39,40 +38,24 @@ class MenuScreen(Screen):
         **kwargs
     ) -> None:
 
+        super().__init__(**kwargs)
         self.export_callback = export_callback
         self.db = db
-        super().__init__(**kwargs)
+        # TODO: find out why this must be executed after super().__init__
+        self.init_plot()
 
-    def on_enter(self, *args) -> None:
+    def on_pre_enter(self) -> None:
         """
         Methods to execute right before switching to this window
-
-        These methods depend on the existence of the database, however
-        the database is only guaranteed to exist after App.build() is
-        executed. Therefore the methods arent executed here, but scheduled
-        (with a time delay of 0 seconds). Scheduled tasks seem to be run
-        only after the app is built.
         """
 
-        # This is ugly, but I don't know how to fix.
-        # Database won't be set up yet, so need to wait until
-        # App.build() is executed...
-        Clock.schedule_once(self.update_spoons_spent_display, 0)
-        if not self.plot_initialized:
-            Clock.schedule_once(self.init_plot, 0)
-            self.plot_initialized = True
-        Clock.schedule_once(self.update_plot, 0)
-        return super().on_enter(*args)
+        self.update_spoons_spent_display()
+        self.update_plot()
 
-    def update_spoons_spent_display(self, dt: Optional[int] = None) -> None:
+    def update_spoons_spent_display(self) -> None:
         """
         Update display of spoons spent today over daily spoons spent
         averaged over past fortnight
-
-        Parameters
-        ----------
-        dt : float, unused
-            only included to satisfy schedulable methods signature requirement
         """
 
         spoons_today = analyser.fetch_daily_total(self.db, 0)
@@ -85,7 +68,7 @@ class MenuScreen(Screen):
 
         self.export_callback()
 
-    def init_plot(self, dt: Optional[int] = None) -> None:
+    def init_plot(self) -> None:
         """
         Initialize the home screen plot.
 
@@ -96,12 +79,6 @@ class MenuScreen(Screen):
         and standard deviation offsets (mean, below, above). The points for
         today are plotted in .update_plot(). Done this way, the mean (+/- std)
         must only be calculated once per day.
-
-        Parameters
-        ----------
-        dt : float, unused
-            only included to satisfy signature requirement of schedulable
-            methods
         """
 
         self.graph = Graph(
@@ -139,17 +116,11 @@ class MenuScreen(Screen):
         self.graph.add_plot(self.above)
         self.graph.add_plot(self.today)
 
-    def update_plot(self, dt: Optional[int] = None) -> None:
+    def update_plot(self) -> None:
         """
         Update the plot by plotting the day's cumulative spoons.
 
         Note that the mean, below and above plots remain unchanged.
-
-        Parameters
-        ----------
-        dt : float, unused
-            only included to satisfy signature requirement of schedulable
-            methods
         """
 
         today = 0

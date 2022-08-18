@@ -62,7 +62,13 @@ def date_midnight_from_offset(day_offset: int) -> datetime:
 
 
 def time2decimal(time_in: time | str | timedelta) -> float:
-    """Convert a time from various types to hours in decimal"""
+    """Convert a time from various types to hours in decimal
+
+    TODO: Maybe include a reference datetime, e.g. last night's midnight,
+          s.t. `time` or `datetime` inputs return number of hours since
+          the reference, thereby avoiding increasing time by 24 if before
+          `DAY_BOUNDARY`
+    """
 
     if isinstance(time_in, datetime):
         raise UserWarning("You should explicitly provide time with .time()")
@@ -73,7 +79,7 @@ def time2decimal(time_in: time | str | timedelta) -> float:
 
     if isinstance(time_in, str):
         time_in = datetime.strptime(time_in, DATETIME_FORMATSTRING).time()
-    # TODO: handle times between midnight and `hour_cutoff`
+
     decimal_time = (
         time_in.hour
         + time_in.minute / 60
