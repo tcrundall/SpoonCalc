@@ -19,6 +19,7 @@ from spooncalc.screens.plotscreen import plotscreen
 from spooncalc.screens.logsscreen import logsscreen
 from spooncalc.screens.importscreen import importscreen
 from spooncalc.screens.inputscreen import inputscreen
+from spooncalc.models.activitylog import ActivityLog
 
 # Android specific imports and setup
 if platform == 'android':
@@ -125,11 +126,12 @@ class SpoonCalcApp(App):
     def import_csv_data(self, filename) -> None:
         filepath = os.path.join(self.EXTERNALSTORAGE, filename)
         with open(filepath, 'r') as fp:
-            _ = fp.readline()       # skip header
+            header = fp.readline()       # skip header
+            # colnames = header.strip().split(',')
             for line in fp:
-                self.insert_if_unique(line)
+                self.insert_if_unique(header, line)
 
-    def insert_if_unique(self, csv_row: str) -> None:
+    def insert_if_unique(self, header: str, csv_row: str) -> None:
         """
         Take a raw csv row, extract relevant data, and insert into database.
 
@@ -138,37 +140,23 @@ class SpoonCalcApp(App):
 
         Paramters
         ---------
+        header : str
+            A raw csv header from a previous database export
         csv_row : str
             A raw csv row from a previous database export
         """
-        _, start, end, duration, name, cogload, physload, energy =\
-            csv_row.strip().split(',')
+        colnames = header.strip().split(',')
+        values = csv_row.strip().split(',')
 
-        query_text = f"""
-            SELECT EXISTS(
-                SELECT * from activities WHERE
-                    start="{start}"
-                    AND end="{end}"
-                    AND duration="{duration}"
-                    AND name="{name}"
-                    AND cogload = "{cogload}"
-                    AND physload = "{physload}"
-                    AND energy = "{energy}"
-            );
-        """
-        contents = self.db.submit_query(query_text)
-        if contents[0][0] > 0:
-            return
+        # Collect values applicable to ActivityLog class
+        activitylog_params = {
+            k: v for k, v in zip(colnames, values)
+            if k in ActivityLog.__dict__['__dataclass_fields__']
+        }
 
-        query_text = f"""
-            INSERT INTO activities
-                (start, end, duration, name, cogload, physload, energy)
-                VALUES(
-                    "{start}", "{end}", "{duration}", "{name}", "{cogload}",
-                    "{physload}", "{energy}"
-                );
-        """
-        self.db.submit_query(query_text)
+        activitylog = ActivityLog(**activitylog_params)  # type: ignore
+
+        self.db.insert_activitylog_if_unique(activitylog)
 
     def export_database(self) -> None:
         """

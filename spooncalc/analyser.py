@@ -57,96 +57,7 @@ def fetch_daily_total(db: Database, day_offset: int) -> float:
         The total number of spoons spent on this day
     """
 
-    entries = db.get_logs_from_day(
-        day_offset=day_offset,
-        colnames=['duration', 'cogload', 'physload']
-    )
-
-    spoons = 0.
-    for entry in entries:
-        spoons += calculate_spoons(**entry)
-
-    return spoons
-
-
-def calculate_spoons(
-    duration: str | float,
-    cogload: str | float,
-    physload: str | float,
-    **kwargs
-) -> float:
-    """
-    Convert load levels and duration into energy spent with units
-    "spoons".
-
-    The formula used is:
-        duration [in hours] * (cogload + physload)
-
-    Current implementation of data storage stores cog- and physload
-    as floats, however for backwards compatibility this method
-    can also handle the old style of strings.
-    where cogload and physload are mapped:
-        "v. low"  --> 0
-        "low"     --> 0.5
-        "mid"     --> 1
-        "high"    --> 1.5
-        "v. high" --> 2
-
-    Parameters
-    ----------
-    duration: str
-        string representaiton HH:MM:SS e.g. '2:00:00'
-    cogload: str
-        spoons per hour cost of cognitive load
-            [0 | 0.5 | 1 | 1.5 | 2] or ['low' | 'mid' | 'high']
-    physload: str
-        spoons per hour cost of physical load
-            [0 | 0.5 | 1 | 1.5 | 2] or ['low' | 'mid' | 'high']
-    **kwargs:
-        ignore any superfluous keys. This makes expanding entries
-        more convenient, as entries are permitted to have extra columns
-
-    Examples
-    --------
-    >>> calculate_spoons("2:00:00", "1.5", "mid")
-    5.
-    >>> calculate_spoons(3.5, "0.5", "1.5")
-    7.
-    """
-
-    if isinstance(duration, str):
-        duration = parse_duration_string(duration)
-    res = duration * (parse_load_string(cogload) + parse_load_string(physload))
-    return res
-
-
-def parse_duration_string(dur_str: str) -> float:
-    """Convert duration string into hours
-
-    Parameters
-    ----------
-    dur_str : str
-        Duration with the format [H]H:MM:SS]
-    """
-    hours, mins, secs = [int(el) for el in dur_str.split(':')]
-    return hours + mins / 60. + secs / 3600.
-
-
-def parse_load_string(load: float | str) -> float:
-    """Convert load string to a float
-
-    Loads are stored as (strings of) floats, but for backwards
-    compatibility, this method can also handle conversions from
-    the stored words.
-    """
-    load_dict = {
-        "low": 0.,
-        "mid": 1.,
-        "high": 2.,
-    }
-    if load in load_dict:
-        return load_dict[load]
-    return float(load)
+    return sum(log.spoons for log in db.get_logs_from_day(day_offset))
 
 
 def fetch_average_spoons_per_day(
@@ -174,14 +85,10 @@ def fetch_average_spoons_per_day(
     start=-14, end=0: spoons per day, averaged over past 14 days
                       (i.e.not including today)
     """
-    entries = db.get_entries_between_offsets(
-        day_offset_start,
-        day_offset_end,
-        colnames=['duration', 'cogload', 'physload'],
-    )
+    logs = db.get_logs_between_offsets(day_offset_start, day_offset_end)
     total_spoons = 0
-    for entry in entries:
-        total_spoons += calculate_spoons(**entry)
+    for log in logs:
+        total_spoons += log.spoons
 
     return total_spoons / (day_offset_end - day_offset_start)
 
@@ -194,7 +101,7 @@ def fetch_cumulative_time_spoons(
     Generate data points for a cumulative spoon expenditure
     for a given day.
 
-    x points are end times of entries, in units of hours.
+    x points are end times of logs, in units of hours.
 
     Parameters
     ----------
@@ -214,36 +121,29 @@ def fetch_cumulative_time_spoons(
             thereby resulting in a flat line for periods with no
             logged activities.
     """
-    colnames = [
-        'start',
-        'end',
-        'duration',
-        'cogload',
-        'physload',
-    ]
 
-    entries = db.get_entries_between_offsets(
-        day_offset,
-        day_offset + 1,
-        colnames=colnames,
-    )
+    logs = db.get_logs_between_offsets(day_offset, day_offset + 1)
+    logs = sorted(logs, key=lambda e: e.end)
 
-    entries = sorted(entries, key=lambda e: e['end'])
+    # if no logs, return a single point at (0,0)
+    if not logs:
+        return [0.], [0.]
 
+    # Note: maybe breaks if between 0:00 and timeutils.DAY_BOUNDARY
     earliest_starttime = timeutils.time2decimal(
-        db.get_earliest_starttime(day_offset).time()
+        min([e.start for e in logs]).time()
     )
 
-    # Initialise points s.t. flat line between start and first entry
+    # Initialise points s.t. flat line between start and first log
     xs = [0., earliest_starttime]
     ys = [0., 0.]
     total_spoons = 0.
-    for entry in entries:
+    for log in logs:
         hours_since_midnight = timeutils.hours_between(
             timeutils.date_midnight_from_offset(day_offset),
-            str(entry['end']),      # (re)casting to str to satisfy typehints
+            str(log.end),      # (re)casting to str to satisfy typehints
         )
-        total_spoons += calculate_spoons(**entry)
+        total_spoons += log.spoons
         xs.append(hours_since_midnight)
         ys.append(total_spoons)
     return xs, ys
@@ -336,9 +236,9 @@ def get_mean_and_spread(
     above: list(float)
         one standard deviation above the mean at each time
 
-    TODO:   Don't use std, because this can lead to decreasing
-            curves for `below`, but rather calculate the 67.5%
-            and 32.5%.
+    TODO:   Don't use std, because this can lead to non-monotonic
+            curves for `below`, but rather calculate the 84%
+            and 16%
     """
     cumulative_plots = [
         fetch_cumulative_time_spoons(db, day_offset)

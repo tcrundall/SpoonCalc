@@ -1,10 +1,44 @@
-from typing import Optional
+from typing import Optional, Any
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from spooncalc import timeutils
 
 PHYSLOAD_BOOST_SPOON_VALUE = 2.
+LOAD_DICT = {
+    'low': 0.,
+    'mid': 1.,
+    'high': 2.,
+}
+
+
+def clean_param(param: Any) -> datetime | bool | float | str:
+    """
+    TODO: handle case where boolean parameter was stored as "None"
+    """
+    if not isinstance(param, str):
+        return param
+    try:
+        return datetime.strptime(param, timeutils.DATETIME_FORMATSTRING)
+    except ValueError:
+        pass
+
+    # Handle booleans
+    if param.lower() == "true":
+        return True
+    elif param.lower() == "false":
+        return False
+
+    try:
+        return float(param)
+    except ValueError:
+        pass
+
+    # Backwards compatibility for when loads were stored as labels
+    if param in LOAD_DICT:
+        return LOAD_DICT[param]
+
+    return str(param)
 
 
 @dataclass
@@ -40,13 +74,48 @@ class ActivityLog:
             )
 
         if isinstance(self.cogload, str):
-            self.cogload = float(self.cogload)
+            try:
+                self.cogload = float(self.cogload)
+            except ValueError:
+                self.cogload = LOAD_DICT(self.cogload.lower())  # type: ignore
 
         if isinstance(self.physload, str):
+            try:
+                self.physload = float(self.physload)
+            except ValueError:
+                self.physload = LOAD_DICT(
+                    self.physload.lower()   # type: ignore
+                )
+
+        if isinstance(self.energy, str):
             self.physload = float(self.physload)
 
-        if isinstance(self.physload, str):
-            self.physload = float(self.physload)
+        if isinstance(self.phone, str):
+            self.phone = bool(self.phone)
+
+        if isinstance(self.screen, str):
+            self.screen = bool(self.screen)
+
+        if isinstance(self.productive, str):
+            self.productive = bool(self.productive)
+
+        if isinstance(self.leisure, str):
+            self.leisure = bool(self.leisure)
+
+        if isinstance(self.rest, str):
+            self.rest = bool(self.rest)
+
+        if isinstance(self.exercise, str):
+            self.exercise = bool(self.exercise)
+
+        if isinstance(self.physload_boost, str):
+            self.physload_boost = bool(self.physload_boost)
+
+        if isinstance(self.necessary, str):
+            self.necessary = bool(self.necessary)
+
+        if isinstance(self.social, str):
+            self.social = bool(self.social)
 
     # The property decorator enforces `activitylog.duration` usage
     @property

@@ -2,12 +2,12 @@
 A collection of helper functions for interacting with database
 """
 from datetime import datetime, timedelta
-from typing import Any, Optional
+from typing import Any
 import sqlite3
 from sqlite3 import Cursor as SQLCursor
 
 from spooncalc import timeutils
-from spooncalc.models.activitylog import ActivityLog
+from spooncalc.models.activitylog import ActivityLog, clean_param
 
 
 class Cursor:
@@ -44,7 +44,16 @@ class Database:
         'duration',
         'cogload',
         'physload',
-        'energy'
+        'energy',
+        'phone',
+        'screen',
+        'productive',
+        'leisure',
+        'rest',
+        'exercise',
+        'physload_boost',
+        'necessary',
+        'social',
     )
 
     def __init__(self, db_path: str = "spooncalc.db") -> None:
@@ -58,6 +67,7 @@ class Database:
         """
         self.db_path = db_path
         self.initialize_database()
+        self.add_missing_columns()
 
     def submit_query(self, query_text) -> list[Any]:
         """
@@ -86,8 +96,7 @@ class Database:
     def get_logs_from_day(
         self,
         day_offset: int,
-        colnames: Optional[list[str]] = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[ActivityLog]:
 
         """
         Calculate total spoons spent on the day
@@ -101,10 +110,6 @@ class Database:
         day_offset : int
             The number of days between today and day in question.
             `day_offset`=0 is today, `day_offset`=-1 is yesterday
-        colnames : list[str] default None
-            The list of database column names. If None, defaults are those
-            used by get_entries_between_datetimes:
-                'id', 'start', 'end', 'name', 'duration', 'cogload', 'physload'
 
         Returns
         -------
@@ -114,23 +119,21 @@ class Database:
             that row.
         """
 
-        entries = self.get_entries_between_offsets(
+        logs = self.get_logs_between_offsets(
             day_offset,
             day_offset + 1,
-            colnames=colnames
         )
-        return entries
+        return logs
 
-    def get_entries_between_offsets(
+    def get_logs_between_offsets(
         self,
         start: int,
         end: int,
-        colnames=None
-    ) -> list[dict[str, int | str]]:
+    ) -> list[ActivityLog]:
         """
-        Get all entries between day offsets [start, end).
+        Get all logs between day offsets [start, end).
 
-        This is a convenience wrapper of get_entries_between_datetimes,
+        This is a convenience wrapper of get_logs_between_datetimes,
         avoiding usage of specific datetimes, when standard day boundaries
         suffice.
 
@@ -143,10 +146,6 @@ class Database:
             The starting day_offset
         end : int
             The ending day_offset
-        colnames : list(str), optional
-            The list of database column names. If None, defaults are those
-            used by get_entries_between_datetimes:
-                'id', 'start', 'end', 'name', 'duration', 'cogload', 'physload'
 
         Returns
         -------
@@ -157,28 +156,26 @@ class Database:
 
         Examples
         --------
-            start=-1, end=0: all entries from yesterday
+            start=-1, end=0: all logs from yesterday
             start=-1, end=-1: no results
-            start=-1, end=1: all entries from yesterday and today
+            start=-1, end=1: all logs from yesterday and today
         """
 
         start_datetime = timeutils.datetime_from_offset(start)
         end_datetime = timeutils.datetime_from_offset(end)
-        entries = self.get_entries_between_datetimes(
+        logs = self.get_logs_between_datetimes(
             start_datetime,
             end_datetime,
-            colnames=colnames
         )
-        return entries
+        return logs
 
-    def get_entries_between_datetimes(
+    def get_logs_between_datetimes(
         self,
         start: datetime,
         end: datetime,
-        colnames: Optional[list[str]] = None,
-    ) -> list[dict[str, int | str]]:
+    ) -> list[ActivityLog]:
         """
-        Get all entries between the datetimes `start` and `end`.
+        Get all logs between the datetimes `start` and `end`.
 
         Parameters
         ----------
@@ -186,10 +183,6 @@ class Database:
             the lower limit date-time of desired range
         end : datetime
             the upper limit date-time of desired range
-        colnames : list(str), optional
-            the column names to be included in the db SELECT query,
-            if None, the defaults are used:
-                'id', 'start', 'end', 'name', 'duration', 'cogload', 'physload'
 
         Returns
         -------
@@ -199,10 +192,7 @@ class Database:
             that row.
         """
 
-        if colnames is None:
-            colnames = [
-                'id', 'start', 'end', 'name', 'duration', 'cogload', 'physload'
-            ]
+        colnames = ['id'] + list(self.ACTIVITIES_COLNAMES)
 
         start_date_str = start.strftime(self.DATETIME_FORMATSTRING)
         end_date_str = end.strftime(self.DATETIME_FORMATSTRING)
@@ -214,12 +204,16 @@ class Database:
         """
         contents = self.submit_query(query_text)
 
-        entries = [
-            {colname: value for colname, value in zip(colnames, entry)}
-            for entry in contents
-        ]
+        logs = []
+        for entry in contents:
+            params = map(clean_param, entry)
+            log_pars = {
+                k: v for k, v in zip(colnames, params)
+                if k != "duration"
+            }
+            logs.append(ActivityLog(**log_pars))    # type: ignore
 
-        return entries
+        return logs
 
     def delete_entry(self, id: int) -> None:
         """
@@ -290,17 +284,22 @@ class Database:
         """
         contents = self.submit_query(query_text)
         earliest_start = contents[0][0]
-        if earliest_start is None:
-            today_start = datetime.now().replace(
-                hour=timeutils.DAY_BOUNDARY,
-                minute=0,
-                second=0,
-                microsecond=0
-            )
-            target_day_start = today_start + timedelta(days=day_offset)
-            return target_day_start
 
-        return datetime.strptime(earliest_start, self.DATETIME_FORMATSTRING)
+        if earliest_start:
+            return datetime.strptime(
+                earliest_start,
+                self.DATETIME_FORMATSTRING
+            )
+
+        # If nothing in database, return start of target day
+        today_start = datetime.now().replace(
+            hour=timeutils.DAY_BOUNDARY,
+            minute=0,
+            second=0,
+            microsecond=0
+        )
+        target_day_start = today_start + timedelta(days=day_offset)
+        return target_day_start
 
     def initialize_database(self) -> None:
         # Dynamically generate column names
@@ -315,6 +314,26 @@ class Database:
         );
         """
         self.submit_query(query_text)
+
+    def get_colnames(self) -> list[str]:
+        with Cursor(self.db_path) as c:
+            c.execute("SELECT * from activities limit 1")
+            c.fetchall()
+            description = c.description
+
+        return [d[0] for d in description]
+
+    def add_missing_columns(self) -> None:
+        """If database was initialized by outdated code, update tables with
+        new columns"""
+        db_colnames = self.get_colnames()
+
+        for colname in self.ACTIVITIES_COLNAMES:
+            if colname not in db_colnames:
+                self.submit_query(f"""
+                    ALTER TABLE activities
+                    ADD {colname} text;
+                """)
 
     def export_database(self, filename: str) -> None:
         """
@@ -359,3 +378,27 @@ class Database:
                 );
         """
         self.submit_query(query_text)
+
+    def insert_activitylog_if_unique(self, log: ActivityLog) -> None:
+        """
+        Perhaps a better way is to add all logs, then remove duplicates
+        """
+        valid_cols = [c for c in self.ACTIVITIES_COLNAMES if hasattr(log, c)]
+
+        # Use column names to dynamically generate equality checks
+        equality_checks = [
+            f'{col}="{getattr(log, col)}"' for col in valid_cols
+        ]
+
+        # Check to see if this activity is already in the database
+        query_text = f"""
+            SELECT EXISTS(
+                SELECT * from activities WHERE
+                    {" AND ".join(equality_checks)}
+            );
+        """
+        contents = self.submit_query(query_text)
+        if contents[0][0] > 0:
+            return
+
+        self.insert_activitylog(log)
