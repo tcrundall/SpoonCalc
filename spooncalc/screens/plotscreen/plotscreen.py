@@ -95,6 +95,10 @@ class PlotScreen(Screen):
                             for d, spoons in self.spoons_per_day.items()]
         self.graph.add_plot(self.plot)
 
+        self.plot_average = LinePlot(color=[1, 1, 1, 1], line_width=2.)
+        self.graph.add_plot(self.plot_average)
+        self.average_current_plot()
+
     def update_plot(self) -> None:
         """
         Update plot, reflecting changes in mode and/or x-range
@@ -114,6 +118,22 @@ class PlotScreen(Screen):
         ymax_current = max(self.spoons_per_day.values())
         self.ymax_persistent = max(ymax_current * 1.1, self.ymax_persistent)
         self.graph.ymax = self.ymax_persistent
+        self.average_current_plot()
+
+    def average_current_plot(self) -> None:
+        """
+        Take the current monthly or weekly plot and over plot
+        an average
+        """
+        average_span = 3
+        xs = [x for x, _ in self.plot.points]
+        ys = [y for _, y in self.plot.points]
+
+        av_ys = []
+        for i in range(len(ys) + 1 - average_span):
+            av_ys.append(sum(ys[i:i + average_span]) / average_span)
+        av_xs = xs[1:-1]
+        self.plot_average.points = zip(av_xs, av_ys)
 
     def shift_window_left(self) -> None:
         """
