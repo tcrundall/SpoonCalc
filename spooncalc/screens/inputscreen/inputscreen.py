@@ -28,8 +28,6 @@ class InputScreen(Screen):
         string representation of activity start time, accessible by kivy
     end_display : StringProperty
         string representation of activity end time, accessible by kivy
-    time_buttons : dict(str : int)
-        dictionary converting the text for timing buttons to minutes
     cogload : float
         the cognitive load of activity (from 0 to 2 spoons per hour)
     physload : float
@@ -42,12 +40,18 @@ class InputScreen(Screen):
     start_display = StringProperty()
     end_display = StringProperty()
 
-    time_buttons = {
-        '-1': -60,
-        '-0:15': -15,
-        '+0:15': 15,
-        '+1': 60,
-    }
+    QUALIFIERS = (
+        "necessary",
+        "leisure",
+        "rest",
+        "productive",
+        "social",
+        "phone",
+        "screen",
+        "exercise",
+        "physload_boost",
+        "misc",
+    )
 
     def __init__(self, db, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -71,10 +75,14 @@ class InputScreen(Screen):
         self.ids.activity_name.text = self.activitylog.name
 
         # Reset load toggles
-        default_pressed_toggle_ids = ["cog_mid", "phys_mid", "energy_mid"]
+        default_pressed_toggle_ids = ["cog_mid", "phys_mid"]  # , "energy_mid"]
         for toggle_id in default_pressed_toggle_ids:
             if self.ids[toggle_id].state == "normal":
                 self.ids[toggle_id]._do_press()
+
+        # Reset qualifier toggles
+        for qual_id in self.QUALIFIERS:
+            self.ids[qual_id].state = "normal"
 
     def get_default_times(self) -> tuple[datetime, datetime]:
         """
@@ -106,6 +114,10 @@ class InputScreen(Screen):
     def set_energy(self, energy: float) -> None:
         """Set the activitylog's energy"""
         self.activitylog.energy = energy
+
+    def set_activitylog_qualifiers(self) -> None:
+        for qual in self.QUALIFIERS:
+            setattr(self.activitylog, qual, self.ids[qual].state == "down")
 
     def update_time_displays(self) -> None:
         """
@@ -165,6 +177,8 @@ class InputScreen(Screen):
         raw_activity_name = self.ids['activity_name'].text
         for char in ',.:-\"\'':
             self.activitylog.name = raw_activity_name.replace(char, '')
+
+        self.set_activitylog_qualifiers()
 
         self.db.insert_activitylog(self.activitylog)
 

@@ -6,7 +6,7 @@
 
 <Option@BoxLayout>:
     orientation: "vertical"
-    padding: (pad, pad, pad, pad)
+    padding: (hpad, vpad, hpad, vpad)
     size_hint: 1, 0.15
 
 <LoadToggle@ToggleButton>:
@@ -22,6 +22,10 @@
 
 <EnergyToggle@LoadToggle>:
     group: "energy"
+
+<QualifierToggle@ToggleButton>:
+    font_size: font_size_button_3
+    markup: True
 
 <InputScreen>:
     name: 'inputscreen'
@@ -190,29 +194,68 @@
                     text: "+1"
                     on_press: root.on_time_press(target="end", minutes=60)
                     font_size: font_size_button_2
-        Option:
+        # Option:
+        #     orientation: "vertical"
+        #     BackgroundLabel:
+        #         text: "Energy Level"
+        #         font_size: font_size_heading_2
+        #         id: energy_toggle_label
+        #         color: label_color
+        #     BoxLayout:
+        #         orientation: "horizontal"
+        #         text: "Energy Level"
+        #         id: energy_toggles
+        #         EnergyToggle:
+        #             text: "Low"
+        #             id: energy_low
+        #             on_state: root.set_energy(0.)
+        #         EnergyToggle:
+        #             text: "Mid"
+        #             id: energy_mid
+        #             on_state: root.set_energy(1.)
+        #         EnergyToggle:
+        #             text: "High"
+        #             id: energy_high
+        #             on_state: root.set_energy(2.)
+
+        BoxLayout:
+            size_hint: 1, 0.2
             orientation: "vertical"
-            BackgroundLabel:
-                text: "Energy Level"
-                font_size: font_size_heading_2
-                id: energy_toggle_label
-                color: label_color
+            padding: (hpad, vpad, hpad, vpad)
             BoxLayout:
-                orientation: "horizontal"
-                text: "Energy Level"
-                id: energy_toggles
-                EnergyToggle:
-                    text: "Low"
-                    id: energy_low
-                    on_state: root.set_energy(0.)
-                EnergyToggle:
-                    text: "Mid"
-                    id: energy_mid
-                    on_state: root.set_energy(1.)
-                EnergyToggle:
-                    text: "High"
-                    id: energy_high
-                    on_state: root.set_energy(2.)
+                size_hint: 1, 0.5
+                QualifierToggle:
+                    id: necessary
+                    text: "necessary"
+                QualifierToggle:
+                    id: leisure
+                    text: "leisure"
+                QualifierToggle:
+                    id: rest
+                    text: "rest"
+                QualifierToggle:
+                    id: productive
+                    text: "productive"
+                QualifierToggle:
+                    id: social
+                    text: "social"
+            BoxLayout:
+                size_hint: 1, 0.5
+                QualifierToggle:
+                    id: phone
+                    text: "phone"
+                QualifierToggle:
+                    id: screen
+                    text: "screen"
+                QualifierToggle:
+                    id: exercise
+                    text: "exercise"
+                QualifierToggle:
+                    id: physload_boost
+                    text: "boost"
+                QualifierToggle:
+                    id: misc
+                    text: "misc"
         BoxLayout:
             size_hint: 1, 0.1
             orientation: "horizontal"

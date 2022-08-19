@@ -45,15 +45,16 @@ class Database:
         'cogload',
         'physload',
         'energy',
-        'phone',
-        'screen',
-        'productive',
+        'necessary',
         'leisure',
         'rest',
+        'productive',
+        'social',
+        'phone',
+        'screen',
         'exercise',
         'physload_boost',
-        'necessary',
-        'social',
+        'misc',
     )
 
     def __init__(self, db_path: str = "spooncalc.db") -> None:

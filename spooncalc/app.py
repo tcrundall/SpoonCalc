@@ -19,7 +19,7 @@ from spooncalc.screens.plotscreen import plotscreen
 from spooncalc.screens.logsscreen import logsscreen
 from spooncalc.screens.importscreen import importscreen
 from spooncalc.screens.inputscreen import inputscreen
-from spooncalc.models.activitylog import ActivityLog
+from spooncalc.models.activitylog import ActivityLog, clean_param
 
 # Android specific imports and setup
 if platform == 'android':
@@ -150,7 +150,7 @@ class SpoonCalcApp(App):
 
         # Collect values applicable to ActivityLog class
         activitylog_params = {
-            k: v for k, v in zip(colnames, values)
+            k: clean_param(v) for k, v in zip(colnames, values)
             if k in ActivityLog.__dict__['__dataclass_fields__']
         }
 

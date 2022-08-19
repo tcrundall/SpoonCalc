@@ -56,6 +56,7 @@ class ActivityLog:
     physload_boost: bool = False
     necessary: bool = False
     social: bool = False
+    misc: bool = False
 
     # The property decorator enforces `activitylog.duration` usage
     @property
