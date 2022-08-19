@@ -4,14 +4,7 @@ from pathlib import Path
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.properties import StringProperty
-import kivy_garden.graph as gr
-import kivy.garden.graph as grdot
 from kivy_garden.graph import Graph, LinePlot
-import kivy.garden.matplotlib as mpl
-
-print(gr.__file__)
-print(grdot.__file__)
-print(mpl.__file__)
 
 from spooncalc import analyser, timeutils
 from spooncalc.dbtools import Database
