@@ -10,10 +10,10 @@ Equipped with this knowledge, the user will hopefully be able to identify patter
 ## Home screen
 The home screen displays a plot of the current day's energy expenditure so far and provides access to all features.
 
-<!--- ![Home screen screenshot](./documentation/screenshots/home_screen.png)
+<!--- ![Home screen screenshot](./docs/screenshots/home_screen.png)
 -->
 
-<img src="./documentation/screenshots/home_screen.png" width="300"/>
+<img src="./docs/screenshots/home_screen.png" width="300"/>
 
 The fraction at the top shows "number of spoons spent so far" over "total spoons spent per day averaged over past 14 days".
 
@@ -24,7 +24,7 @@ This plot encapsulates a lot of useful information. The yellow line being signic
 Below the plot are buttons that lead to all available interactions.
 
 ## Log an activity
-<img src="./documentation/screenshots/input_form.png" width="300"/>
+<img src="./docs/screenshots/input_form.png" width="300"/>
 
 This view is used to log activities throughout the day, whether that be every single activity, or just the ones of particular interest to the user. The user may provide an informative name, the "cognitive load", the "physical load", and beginning and end times with a 15 minute resolution. The current energy level may also be provided.
 
@@ -33,7 +33,7 @@ The physical and cognitive loads describe how many spoons an activity costs. Eac
 Upon pressing "save" the data will be stored in a locally stored database. This data can be deleted via the "Show logs" view (see below).
 
 ## Plot
-<img src="./documentation/screenshots/weekly_plot.png" width="300"/>
+<img src="./docs/screenshots/weekly_plot.png" width="300"/>
 
 On top of the plot featured in the home screen, various other plots are available. One can choose a time span from daily, weekly or monthly. The daily plots use the same axes units as the plot on the home screen. The weekly and monthly plots' x-axis denote days, with today being 0, yesterday being -1, etc.
 
