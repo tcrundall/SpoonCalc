@@ -1,4 +1,6 @@
-from typing import Optional, Any
+from __future__ import annotations
+
+from typing import Optional, Any, Union
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
@@ -12,7 +14,7 @@ LOAD_DICT = {
 }
 
 
-def clean_param(param: Any) -> datetime | bool | float | str:
+def clean_param(param: Any) -> Union[datetime, bool, float, str]:
     if not isinstance(param, str):
         return param
     try:

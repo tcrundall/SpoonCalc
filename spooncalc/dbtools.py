@@ -1,8 +1,10 @@
 """
 A collection of helper functions for interacting with database
 """
+from __future__ import annotations
+
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, List
 import sqlite3
 from sqlite3 import Cursor as SQLCursor
 
@@ -70,7 +72,7 @@ class Database:
         self.initialize_database()
         self.add_missing_columns()
 
-    def submit_query(self, query_text) -> list[Any]:
+    def submit_query(self, query_text) -> List[Any]:
         """
         A helper function for fetching results of a query
 
@@ -97,7 +99,7 @@ class Database:
     def get_logs_from_day(
         self,
         day_offset: int,
-    ) -> list[ActivityLog]:
+    ) -> List[ActivityLog]:
 
         """
         Calculate total spoons spent on the day
@@ -130,7 +132,7 @@ class Database:
         self,
         start: int,
         end: int,
-    ) -> list[ActivityLog]:
+    ) -> List[ActivityLog]:
         """
         Get all logs between day offsets [start, end).
 
@@ -174,7 +176,7 @@ class Database:
         self,
         start: datetime,
         end: datetime,
-    ) -> list[ActivityLog]:
+    ) -> List[ActivityLog]:
         """
         Get all logs between the datetimes `start` and `end`.
 
@@ -316,7 +318,7 @@ class Database:
         """
         self.submit_query(query_text)
 
-    def get_colnames(self) -> list[str]:
+    def get_colnames(self) -> List[str]:
         with Cursor(self.db_path) as c:
             c.execute("SELECT * from activities limit 1")
             c.fetchall()

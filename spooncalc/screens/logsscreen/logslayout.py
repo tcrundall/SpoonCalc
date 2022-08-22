@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import List
+
 from kivy.uix.stacklayout import StackLayout
 
 # from spooncalc.models.activitylog import ActivityLog
@@ -17,7 +21,7 @@ class LogsLayout(StackLayout):
     ----------
     current_day : int
         the day in question, encoded as an offset from today
-    boxes : list[EntryBox]
+    boxes : List[EntryBox]
         a list of all entryBoxes, where each entryBox is a widget
         displaying partial information of a logged activity.
     """
@@ -43,7 +47,7 @@ class LogsLayout(StackLayout):
         """
 
         self.clear_widgets()
-        self.boxes: list[EntryBox] = []
+        self.boxes: List[EntryBox] = []
 
         # Grab all logs from today
         logs = self.db.get_logs_from_day(self.current_day)

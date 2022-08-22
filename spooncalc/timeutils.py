@@ -1,6 +1,8 @@
 """
 A collection of helpful functions for using datetime
 """
+from __future__ import annotations
+
 from datetime import datetime, timedelta, time
 
 

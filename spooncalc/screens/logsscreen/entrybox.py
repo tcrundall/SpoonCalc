@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.checkbox import CheckBox

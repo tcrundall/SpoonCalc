@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta
 import os
 from pathlib import Path
@@ -195,7 +197,7 @@ class InputScreen(Screen):
         else:
             self.title = "hmmm... bad data?"
 
-    # def get_widgets_in_group(self, group) -> list[Widget]:
+    # def get_widgets_in_group(self, group) -> List[Widget]:
     #     """
     #     Collect all widgets that are a member of `group`.
 
@@ -210,7 +212,7 @@ class InputScreen(Screen):
     #             widgets.append(widget)
     #     return widgets
 
-    # def get_down_from_group(self, group) -> list[Widget]:
+    # def get_down_from_group(self, group) -> List[Widget]:
     #     """
     #     Identify which toggle from a provided widget group is down
     #     """

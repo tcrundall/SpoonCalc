@@ -2,7 +2,9 @@
 Analyse data stored in database and generate
 informative plots
 """
-from typing import Optional
+from __future__ import annotations
+
+from typing import Optional, List, Tuple
 
 from spooncalc import timeutils
 from spooncalc.dbtools import Database
@@ -96,7 +98,7 @@ def fetch_average_spoons_per_day(
 def fetch_cumulative_time_spoons(
     db: Database,
     day_offset: int = 0,
-) -> tuple[list[float], list[float]]:
+) -> Tuple[List[float], List[float]]:
     """
     Generate data points for a cumulative spoon expenditure
     for a given day.
@@ -149,7 +151,7 @@ def fetch_cumulative_time_spoons(
     return xs, ys
 
 
-def linearly_interpolate(x: float, xs: list[float], ys: list[float]) -> float:
+def linearly_interpolate(x: float, xs: List[float], ys: List[float]) -> float:
     """
     Get the y value corresponding to x, linearly
     interpolating between xs and ys as needed.
@@ -191,13 +193,13 @@ def linearly_interpolate(x: float, xs: list[float], ys: list[float]) -> float:
     return y_left + dx * grad
 
 
-def calc_mean(values: list[float]) -> float:
+def calc_mean(values: List[float]) -> float:
     """Calculate the mean of a set of values"""
     n = len(values)
     return sum(values) / n
 
 
-def calc_stdev(values: list[float], mean: Optional[float] = None) -> float:
+def calc_stdev(values: List[float], mean: Optional[float] = None) -> float:
     """Calculate the standard deviation of a set of values"""
     if mean is None:
         mean = calc_mean(values)
@@ -212,7 +214,7 @@ def get_mean_and_spread(
     db: Database,
     day_offset_start: int = -14,
     day_offset_end: int = 0
-) -> tuple[list[float], list[float], list[float], list[float]]:
+) -> Tuple[List[float], List[float], List[float], List[float]]:
     """
     Get mean and spread of cumulative daily spoon plots.
 
@@ -254,10 +256,10 @@ def get_mean_and_spread(
     )
     """
     dt = 0.25       # 15 min resolution
-    times: list[float] = []
-    means: list[float] = []
-    above: list[float] = []
-    below: list[float] = []
+    times: List[float] = []
+    means: List[float] = []
+    above: List[float] = []
+    below: List[float] = []
 
     t = timeutils.day_start_hour()
     while t < timeutils.day_end_hour():
