@@ -99,7 +99,7 @@ class PlotScreen(Screen):
                             for d, spoons in self.spoons_per_day.items()]
         self.graph.add_plot(self.plot)
 
-        self.plot_average = LinePlot(color=[1, 1, 1, 1], line_width=2.)
+        self.plot_average = LinePlot(color=[1, 1, 1, 1], line_width=0.5)
         self.graph.add_plot(self.plot_average)
         self.average_current_plot()
 
