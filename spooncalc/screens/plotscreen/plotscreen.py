@@ -7,8 +7,6 @@ from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.properties import StringProperty
 from kivy_garden.graph import Graph, LinePlot
-from spooncalc.kvmpl import backend_kivyagg
-print(backend_kivyagg.__file__)
 
 from spooncalc import analyser, timeutils
 from spooncalc.dbtools import Database
