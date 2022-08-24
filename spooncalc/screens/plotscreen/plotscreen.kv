@@ -7,6 +7,10 @@
     x: self.parent.x + 0.25 * self.parent.width
     y: self.parent.y + 0.4 * self.parent.height
 
+<PltQualifierToggle@ToggleButton>:
+    font_size: font_size_button_3
+    markup: True
+
 <PlotToggle@LoadToggle>
     group: "plot"
     size_hint: 0.2, 1
@@ -24,6 +28,63 @@
             id: graph
             size_hint: 1, 0.9
             padding: 10, 10, 0, 10
+        BoxLayout:
+            size_hint: 1, 0.2
+            orientation: "vertical"
+            padding: (hpad, vpad, hpad, vpad)
+            BoxLayout:
+                size_hint: 1, 0.5
+                PltQualifierToggle:
+                    id: necessary_plt
+                    text: "necessary"
+                PltQualifierToggle:
+                    id: leisure_plt
+                    text: "leisure"
+                PltQualifierToggle:
+                    id: rest_plt
+                    text: "rest"
+                PltQualifierToggle:
+                    id: productive_plt
+                    text: "productive"
+                PltQualifierToggle:
+                    id: social_plt
+                    text: "social"
+                PltQualifierToggle:
+                    id: total_plt
+                    text: "total"
+            BoxLayout:
+                size_hint: 1, 0.5
+                PltQualifierToggle:
+                    id: phone_plt
+                    text: "phone"
+                PltQualifierToggle:
+                    id: screen_plt
+                    text: "screen"
+                PltQualifierToggle:
+                    id: exercise_plt
+                    text: "exercise"
+                PltQualifierToggle:
+                    id: physload_boost_plt
+                    text: "boost"
+                PltQualifierToggle:
+                    id: misc_plt
+                    text: "misc"
+                PltQualifierToggle:
+                    id: averaged_plt
+                    text: "averaged"
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: 1, 0.05
+            ToggleButton:
+                id: spoons_plt
+                text: "Spoons"
+                group: "plot-yaxis"
+                state: "normal"
+            ToggleButton:
+                id: hours_plt
+                text: "Hours"
+                group: "plot-yaxis"
+                state: "down"
         BoxLayout:
             orientation: "horizontal"
             size_hint: 1, 0.05
