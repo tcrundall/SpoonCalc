@@ -37,54 +37,87 @@
                 PltQualifierToggle:
                     id: necessary_plt
                     text: "necessary"
+                    name: "necessary"
+                    on_press: root.update_qualifier(self)
                 PltQualifierToggle:
                     id: leisure_plt
                     text: "leisure"
+                    name: "leisure"
+                    on_press: root.update_qualifier(self)
                 PltQualifierToggle:
                     id: rest_plt
                     text: "rest"
+                    name: "rest"
+                    on_press: root.update_qualifier(self)
                 PltQualifierToggle:
                     id: productive_plt
                     text: "productive"
+                    name: "productive"
+                    on_press: root.update_qualifier(self)
                 PltQualifierToggle:
                     id: social_plt
                     text: "social"
+                    name: "social"
+                    on_press: root.update_qualifier(self)
                 PltQualifierToggle:
                     id: total_plt
                     text: "total"
+                    name: "total"
+                    on_press: root.update_qualifier(self)
+                    state: "down"
             BoxLayout:
                 size_hint: 1, 0.5
                 PltQualifierToggle:
                     id: phone_plt
                     text: "phone"
+                    name: "phone"
+                    on_press: root.update_qualifier(self)
                 PltQualifierToggle:
                     id: screen_plt
                     text: "screen"
+                    name: "screen"
+                    on_press: root.update_qualifier(self)
                 PltQualifierToggle:
                     id: exercise_plt
                     text: "exercise"
+                    name: "exercise"
+                    on_press: root.update_qualifier(self)
                 PltQualifierToggle:
                     id: physload_boost_plt
                     text: "boost"
+                    name: "boost"
+                    on_press: root.update_qualifier(self)
                 PltQualifierToggle:
                     id: misc_plt
                     text: "misc"
+                    name: "misc"
+                    on_press: root.update_qualifier(self)
                 PltQualifierToggle:
                     id: averaged_plt
                     text: "averaged"
+                    name: "averaged"
+                    on_press: root.update_qualifier(self)
         BoxLayout:
             orientation: "horizontal"
             size_hint: 1, 0.05
             ToggleButton:
                 id: spoons_plt
+                name: "spoon"
                 text: "Spoons"
                 group: "plot-yaxis"
-                state: "normal"
+                state: "down"
+                on_press:
+                    setattr(self, 'state', 'down')
+                    root.set_ymode()
             ToggleButton:
                 id: hours_plt
+                name: "hour"
                 text: "Hours"
                 group: "plot-yaxis"
-                state: "down"
+                state: "normal"
+                on_press:
+                    setattr(self, 'state', 'down')
+                    root.set_ymode()
         BoxLayout:
             orientation: "horizontal"
             size_hint: 1, 0.05

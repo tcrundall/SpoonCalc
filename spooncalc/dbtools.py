@@ -55,7 +55,7 @@ class Database:
         'phone',
         'screen',
         'exercise',
-        'physload_boost',
+        'boost',
         'misc',
     )
 

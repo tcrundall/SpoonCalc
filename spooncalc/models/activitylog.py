@@ -14,6 +14,20 @@ LOAD_DICT = {
 }
 
 
+QUALIFIERS = [
+    "necessary",
+    "leisure",
+    "rest",
+    "productive",
+    "social",
+    "phone",
+    "screen",
+    "boost",
+    "exercise",
+    "misc",
+]
+
+
 def clean_param(param: Any) -> Union[datetime, bool, float, str]:
     if not isinstance(param, str):
         return param
@@ -49,15 +63,15 @@ class ActivityLog:
     cogload: float = 1.0
     physload: float = 1.0
     energy: float = 1.0
-    phone: bool = False
-    screen: bool = False
-    productive: bool = False
+    necessary: bool = False
     leisure: bool = False
     rest: bool = False
-    exercise: bool = False
-    physload_boost: bool = False
-    necessary: bool = False
+    productive: bool = False
     social: bool = False
+    phone: bool = False
+    screen: bool = False
+    exercise: bool = False
+    boost: bool = False
     misc: bool = False
 
     # The property decorator enforces `activitylog.duration` usage
@@ -65,27 +79,6 @@ class ActivityLog:
     def duration(self) -> timedelta:
         """The duration is a derived value"""
         return self.end - self.start
-
-    def get_value_string(self) -> str:
-        """
-        Generates long string of all values
-
-        This is used for building SQL requests.
-
-        Note: this is bad, because it relies on the identical ordering
-        of attributes wherever this SQL is done.
-        TODO:   instead, when generating SQL request, loop over attribute
-                names and use getattr
-        """
-        return f"""
-            "{self.start}",
-            "{self.end}",
-            "{self.duration}",
-            "{self.name}",
-            "{self.cogload}",
-            "{self.physload}",
-            "{self.energy}"
-        """
 
     def is_everything_today(self) -> bool:
         """Check if start and end datetimes are today"""
@@ -95,15 +88,17 @@ class ActivityLog:
         """
         Calculate spoons spent by this activity
         """
-        duration = timeutils.time2decimal(self.end - self.start)
-
         # Augment physload when physload_boost is used
         augmented_physload = self.physload
-        if self.physload_boost:
+        if self.boost:
             augmented_physload += PHYSLOAD_BOOST_SPOON_VALUE
 
-        return duration * (self.cogload + augmented_physload)
+        return self.hours * (self.cogload + augmented_physload)
 
     @property
     def spoons(self) -> float:
         return self.get_spoons()
+
+    @property
+    def hours(self) -> float:
+        return timeutils.time2decimal(self.duration)
