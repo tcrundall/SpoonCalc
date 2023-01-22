@@ -84,7 +84,7 @@ class MenuScreen(Screen):
         self.graph = Graph(
             xmin=timeutils.DAY_BOUNDARY,
             xmax=timeutils.DAY_BOUNDARY + 24,
-            ymin=0, ymax=35,
+            ymin=0, ymax=50,
             x_ticks_major=3,
             y_ticks_major=5,
             border_color=[0, 1, 1, 1],
