@@ -31,6 +31,7 @@ if platform == 'android':
     request_permissions([
         'android.permisssion.MANAGE_EXTERNAL_STORAGE',
         Permission.READ_EXTERNAL_STORAGE,
+        Permission.WRITE_EXTERNAL_STORAGE,
     ])
 
     # Set external storage
