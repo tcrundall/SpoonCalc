@@ -28,9 +28,7 @@ if platform == 'android':
     from android.permissions import request_permissions        # type:ignore
     from android.permissions import Permission                 # type:ignore
     from android.storage import primary_external_storage_path  # type:ignore
-    request_permissions([
-        Permission.MANAGE_EXTERNAL_STORAGE
-    ])
+    request_permissions(['android.permisssion.MANAGE_EXTERNAL_STORAGE'])
 
     # Set external storage
     if platform == 'android':
