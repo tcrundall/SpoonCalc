@@ -128,13 +128,18 @@ class PlotScreen(Screen):
         an average
         """
         average_span = 3
+        if self.mode == "weekly":
+            average_span = 3
+        elif self.mode == "monthly":
+            average_span = 7
+        half_span = average_span // 2
         xs = [x for x, _ in self.plot.points]
         ys = [y for _, y in self.plot.points]
 
         av_ys = []
-        for i in range(len(ys) + 1 - average_span):
+        for i in range(len(ys) + half_span - average_span):
             av_ys.append(sum(ys[i:i + average_span]) / average_span)
-        av_xs = xs[1:-1]
+        av_xs = xs[half_span:-half_span]
         self.plot_average.points = zip(av_xs, av_ys)
 
     def shift_window_left(self) -> None:

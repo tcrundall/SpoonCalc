@@ -106,7 +106,7 @@ class MenuScreen(Screen):
 
         # Get the mean (plus and minus 1 standard deviation) of past 14 days
         # and provide points to LinePlot objects
-        xs, mean, below, above = analyser.get_mean_and_spread(self.db)
+        xs, mean, below, above = analyser.get_mean_and_spread(self.db, -28, 0)
         self.mean.points = zip(xs, mean)
         self.below.points = zip(xs, below)
         self.above.points = zip(xs, above)
