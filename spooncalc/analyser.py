@@ -4,7 +4,7 @@ informative plots
 """
 from __future__ import annotations
 
-from typing import Optional, List, Tuple
+from typing import List, Tuple
 
 from spooncalc import timeutils
 from spooncalc.dbtools import Database
@@ -199,15 +199,19 @@ def calc_mean(values: List[float]) -> float:
     return sum(values) / n
 
 
-def calc_stdev(values: List[float], mean: Optional[float] = None) -> float:
-    """Calculate the standard deviation of a set of values"""
-    if mean is None:
-        mean = calc_mean(values)
+def calc_percentile(values: List[float], percentile: float) -> float:
+    if percentile >= 100.:
+        return sorted(values)[-1]
+
     n = len(values)
-    total = 0.
-    for val in values:
-        total += (val - mean)**2
-    return (total / n)**(0.5)
+    sorted_values = sorted(values)
+    closest_lower_ix = int((n * percentile) // 1)
+    fraction_towards_upper = (n * percentile) % 1
+
+    lower_value = sorted_values[closest_lower_ix]
+    upper_value = sorted_values[closest_lower_ix + 1]
+
+    return lower_value + fraction_towards_upper * (upper_value - lower_value)
 
 
 def get_mean_and_spread(
@@ -237,10 +241,6 @@ def get_mean_and_spread(
         one standard deviation below the mean at each time
     above: list(float)
         one standard deviation above the mean at each time
-
-    TODO:   Don't use std, because this can lead to non-monotonic
-            curves for `below`, but rather calculate the 84%
-            and 16%
     """
     cumulative_plots = [
         fetch_cumulative_time_spoons(db, day_offset)
@@ -257,23 +257,21 @@ def get_mean_and_spread(
     """
     dt = 0.25       # 15 min resolution
     times: List[float] = []
-    means: List[float] = []
-    above: List[float] = []
-    below: List[float] = []
-
     t = timeutils.day_start_hour()
     while t < timeutils.day_end_hour():
         times.append(t)
         t += dt
 
+    means: List[float] = []
+    above: List[float] = []
+    below: List[float] = []
     for time in times:
         cumulative_spoons = [
             linearly_interpolate(time, xs, ys) for xs, ys in cumulative_plots
         ]
         mean = calc_mean(cumulative_spoons)
-        stdev = calc_stdev(cumulative_spoons, mean)
         means.append(mean)
-        above.append(mean + stdev)
-        below.append(mean - stdev)
+        above.append(calc_percentile(cumulative_spoons, 84))
+        below.append(calc_percentile(cumulative_spoons, 16))
 
     return times, means, below, above
