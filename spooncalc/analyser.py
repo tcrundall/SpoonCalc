@@ -211,9 +211,12 @@ def calc_percentile(values: List[float], percentile: float) -> float:
 
     n = len(values)
     sorted_values = sorted(values)
-    closest_lower_ix = int((n * percentile) // 1)
-    fraction_towards_upper = (n * percentile) % 1
+    closest_lower_ix = int((n * percentile / 100.) // 1) - 1
+    fraction_towards_upper = (n * percentile / 100.) % 1
 
+    print(f"{values=}")
+    print(f"{closest_lower_ix=}")
+    print(f"{closest_lower_ix + 1=}")
     lower_value = sorted_values[closest_lower_ix]
     upper_value = sorted_values[closest_lower_ix + 1]
 
