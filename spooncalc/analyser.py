@@ -200,8 +200,14 @@ def calc_mean(values: List[float]) -> float:
 
 
 def calc_percentile(values: List[float], percentile: float) -> float:
+    if len(values) == 0:
+        return 0.
+    if len(values) == 1:
+        return values[0]
     if percentile >= 100.:
         return sorted(values)[-1]
+    if percentile <= 0.:
+        return sorted(values)[0]
 
     n = len(values)
     sorted_values = sorted(values)
