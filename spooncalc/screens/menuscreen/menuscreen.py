@@ -140,7 +140,7 @@ class MenuScreen(Screen):
         kivy lang.
         """
 
-        xs, mean, below, above = analyser.get_mean_and_spread(db=self.db)
+        xs, mean, below, above = analyser.get_mean_and_spread(self.db, -28, 0)
         self.mean.points = zip(xs, mean)
         self.below.points = zip(xs, below)
         self.above.points = zip(xs, above)
