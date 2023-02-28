@@ -49,10 +49,11 @@ def hours_between(start: datetime | str, end: datetime | str) -> float:
 
 def datetime_from_offset(day_offset: int) -> datetime:
     """Get the start of the day `day_offset` from today, as a datetime"""
-    day_start = datetime.now().replace(
-        hour=DAY_BOUNDARY, minute=0, second=0, microsecond=0
-    )
-    return day_start + timedelta(days=day_offset)
+    effective_day_start = (
+        # offset s.t. the hours before the "DAY_BOUDNARY" are part of yesterday
+        datetime.now() - timedelta(hours=DAY_BOUNDARY)
+    ).replace(hour=DAY_BOUNDARY, minute=0, second=0, microsecond=0)
+    return effective_day_start + timedelta(days=day_offset)
 
 
 def date_midnight_from_offset(day_offset: int) -> datetime:
