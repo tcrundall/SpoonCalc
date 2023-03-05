@@ -58,10 +58,9 @@ def datetime_from_offset(day_offset: int) -> datetime:
 
 def date_midnight_from_offset(day_offset: int) -> datetime:
     """Get the starting midnight of the day `day_offset` as a datetime"""
-    day_start = datetime.now().replace(
-        hour=0, minute=0, second=0, microsecond=0
-    )
-    return day_start + timedelta(days=day_offset)
+
+    effective_day_start = datetime_from_offset(day_offset)
+    return effective_day_start - timedelta(hours=DAY_BOUNDARY)
 
 
 def time2decimal(time_in: time | str | timedelta) -> float:

@@ -131,7 +131,6 @@ def fetch_cumulative_time_spoons(
     if not logs:
         return [0.], [0.]
 
-    # Note: maybe breaks if between 0:00 and timeutils.DAY_BOUNDARY
     earliest_starttime = timeutils.time2decimal(
         min([e.start for e in logs]).time()
     )
@@ -148,6 +147,7 @@ def fetch_cumulative_time_spoons(
         total_spoons += log.spoons
         xs.append(hours_since_midnight)
         ys.append(total_spoons)
+
     return xs, ys
 
 
@@ -261,13 +261,13 @@ def get_mean_and_spread(
     times = numpy.linspace(
         timeutils.day_start_hour(),
         timeutils.day_end_hour(),
-        0.25
+        24,
     )
     """
-    dt = 0.25       # 15 min resolution
+    dt = 1.0          # 60 min resolution
     times: List[float] = []
     t = timeutils.day_start_hour()
-    while t < timeutils.day_end_hour():
+    while t <= timeutils.day_end_hour():
         times.append(t)
         t += dt
 
@@ -278,8 +278,7 @@ def get_mean_and_spread(
         cumulative_spoons = [
             linearly_interpolate(time, xs, ys) for xs, ys in cumulative_plots
         ]
-        mean = calc_mean(cumulative_spoons)
-        means.append(mean)
+        means.append(calc_percentile(cumulative_spoons, 50))
         above.append(calc_percentile(cumulative_spoons, 84))
         below.append(calc_percentile(cumulative_spoons, 16))
 
