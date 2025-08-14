@@ -2,18 +2,21 @@ import os
 from pathlib import Path
 from typing import Callable
 
-from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.properties import StringProperty
-from kivy_garden.graph import Graph, LinePlot
+from kivy.uix.screenmanager import Screen
+from kivy_garden.graph import (
+    Graph,
+    LinePlot,
+)
 
-from spooncalc import analyser, timeutils
+from spooncalc import (
+    analyser,
+    timeutils,
+)
 from spooncalc.dbtools import Database
 
-Builder.load_file(os.path.join(
-    Path(__file__).parent.absolute(),
-    "menuscreen.kv"
-))
+Builder.load_file(os.path.join(Path(__file__).parent.absolute(), "menuscreen.kv"))
 
 
 class MenuScreen(Screen):
@@ -31,12 +34,7 @@ class MenuScreen(Screen):
     spoons_spent_display = StringProperty()
     plot_initialized = False
 
-    def __init__(
-        self,
-        export_callback: Callable,
-        db: Database,
-        **kwargs
-    ) -> None:
+    def __init__(self, export_callback: Callable, db: Database, **kwargs) -> None:
 
         super().__init__(**kwargs)
         self.export_callback = export_callback
@@ -60,11 +58,10 @@ class MenuScreen(Screen):
 
         spoons_today = analyser.fetch_daily_total(self.db, 0)
         spoons_average = analyser.fetch_average_spoons_per_day(self.db, -14, 0)
-        self.spoons_spent_display =\
-            f"{spoons_today:.0f} / {spoons_average:.0f}"
+        self.spoons_spent_display = f"{spoons_today:.0f} / {spoons_average:.0f}"
 
     def export_database(self) -> None:
-        """ Export the entire activities database as a csv file.  """
+        """Export the entire activities database as a csv file."""
 
         self.export_callback()
 
@@ -84,12 +81,14 @@ class MenuScreen(Screen):
         self.graph = Graph(
             xmin=timeutils.DAY_BOUNDARY,
             xmax=timeutils.DAY_BOUNDARY + 24,
-            ymin=0, ymax=35,
+            ymin=0,
+            ymax=35,
             x_ticks_major=3,
             y_ticks_major=5,
             border_color=[0, 1, 1, 1],
             tick_color=[0, 1, 1, 0.7],
-            x_grid=True, y_grid=True,
+            x_grid=True,
+            y_grid=True,
             draw_border=True,
             x_grid_label=True,
             y_grid_label=True,
@@ -124,10 +123,7 @@ class MenuScreen(Screen):
         """
 
         today = 0
-        xs, ys = analyser.fetch_cumulative_time_spoons(
-            db=self.db,
-            day_offset=today
-        )
+        xs, ys = analyser.fetch_cumulative_time_spoons(db=self.db, day_offset=today)
 
         self.today.points = list(zip(xs, ys))
 

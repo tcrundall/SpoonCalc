@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
 from kivy.uix.checkbox import CheckBox
+from kivy.uix.label import Label
 
 from spooncalc.models.activitylog import ActivityLog
 
@@ -56,21 +56,12 @@ class EntryBox(BoxLayout):
         time_label = Label(text=self.get_timetext(), size_hint=(0.2, 1))
         self.add_widget(time_label)
 
-        name_label = Label(
-            text=f"{self.activitylog.name}",
-            size_hint=(0.45, 1)
-        )
+        name_label = Label(text=f"{self.activitylog.name}", size_hint=(0.45, 1))
         self.add_widget(name_label)
 
-        self.add_widget(
-            Label(text=f"{self.activitylog.cogload:.1f}", size_hint=(0.1, 1))
-        )
-        self.add_widget(
-            Label(text=f"{self.activitylog.physload:.1f}", size_hint=(0.1, 1))
-        )
-        self.add_widget(
-            Label(text=f"{self.activitylog.spoons:.1f}", size_hint=(0.1, 1))
-        )
+        self.add_widget(Label(text=f"{self.activitylog.cogload:.1f}", size_hint=(0.1, 1)))
+        self.add_widget(Label(text=f"{self.activitylog.physload:.1f}", size_hint=(0.1, 1)))
+        self.add_widget(Label(text=f"{self.activitylog.spoons:.1f}", size_hint=(0.1, 1)))
 
         self.checkbox = CheckBox(
             size_hint=(0.05, 1),
@@ -84,4 +75,4 @@ class EntryBox(BoxLayout):
 
         start = self.activitylog.start.strftime("%H:%M")
         end = self.activitylog.end.strftime("%H:%M")
-        return f'{start}-{end}'
+        return f"{start}-{end}"

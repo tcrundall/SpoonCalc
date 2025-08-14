@@ -1,19 +1,30 @@
 """
 A collection of helper functions for interacting with database
 """
+
 from __future__ import annotations
 
-from datetime import datetime, timedelta
-from typing import Any, List
 import sqlite3
+from datetime import (
+    datetime,
+    timedelta,
+)
 from sqlite3 import Cursor as SQLCursor
+from typing import (
+    Any,
+    List,
+)
 
 from spooncalc import timeutils
-from spooncalc.models.activitylog import ActivityLog, clean_param
+from spooncalc.models.activitylog import (
+    ActivityLog,
+    clean_param,
+)
 
 
 class Cursor:
     """A context manager for connecting to sqlite3 databases"""
+
     def __init__(self, db_path: str) -> None:
         """Initialize the context manager"""
         self.db_path = db_path
@@ -40,23 +51,23 @@ class Database:
     DATE_FORMATSTRING = "%Y-%m-%d"
     DATETIME_FORMATSTRING = "%Y-%m-%d %H:%M:%S"
     ACTIVITIES_COLNAMES = (
-        'start',
-        'end',
-        'name',
-        'duration',
-        'cogload',
-        'physload',
-        'energy',
-        'necessary',
-        'leisure',
-        'rest',
-        'productive',
-        'social',
-        'phone',
-        'screen',
-        'exercise',
-        'boost',
-        'misc',
+        "start",
+        "end",
+        "name",
+        "duration",
+        "cogload",
+        "physload",
+        "energy",
+        "necessary",
+        "leisure",
+        "rest",
+        "productive",
+        "social",
+        "phone",
+        "screen",
+        "exercise",
+        "boost",
+        "misc",
     )
 
     def __init__(self, db_path: str = "spooncalc.db") -> None:
@@ -100,7 +111,6 @@ class Database:
         self,
         day_offset: int,
     ) -> List[ActivityLog]:
-
         """
         Calculate total spoons spent on the day
         `day_offset` days from today.
@@ -195,7 +205,7 @@ class Database:
             that row.
         """
 
-        colnames = ['id'] + list(self.ACTIVITIES_COLNAMES)
+        colnames = ["id"] + list(self.ACTIVITIES_COLNAMES)
 
         start_date_str = start.strftime(self.DATETIME_FORMATSTRING)
         end_date_str = end.strftime(self.DATETIME_FORMATSTRING)
@@ -210,11 +220,8 @@ class Database:
         logs = []
         for entry in contents:
             params = map(clean_param, entry)
-            log_pars = {
-                k: v for k, v in zip(colnames, params)
-                if k != "duration"
-            }
-            logs.append(ActivityLog(**log_pars))    # type: ignore
+            log_pars = {k: v for k, v in zip(colnames, params) if k != "duration"}
+            logs.append(ActivityLog(**log_pars))  # type: ignore
 
         return logs
 
@@ -278,8 +285,7 @@ class Database:
             start of day.
         """
 
-        datetime_str = timeutils.datetime_from_offset(day_offset)\
-            .strftime(self.DATETIME_FORMATSTRING)
+        datetime_str = timeutils.datetime_from_offset(day_offset).strftime(self.DATETIME_FORMATSTRING)
 
         query_text = f"""
             SELECT MIN (start) FROM activities
@@ -289,26 +295,16 @@ class Database:
         earliest_start = contents[0][0]
 
         if earliest_start:
-            return datetime.strptime(
-                earliest_start,
-                self.DATETIME_FORMATSTRING
-            )
+            return datetime.strptime(earliest_start, self.DATETIME_FORMATSTRING)
 
         # If nothing in database, return start of target day
-        today_start = datetime.now().replace(
-            hour=timeutils.DAY_BOUNDARY,
-            minute=0,
-            second=0,
-            microsecond=0
-        )
+        today_start = datetime.now().replace(hour=timeutils.DAY_BOUNDARY, minute=0, second=0, microsecond=0)
         target_day_start = today_start + timedelta(days=day_offset)
         return target_day_start
 
     def initialize_database(self) -> None:
         # Dynamically generate column names
-        col_props = ', '.join(
-            [f'{col} text NOT NULL' for col in self.ACTIVITIES_COLNAMES]
-        )
+        col_props = ", ".join([f"{col} text NOT NULL" for col in self.ACTIVITIES_COLNAMES])
 
         query_text = f"""
             CREATE TABLE if not exists activities(
@@ -333,10 +329,12 @@ class Database:
 
         for colname in self.ACTIVITIES_COLNAMES:
             if colname not in db_colnames:
-                self.submit_query(f"""
+                self.submit_query(
+                    f"""
                     ALTER TABLE activities
                     ADD {colname} text;
-                """)
+                """
+                )
 
     def export_database(self, filename: str) -> None:
         """
@@ -350,19 +348,16 @@ class Database:
             description = c.description
 
         # Construct the csv file header from the request's description
-        SEP = ','
-        formatted_header = SEP.join([str(col[0])
-                                    for col in description])
-        formatted_contents = '\n'.join([SEP.join([
-            str(val) for val in entry
-        ]) for entry in contents])
+        SEP = ","
+        formatted_header = SEP.join([str(col[0]) for col in description])
+        formatted_contents = "\n".join([SEP.join([str(val) for val in entry]) for entry in contents])
 
         # Avoid exporting empty database (and risking an overwrite)
         if len(contents) == 0:
             return
-        text = '\n'.join((formatted_header, formatted_contents))
+        text = "\n".join((formatted_header, formatted_contents))
 
-        with open(filename, 'w') as fp:
+        with open(filename, "w") as fp:
             fp.write(text)
 
     def insert_activitylog(self, log: ActivityLog) -> None:
@@ -389,9 +384,7 @@ class Database:
         valid_cols = [c for c in self.ACTIVITIES_COLNAMES if hasattr(log, c)]
 
         # Use column names to dynamically generate equality checks
-        equality_checks = [
-            f'{col}="{getattr(log, col)}"' for col in valid_cols
-        ]
+        equality_checks = [f'{col}="{getattr(log, col)}"' for col in valid_cols]
 
         # Check to see if this activity is already in the database
         query_text = f"""

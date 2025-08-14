@@ -1,7 +1,13 @@
-from spooncalc.dbtools import Database
-from spooncalc import timeutils, analyser
+from kivy_garden.graph import (
+    Graph,
+    LinePlot,
+)
 
-from kivy_garden.graph import Graph, LinePlot
+from spooncalc import (
+    analyser,
+    timeutils,
+)
+from spooncalc.dbtools import Database
 
 
 class HourlyCumulative:
@@ -34,7 +40,8 @@ class HourlyCumulative:
 
     def update_data(self):
         xs, ys = analyser.fetch_cumulative_time_spoons(
-            self.db, self.day_offset,
+            self.db,
+            self.day_offset,
         )
         # If plotting for a past day, extend line plot to end of x range
         if self.day_offset < 0 and max(xs) < self.graph.xmax:

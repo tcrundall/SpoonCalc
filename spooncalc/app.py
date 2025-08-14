@@ -3,41 +3,52 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from kivy.config import Config
+
 # os.environ["KIVY_NO_CONSOLELOG"] = '1'
 
-from kivy.config import Config
-Config.set('kivy', 'exit_on_escape', '0')
-Config.set('graphics', 'width', '393')
-Config.set('graphics', 'height', '830')
 
-from kivy.core.window import Window
-from kivy.uix.screenmanager import ScreenManager, FadeTransition
+Config.set("kivy", "exit_on_escape", "0")
+Config.set("graphics", "width", "393")
+Config.set("graphics", "height", "830")
+
 from kivy.app import App
+from kivy.core.window import Window
+from kivy.uix.screenmanager import (
+    FadeTransition,
+    ScreenManager,
+)
 from kivy.utils import platform
 
 from spooncalc.dbtools import Database
-from spooncalc.screens.menuscreen import menuscreen
-from spooncalc.screens.plotscreen import plotscreen
-from spooncalc.screens.logsscreen import logsscreen
+from spooncalc.models.activitylog import (
+    ActivityLog,
+    clean_param,
+)
 from spooncalc.screens.importscreen import importscreen
 from spooncalc.screens.inputscreen import inputscreen
-from spooncalc.models.activitylog import ActivityLog, clean_param
+from spooncalc.screens.logsscreen import logsscreen
+from spooncalc.screens.menuscreen import menuscreen
+from spooncalc.screens.plotscreen import plotscreen
 
 # Android specific imports and setup
-if platform == 'android':
-    from android.permissions import request_permissions        # type:ignore
-    from android.permissions import Permission                 # type:ignore
+if platform == "android":
+    from android.permissions import Permission  # type:ignore
+    from android.permissions import request_permissions  # type:ignore
     from android.storage import primary_external_storage_path  # type:ignore
-    request_permissions([
-        Permission.WRITE_EXTERNAL_STORAGE,
-        Permission.READ_EXTERNAL_STORAGE
-    ])
+
+    request_permissions(
+        [
+            Permission.WRITE_EXTERNAL_STORAGE,
+            Permission.READ_EXTERNAL_STORAGE,
+        ]
+    )
 
     # Set external storage
-    if platform == 'android':
+    if platform == "android":
         EXTERNALSTORAGE = primary_external_storage_path()
 
-elif platform == 'macosx':
+elif platform == "macosx":
     # Set external storage
     home = str(Path.home())
     EXTERNALSTORAGE = home
@@ -47,13 +58,13 @@ else:
 
 class MyScreenManager(ScreenManager):
     """
-   The screen manager which holds instances of all screens.
-    The current screen layout is:
-        MenuScreen
-            InputScreen
-            PlotScreen
-            LogsScreen
-            ImportScreen
+    The screen manager which holds instances of all screens.
+     The current screen layout is:
+         MenuScreen
+             InputScreen
+             PlotScreen
+             LogsScreen
+             ImportScreen
     """
 
     def __init__(self, **kwargs) -> None:
@@ -83,6 +94,7 @@ class SpoonCalcApp(App):
     This class holds all the (python) methods required for building,
     initialising, and reacting.
     """
+
     title = "SpoonCalc"
 
     def build(self) -> MyScreenManager:
@@ -100,16 +112,16 @@ class SpoonCalcApp(App):
         self.db = Database(db_path="spooncalc.db")
 
         sm = MyScreenManager()
-        sm.add_widget(menuscreen.MenuScreen(
-            export_callback=self.export_database,
-            db=self.db,
-        ))
+        sm.add_widget(
+            menuscreen.MenuScreen(
+                export_callback=self.export_database,
+                db=self.db,
+            )
+        )
         sm.add_widget(inputscreen.InputScreen(db=self.db))
         sm.add_widget(logsscreen.LogsScreen(db=self.db))
         sm.add_widget(plotscreen.PlotScreen(db=self.db))
-        sm.add_widget(importscreen.ImportScreen(
-            import_callback=self.import_csv_data
-        ))
+        sm.add_widget(importscreen.ImportScreen(import_callback=self.import_csv_data))
         self.manager = sm
 
         Window.bind(on_key_up=self.back_button)
@@ -127,8 +139,8 @@ class SpoonCalcApp(App):
 
     def import_csv_data(self, filename) -> None:
         filepath = os.path.join(self.EXTERNALSTORAGE, filename)
-        with open(filepath, 'r') as fp:
-            header = fp.readline()       # skip header
+        with open(filepath, "r") as fp:
+            header = fp.readline()  # skip header
             # colnames = header.strip().split(',')
             for line in fp:
                 self.insert_if_unique(header, line)
@@ -147,13 +159,12 @@ class SpoonCalcApp(App):
         csv_row : str
             A raw csv row from a previous database export
         """
-        colnames = header.strip().split(',')
-        values = csv_row.strip().split(',')
+        colnames = header.strip().split(",")
+        values = csv_row.strip().split(",")
 
         # Collect values applicable to ActivityLog class
         activitylog_params = {
-            k: clean_param(v) for k, v in zip(colnames, values)
-            if k in ActivityLog.__dict__['__dataclass_fields__']
+            k: clean_param(v) for k, v in zip(colnames, values) if k in ActivityLog.__dict__["__dataclass_fields__"]
         }
 
         activitylog = ActivityLog(**activitylog_params)  # type: ignore
@@ -164,5 +175,5 @@ class SpoonCalcApp(App):
         """
         Export the entire activities database as a csv file.
         """
-        filename = os.path.join(self.EXTERNALSTORAGE, 'spoon-output.csv')
+        filename = os.path.join(self.EXTERNALSTORAGE, "spoon-output.csv")
         self.db.export_database(filename)

@@ -1,16 +1,23 @@
 from __future__ import annotations
 
-from typing import Optional, Any, Union
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import (
+    datetime,
+    timedelta,
+)
+from typing import (
+    Any,
+    Optional,
+    Union,
+)
 
 from spooncalc import timeutils
 
-PHYSLOAD_BOOST_SPOON_VALUE = 2.
+PHYSLOAD_BOOST_SPOON_VALUE = 2.0
 LOAD_DICT = {
-    'low': 0.,
-    'mid': 1.,
-    'high': 2.,
+    "low": 0.0,
+    "mid": 1.0,
+    "high": 2.0,
 }
 
 
@@ -82,7 +89,7 @@ class ActivityLog:
 
     def is_everything_today(self) -> bool:
         """Check if start and end datetimes are today"""
-        return (self.start.date() == self.end.date() == datetime.now().date())
+        return self.start.date() == self.end.date() == datetime.now().date()
 
     def get_spoons(self) -> float:
         """

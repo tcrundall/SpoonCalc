@@ -6,8 +6,9 @@ from kivy.uix.stacklayout import StackLayout
 
 # from spooncalc.models.activitylog import ActivityLog
 from spooncalc.dbtools import Database
-from .titlebox import TitleBox
+
 from .entrybox import EntryBox
+from .titlebox import TitleBox
 
 
 class LogsLayout(StackLayout):
@@ -32,7 +33,7 @@ class LogsLayout(StackLayout):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         # Set the stacking order: left-to-right, then top-to-bottom
-        self.orientation = 'lr-tb'
+        self.orientation = "lr-tb"
 
     def pass_db_reference(self, db: Database) -> None:
         """Provide this class with reference to object wrapping database"""
@@ -55,7 +56,7 @@ class LogsLayout(StackLayout):
         # Sort logs by start time
         logs = sorted(logs, key=lambda l: l.start)
 
-        self.add_widget(TitleBox())             # Add a header
+        self.add_widget(TitleBox())  # Add a header
         for activitylog in logs:
             entry_box = EntryBox(activitylog)
             self.boxes.append(entry_box)
@@ -74,13 +75,13 @@ class LogsLayout(StackLayout):
                 return
 
     def decrement_day(self) -> None:
-        """ Display logs for previous day """
+        """Display logs for previous day"""
 
         self.current_day -= 1
         self.update()
 
     def increment_day(self) -> None:
-        """ Display logs for following day """
+        """Display logs for following day"""
 
         self.current_day += 1
         self.update()

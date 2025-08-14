@@ -4,13 +4,10 @@ import os
 from pathlib import Path
 from typing import Callable
 
-from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
+from kivy.uix.screenmanager import Screen
 
-Builder.load_file(os.path.join(
-    Path(__file__).parent.absolute(),
-    "importscreen.kv"
-))
+Builder.load_file(os.path.join(Path(__file__).parent.absolute(), "importscreen.kv"))
 
 
 class ImportScreen(Screen):
@@ -22,6 +19,7 @@ class ImportScreen(Screen):
     on_import_press(filename)
         Parses activities in provided csv and inserts into database
     """
+
     def __init__(self, import_callback: Callable, **kwargs) -> None:
         self.import_callback = import_callback
         super().__init__(**kwargs)

@@ -1,14 +1,18 @@
 """
 A collection of helpful functions for using datetime
 """
+
 from __future__ import annotations
 
-from datetime import datetime, timedelta, time
-
+from datetime import (
+    datetime,
+    time,
+    timedelta,
+)
 
 DATE_FORMATSTRING = "%Y-%m-%d"
 DATETIME_FORMATSTRING = "%Y-%m-%d %H:%M:%S"
-DAY_BOUNDARY = 3         # o'Clock chosen as the divider between days
+DAY_BOUNDARY = 3  # o'Clock chosen as the divider between days
 
 
 def day_start_hour() -> int:
@@ -40,7 +44,7 @@ def hours_between(start: datetime | str, end: datetime | str) -> float:
     if type(end) is str:
         end = datetime.strptime(end, DATETIME_FORMATSTRING)
 
-    assert isinstance(start, datetime)       # assertions to satisfy type hints
+    assert isinstance(start, datetime)  # assertions to satisfy type hints
     assert isinstance(end, datetime)
 
     duration = end - start
@@ -49,17 +53,13 @@ def hours_between(start: datetime | str, end: datetime | str) -> float:
 
 def datetime_from_offset(day_offset: int) -> datetime:
     """Get the start of the day `day_offset` from today, as a datetime"""
-    day_start = datetime.now().replace(
-        hour=DAY_BOUNDARY, minute=0, second=0, microsecond=0
-    )
+    day_start = datetime.now().replace(hour=DAY_BOUNDARY, minute=0, second=0, microsecond=0)
     return day_start + timedelta(days=day_offset)
 
 
 def date_midnight_from_offset(day_offset: int) -> datetime:
     """Get the starting midnight of the day `day_offset` as a datetime"""
-    day_start = datetime.now().replace(
-        hour=0, minute=0, second=0, microsecond=0
-    )
+    day_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     return day_start + timedelta(days=day_offset)
 
 
@@ -76,23 +76,19 @@ def time2decimal(time_in: time | str | timedelta) -> float:
         raise UserWarning("You should explicitly provide time with .time()")
 
     if isinstance(time_in, timedelta):
-        decimal_time = time_in.total_seconds() / 3600.
+        decimal_time = time_in.total_seconds() / 3600.0
         return decimal_time
 
     if isinstance(time_in, str):
         time_in = datetime.strptime(time_in, DATETIME_FORMATSTRING).time()
 
-    decimal_time = (
-        time_in.hour
-        + time_in.minute / 60
-        + time_in.second / 3600
-    )
+    decimal_time = time_in.hour + time_in.minute / 60 + time_in.second / 3600
 
     # Activities from tomorrow's early morning are included in today, so
     # for these activities we increase the time by 24 (hours) to ensure
     # correct ordering
     if decimal_time < DAY_BOUNDARY:
-        decimal_time += 24.
+        decimal_time += 24.0
     return decimal_time
 
 
@@ -102,8 +98,7 @@ def round_datetime(dati: datetime, minute_interval=15) -> datetime:
     hour and day if necessary.
     """
     mins = dati.minute
-    rounded_min = int(((mins + (minute_interval / 2)) // minute_interval)
-                      * minute_interval)
+    rounded_min = int(((mins + (minute_interval / 2)) // minute_interval) * minute_interval)
     # Carry the hour if necessary
     if rounded_min >= 60:
         rounded_hour = dati.hour + 1
@@ -117,11 +112,7 @@ def round_datetime(dati: datetime, minute_interval=15) -> datetime:
     else:
         rounded_day = dati.day
 
-    return dati.replace(day=rounded_day,
-                        hour=rounded_hour,
-                        minute=rounded_min,
-                        second=0,
-                        microsecond=0)
+    return dati.replace(day=rounded_day, hour=rounded_hour, minute=rounded_min, second=0, microsecond=0)
 
 
 def get_nowish(interval_mins=15) -> datetime:

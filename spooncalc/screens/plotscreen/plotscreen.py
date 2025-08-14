@@ -1,23 +1,31 @@
 from __future__ import annotations
 
 import os
+from datetime import (
+    datetime,
+    timedelta,
+)
 from pathlib import Path
-from datetime import datetime, timedelta
-from kivy.uix.screenmanager import Screen
+
 from kivy.lang import Builder
 from kivy.properties import StringProperty
+from kivy.uix.screenmanager import Screen
 from kivy.uix.togglebutton import ToggleButtonBehavior
-# from kivy import factory
 
 from spooncalc.dbtools import Database
-from .dailytotalsplot import DailyTotalsPlot, PlotMode, YMode
-from .hourlycumulative import HourlyCumulative
 from spooncalc.models.activitylog import QUALIFIERS
 
-Builder.load_file(os.path.join(
-    Path(__file__).parent.absolute(),
-    "plotscreen.kv"
-))
+from .dailytotalsplot import (
+    DailyTotalsPlot,
+    PlotMode,
+    YMode,
+)
+from .hourlycumulative import HourlyCumulative
+
+# from kivy import factory
+
+
+Builder.load_file(os.path.join(Path(__file__).parent.absolute(), "plotscreen.kv"))
 
 
 class PlotScreen(Screen):
@@ -55,9 +63,7 @@ class PlotScreen(Screen):
         self.daily_totals_plot = DailyTotalsPlot(self.db)
         self.hourly_cumulative = HourlyCumulative(self.db)
 
-        self.qualifiers = {
-            q: q not in QUALIFIERS for q in QUALIFIERS + ["total"]
-        }
+        self.qualifiers = {q: q not in QUALIFIERS for q in QUALIFIERS + ["total"]}
 
         self.current_plot = self.daily_totals_plot
         self.set_weekly()
@@ -123,8 +129,7 @@ class PlotScreen(Screen):
 
         self.current_plot = self.hourly_cumulative
         assert isinstance(self.current_plot, HourlyCumulative)
-        date = datetime.now().date() \
-            + timedelta(days=self.current_plot.day_offset)
+        date = datetime.now().date() + timedelta(days=self.current_plot.day_offset)
         self.plot_title = date.strftime("%A %d.%m")
         self.ids.graph.add_widget(self.current_plot.graph)
 
@@ -133,8 +138,7 @@ class PlotScreen(Screen):
         if isinstance(self.current_plot, HourlyCumulative):
             return
 
-        toggle = [t for t in ToggleButtonBehavior.get_widgets('plot-yaxis')
-                  if t.state == "down"][0]
+        toggle = [t for t in ToggleButtonBehavior.get_widgets("plot-yaxis") if t.state == "down"][0]
 
         if toggle.name == "spoon":
             self.current_plot.set_ymode(YMode.SPOONS)

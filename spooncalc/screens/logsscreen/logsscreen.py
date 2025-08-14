@@ -1,18 +1,19 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
 import os
+from datetime import (
+    datetime,
+    timedelta,
+)
 from pathlib import Path
-from kivy.uix.screenmanager import Screen
+
 from kivy.lang import Builder
 from kivy.properties import StringProperty
+from kivy.uix.screenmanager import Screen
 
 from spooncalc.dbtools import Database
 
-Builder.load_file(os.path.join(
-    Path(__file__).parent.absolute(),
-    "logsscreen.kv"
-))
+Builder.load_file(os.path.join(Path(__file__).parent.absolute(), "logsscreen.kv"))
 
 
 class LogsScreen(Screen):
@@ -30,7 +31,7 @@ class LogsScreen(Screen):
     TODO: Include day name in title
     """
 
-    title = StringProperty(datetime.today().strftime('%d.%m.%Y'))
+    title = StringProperty(datetime.today().strftime("%d.%m.%Y"))
 
     def __init__(self, db: Database, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -43,7 +44,7 @@ class LogsScreen(Screen):
 
         day_delta = timedelta(days=day_offset)
         current_day = datetime.today() + day_delta
-        self.title = current_day.strftime('%d.%m.%Y')
+        self.title = current_day.strftime("%d.%m.%Y")
 
     def on_pre_enter(self, *args) -> None:
         """

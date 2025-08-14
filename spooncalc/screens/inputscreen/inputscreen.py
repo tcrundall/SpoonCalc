@@ -1,21 +1,21 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
 import os
+from datetime import (
+    datetime,
+    timedelta,
+)
 from pathlib import Path
 
-from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.properties import StringProperty
+from kivy.uix.screenmanager import Screen
 
 from spooncalc import timeutils
-from spooncalc.models.activitylog import ActivityLog
 from spooncalc.dbtools import Database
+from spooncalc.models.activitylog import ActivityLog
 
-Builder.load_file(os.path.join(
-    Path(__file__).parent.absolute(),
-    "inputscreen.kv"
-))
+Builder.load_file(os.path.join(Path(__file__).parent.absolute(), "inputscreen.kv"))
 
 
 class InputScreen(Screen):
@@ -158,11 +158,9 @@ class InputScreen(Screen):
         duration = self.activitylog.end - self.activitylog.start
         if duration.total_seconds() <= 0:
             if target == "start":
-                self.activitylog.end = \
-                    self.activitylog.start + timedelta(hours=1)
+                self.activitylog.end = self.activitylog.start + timedelta(hours=1)
             elif target == "end":
-                self.activitylog.start = \
-                    self.activitylog.end - timedelta(hours=1)
+                self.activitylog.start = self.activitylog.end - timedelta(hours=1)
 
         self.update_time_displays()
 
@@ -176,9 +174,9 @@ class InputScreen(Screen):
         if duration_timedelta and duration_timedelta.total_seconds() < 0:
             return False
 
-        raw_activity_name = self.ids['activity_name'].text
-        for char in ',.:-\"\'':
-            self.activitylog.name = raw_activity_name.replace(char, '')
+        raw_activity_name = self.ids["activity_name"].text
+        for char in ",.:-\"'":
+            self.activitylog.name = raw_activity_name.replace(char, "")
 
         self.set_activitylog_qualifiers()
 

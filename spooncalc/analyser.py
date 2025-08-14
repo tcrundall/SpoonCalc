@@ -2,19 +2,20 @@
 Analyse data stored in database and generate
 informative plots
 """
+
 from __future__ import annotations
 
-from typing import Optional, List, Tuple
+from typing import (
+    List,
+    Optional,
+    Tuple,
+)
 
 from spooncalc import timeutils
 from spooncalc.dbtools import Database
 
 
-def fetch_daily_totals(
-    db: Database,
-    start_day_offset: int,
-    span: int
-) -> dict:
+def fetch_daily_totals(db: Database, start_day_offset: int, span: int) -> dict:
     """
     Calculate total spoon expenditure per day for the `span`
     days beginning at `start_day_offset`
@@ -34,10 +35,7 @@ def fetch_daily_totals(
     {-2: 20.5, -1: 22.5, 0: 4.25}
     """
 
-    spoons_each_day = {
-        i: fetch_daily_total(db, i) for i in range(start_day_offset,
-                                                   start_day_offset + span)
-    }
+    spoons_each_day = {i: fetch_daily_total(db, i) for i in range(start_day_offset, start_day_offset + span)}
     return spoons_each_day
 
 
@@ -129,21 +127,19 @@ def fetch_cumulative_time_spoons(
 
     # if no logs, return a single point at (0,0)
     if not logs:
-        return [0.], [0.]
+        return [0.0], [0.0]
 
     # Note: maybe breaks if between 0:00 and timeutils.DAY_BOUNDARY
-    earliest_starttime = timeutils.time2decimal(
-        min([e.start for e in logs]).time()
-    )
+    earliest_starttime = timeutils.time2decimal(min([e.start for e in logs]).time())
 
     # Initialise points s.t. flat line between start and first log
-    xs = [0., earliest_starttime]
-    ys = [0., 0.]
-    total_spoons = 0.
+    xs = [0.0, earliest_starttime]
+    ys = [0.0, 0.0]
+    total_spoons = 0.0
     for log in logs:
         hours_since_midnight = timeutils.hours_between(
             timeutils.date_midnight_from_offset(day_offset),
-            str(log.end),      # (re)casting to str to satisfy typehints
+            str(log.end),  # (re)casting to str to satisfy typehints
         )
         total_spoons += log.spoons
         xs.append(hours_since_midnight)
@@ -204,16 +200,14 @@ def calc_stdev(values: List[float], mean: Optional[float] = None) -> float:
     if mean is None:
         mean = calc_mean(values)
     n = len(values)
-    total = 0.
+    total = 0.0
     for val in values:
-        total += (val - mean)**2
-    return (total / n)**(0.5)
+        total += (val - mean) ** 2
+    return (total / n) ** (0.5)
 
 
 def get_mean_and_spread(
-    db: Database,
-    day_offset_start: int = -14,
-    day_offset_end: int = 0
+    db: Database, day_offset_start: int = -14, day_offset_end: int = 0
 ) -> Tuple[List[float], List[float], List[float], List[float]]:
     """
     Get mean and spread of cumulative daily spoon plots.
@@ -243,8 +237,7 @@ def get_mean_and_spread(
             and 16%
     """
     cumulative_plots = [
-        fetch_cumulative_time_spoons(db, day_offset)
-        for day_offset in range(day_offset_start, day_offset_end)
+        fetch_cumulative_time_spoons(db, day_offset) for day_offset in range(day_offset_start, day_offset_end)
     ]
 
     """
@@ -255,7 +248,7 @@ def get_mean_and_spread(
         0.25
     )
     """
-    dt = 0.25       # 15 min resolution
+    dt = 0.25  # 15 min resolution
     times: List[float] = []
     means: List[float] = []
     above: List[float] = []
@@ -267,9 +260,7 @@ def get_mean_and_spread(
         t += dt
 
     for time in times:
-        cumulative_spoons = [
-            linearly_interpolate(time, xs, ys) for xs, ys in cumulative_plots
-        ]
+        cumulative_spoons = [linearly_interpolate(time, xs, ys) for xs, ys in cumulative_plots]
         mean = calc_mean(cumulative_spoons)
         stdev = calc_stdev(cumulative_spoons, mean)
         means.append(mean)
