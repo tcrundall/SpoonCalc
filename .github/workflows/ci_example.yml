@@ -22,12 +22,12 @@ jobs:
 
       # - name: Force garden to be executable(??!)
       #   run: chmod u+x /home/runner/.local/bin/garden
-      
+
       # - name: Check garden exists
       #   run: |
       #     which garden
       #     garden
-        
+
       # - name: Install graph and matplotlib with Garden
       #   run: |
       #     garden install graph
@@ -50,7 +50,7 @@ jobs:
           buildozer_version: stable
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: package
           path: ${{ steps.buildozer.outputs.filename }}
