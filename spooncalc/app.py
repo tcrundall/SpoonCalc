@@ -41,6 +41,7 @@ if platform == "android":
         [
             Permission.WRITE_EXTERNAL_STORAGE,
             Permission.READ_EXTERNAL_STORAGE,
+            Permission.MANAGE_EXTERNAL_STORAGE,
         ]
     )
 
