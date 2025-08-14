@@ -33,21 +33,56 @@ from spooncalc.screens.plotscreen import plotscreen
 
 # Android specific imports and setup
 if platform == "android":
+    from android import activity  # type:ignore
     from android.permissions import Permission  # type:ignore
     from android.permissions import request_permissions  # type:ignore
     from android.storage import primary_external_storage_path  # type:ignore
+    from jnius import (  # type:ignore
+        autoclass,
+        cast,
+    )
 
     request_permissions(
         [
             Permission.WRITE_EXTERNAL_STORAGE,
             Permission.READ_EXTERNAL_STORAGE,
-            Permission.MANAGE_EXTERNAL_STORAGE,
         ]
     )
 
     # Set external storage
     if platform == "android":
         EXTERNALSTORAGE = primary_external_storage_path()
+
+    PythonActivity = autoclass("org.kivy.android.PythonActivity")
+    Intent = autoclass("android.content.Intent")
+    Uri = autoclass("android.net.Uri")
+    Build = autoclass("android.os.Build")
+
+    def pick_csv():
+        intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        intent.setType("text/csv")  # filter for CSV files
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+
+        currentActivity = cast("android.app.Activity", PythonActivity.mActivity)
+        currentActivity.startActivityForResult(intent, 1001)  # arbitrary request code
+
+    # handle result in your activity callback
+    def on_activity_result(requestCode, resultCode, data):
+        if requestCode == 1001 and resultCode == -1:  # RESULT_OK = -1
+            uri = data.getData()
+            # uri is an android.net.Uri object; you can read it using ContentResolver
+            content_resolver = PythonActivity.mActivity.getContentResolver()
+            input_stream = content_resolver.openInputStream(uri)
+            csv_bytes = bytes()
+            buffer = bytearray(1024)
+            while True:
+                read = input_stream.read(buffer)
+                if read == -1:
+                    break
+                csv_bytes += buffer[:read]
+            input_stream.close()
+            csv_text = csv_bytes.decode("utf-8")
+            # now csv_text contains the CSV contents
 
 elif platform == "macosx":
     # Set external storage
@@ -122,7 +157,12 @@ class SpoonCalcApp(App):
         sm.add_widget(inputscreen.InputScreen(db=self.db))
         sm.add_widget(logsscreen.LogsScreen(db=self.db))
         sm.add_widget(plotscreen.PlotScreen(db=self.db))
-        sm.add_widget(importscreen.ImportScreen(import_callback=self.import_csv_data))
+
+        if platform == "android":
+            sm.add_widget(importscreen.ImportScreen(import_callback=self.import_csv_data))
+        elif platform == "macosx":
+            sm.add_widget(importscreen.ImportScreen(import_callback=self.import_csv_data))
+
         self.manager = sm
 
         Window.bind(on_key_up=self.back_button)
